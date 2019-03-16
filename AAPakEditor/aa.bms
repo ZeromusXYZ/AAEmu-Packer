@@ -1,0 +1,65 @@
+# Archeage (script 0.3.1a)
+# script for QuickBMS http://quickbms.aluigi.org
+
+math SIZE = 0x200
+goto 0 0 SEEK_END
+savepos OFFSET
+math OFFSET -= SIZE
+callfunction DECRYPT 1
+
+idstring MEMORY_FILE "WIBO"
+get DUMMY long MEMORY_FILE
+get FILES long MEMORY_FILE
+get EXTRA_FILES long MEMORY_FILE
+get DUMMY long MEMORY_FILE
+get DUMMY long MEMORY_FILE
+get DUMMY long MEMORY_FILE
+get DUMMY long MEMORY_FILE
+print "Files:              %FILES|x%"
+print "Extra files:        %EXTRA_FILES|x%"
+
+math SIZE = FILES
+math SIZE += EXTRA_FILES
+math SIZE *= 0x150
+goto 0 0 SEEK_END
+savepos INFO_OFF
+math INFO_OFF -= 0x200
+for INFO_OFF -= SIZE >= 0
+    if INFO_OFF % 0x200
+        math INFO_OFF -= 0x10
+    else
+        break
+    endif
+next
+print "FileTable offset:   %INFO_OFF|x%"
+
+for i = 0 < FILES
+    math SIZE = 0x150
+    math OFFSET = INFO_OFF
+    callfunction DECRYPT 1
+    math INFO_OFF += 0x150
+
+    getdstring NAME 0x108 MEMORY_FILE
+    get OFFSET longlong MEMORY_FILE
+    get SIZE longlong MEMORY_FILE
+    get XSIZE longlong MEMORY_FILE     # used for encryption alignment?
+    get ZSIZE long MEMORY_FILE         # ???
+    getdstring DUMMY 16 MEMORY_FILE    # MD5 Hash
+    get DUMMY1 long MEMORY_FILE        # ???
+    get TIMESTAMP longlong MEMORY_FILE # Creation TIMESTAMP
+    get TIMESTAMP longlong MEMORY_FILE # Modification TIMESTAMP
+    get DUMMY2 longlong MEMORY_FILE    # ???
+
+    #set EXT extension NAME
+    #if EXT == "sqlite3"
+    #    encryption aes? ???
+    #endif
+    log NAME OFFSET SIZE            # don't use clog for the moment
+    #encryption "" ""
+next i
+
+startfunction DECRYPT
+    encryption aes_128_cbc "\x32\x1F\x2A\xEE\xAA\x58\x4A\xB4\x9A\x6C\x9E\x09\xD5\x9E\x9C\x6F"
+    log MEMORY_FILE OFFSET SIZE
+    encryption "" ""
+endfunction

@@ -8,13 +8,14 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
+using System.Threading;
 using SubStreamHelper;
 
 namespace AAPakEditor
 {
     public partial class MainForm : Form
     {
-        AAPak pak;
+        public AAPak pak;
         private string baseTitle = "";
 
         public MainForm()
@@ -164,12 +165,11 @@ namespace AAPakEditor
 
         }
 
-        public bool ExportFile(string sourceName, string destName)
+        public bool ExportFile(AAPakFileInfo pfi, string destName)
         {
             try
             {
                 // Save file stream
-                AAPakFileInfo pfi = pak.GetFileByName(sourceName);
                 var filePakStream = pak.ExportFileAsStream(pfi);
                 FileStream fs = new FileStream(destName, FileMode.Create);
                 filePakStream.Position = 0;
@@ -180,8 +180,8 @@ namespace AAPakEditor
                 fs.Dispose();
 
                 // Update file details
-                File.SetCreationTime(exportFileDialog.FileName, DateTime.FromFileTime(pfi.createTime));
-                File.SetLastWriteTime(exportFileDialog.FileName, DateTime.FromFileTime(pfi.modifyTime));
+                File.SetCreationTime(destName, DateTime.FromFileTime(pfi.createTime));
+                File.SetLastWriteTime(destName, DateTime.FromFileTime(pfi.modifyTime));
             }
             catch
             {
@@ -190,5 +190,34 @@ namespace AAPakEditor
             return true;
         }
 
+        public bool ExportFile(string sourceName, string destName)
+        {
+            AAPakFileInfo pfi = pak.GetFileByName(sourceName);
+            return ExportFile(pfi, destName);
+        }
+
+        private void MMExportAll_Click(object sender, EventArgs e)
+        {
+            if ((pak == null) || (!pak.isOpen))
+                return;
+
+            if (exportFolderDialog.ShowDialog() != DialogResult.OK)
+                return;
+
+            if (MessageBox.Show("Are you sure you want to export all the files ?\r\nAll files in destination will be overwritten !", "Export All", MessageBoxButtons.YesNo) != DialogResult.Yes)
+                return;
+
+            Application.UseWaitCursor = true;
+            Cursor.Current = Cursors.WaitCursor;
+
+            ExportAllDlg export = new ExportAllDlg();
+            export.pak = this.pak;
+            export.TargetDir = exportFolderDialog.SelectedPath;
+
+            export.ShowDialog(this);
+
+            Cursor.Current = Cursors.Default;
+            Application.UseWaitCursor = false;
+        }
     }
 }

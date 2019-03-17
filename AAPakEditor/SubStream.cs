@@ -1,17 +1,18 @@
 ﻿using System;
 using System.IO;
 
-namespace SubStream
+namespace SubStreamHelper
 {
     // Sources:
     // https://stackoverflow.com/questions/6949441/how-to-expose-a-sub-section-of-my-stream-to-a-user
     // https://social.msdn.microsoft.com/Forums/vstudio/en-US/c409b63b-37df-40ca-9322-458ffe06ea48/how-to-access-part-of-a-filestream-or-memorystream?forum=netfxbcl
 
-    class SubStream : Stream
+    public class SubStream : Stream
     {
         private Stream baseStream;
         private readonly long length;
         private long position;
+        private readonly long baseOffset;
         public SubStream(Stream baseStream, long offset, long length)
         {
             if (baseStream == null) throw new ArgumentNullException("baseStream");
@@ -19,11 +20,12 @@ namespace SubStream
             if (offset < 0) throw new ArgumentOutOfRangeException("offset");
 
             this.baseStream = baseStream;
+            this.baseOffset = offset;
             this.length = length;
 
             if (baseStream.CanSeek)
             {
-                baseStream.Seek(offset, SeekOrigin.Current);
+                baseStream.Seek(offset, SeekOrigin.Begin);
             }
             else
             { // read it manually...
@@ -73,7 +75,14 @@ namespace SubStream
                 CheckDisposed();
                 return position;
             }
-            set { throw new NotSupportedException(); }
+            set
+            {
+                if (position > length)
+                    position = length;
+                else
+                    position = value;
+                baseStream.Position = baseOffset + position; 
+            }
         }
         public override long Seek(long offset, SeekOrigin origin)
         {
@@ -90,6 +99,7 @@ namespace SubStream
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
+            /*
             if (disposing)
             {
                 if (baseStream != null)
@@ -99,6 +109,7 @@ namespace SubStream
                     baseStream = null;
                 }
             }
+            */
         }
         public override void Write(byte[] buffer, int offset, int count)
         {

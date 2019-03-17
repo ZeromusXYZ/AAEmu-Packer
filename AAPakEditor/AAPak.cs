@@ -8,7 +8,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Security.Cryptography;
 using System.Runtime.Serialization.Formatters.Binary;
-using SubStream;
+using SubStreamHelper;
 
 namespace AAPakEditor
 {
@@ -35,29 +35,37 @@ namespace AAPakEditor
         [FieldOffset(0x120)] public Int32 zsize; // ??
         [FieldOffset(0x124)] public byte[] md5;
         [FieldOffset(0x134)] public Int32 dummy1; // ??
-        [FieldOffset(0x138)] public System.Runtime.InteropServices.ComTypes.FILETIME createTime ;
-        [FieldOffset(0x140)] public System.Runtime.InteropServices.ComTypes.FILETIME modifyTime ;
-        [FieldOffset(0x148)] public long dummy2; // ??
+        [FieldOffset(0x138)] public Int64 createTime;
+        [FieldOffset(0x140)] public Int64 modifyTime;
+        //[FieldOffset(0x138)] public System.Runtime.InteropServices.ComTypes.FILETIME createTime ;
+        //[FieldOffset(0x140)] public System.Runtime.InteropServices.ComTypes.FILETIME modifyTime ;
+        [FieldOffset(0x148)] public Int64 dummy2; // ??
     }
 
     public class AAPakFileHeader
     {
-        public AAPak _owner;
+        private readonly byte[] key = new byte[] { 0x32, 0x1F, 0x2A, 0xEE, 0xAA, 0x58, 0x4A, 0xB4, 0x9A, 0x6C, 0x9E, 0x09, 0xD5, 0x9E, 0x9C, 0x6F }; // AES_128 Key
         private static int headerSize = 0x200;
         private static int fileInfoSize = 0x150;
+
+        public AAPak _owner;
         public int Size = headerSize;
         public long headerOffset = 0 ;
+        public long FirstFileInfoOffset = 0;
         public byte[] rawData = new byte[headerSize]; // unencrypted header
         public byte[] data = new byte[headerSize]; // decrypted header data
         public bool isValid;
         public uint fileCount = 0;
         public uint extraFileCount = 0; // not sure what this is for
-        private readonly byte[] key = new byte[] { 0x32, 0x1F, 0x2A, 0xEE, 0xAA, 0x58, 0x4A, 0xB4, 0x9A, 0x6C, 0x9E, 0x09, 0xD5, 0x9E, 0x9C, 0x6F }; // AES_128 Key
-        public List<AAPakFileInfo> files = new List<AAPakFileInfo>();
+
+        public byte[] nullHash;
+        public string nullHashString = "".PadRight(32, '0');
 
         public AAPakFileHeader(AAPak owner)
         {
             _owner = owner;
+            nullHash = new byte[16] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
         }
 
         // Source:
@@ -108,16 +116,16 @@ namespace AAPakEditor
             */
             long TotalFileInfoSize = (fileCount + extraFileCount) * fileInfoSize;
             _owner._gpFileStream.Seek(0, SeekOrigin.End);
-            long FirstFileInfoOffset = _owner._gpFileStream.Position ;
+            FirstFileInfoOffset = _owner._gpFileStream.Position ;
 
             // Search for the first file location, it needs to be alligned to a 0x200 size block
             FirstFileInfoOffset -= headerSize;
             FirstFileInfoOffset -= TotalFileInfoSize;
-
             var dif = FirstFileInfoOffset % 0x200;
             FirstFileInfoOffset -= dif;
 
             _owner._gpFileStream.Position = FirstFileInfoOffset; // This was 0x00000005c66cf200 or 24803865088 on my example pak
+
 
             int bufSize = Marshal.SizeOf(typeof(AAPakFileInfo));
             MemoryStream ms = new MemoryStream(bufSize); // Could probably do without the intermediate memorystream, but it's easier to process
@@ -150,13 +158,15 @@ namespace AAPakEditor
                 pfi.zsize = reader.ReadInt32(); // ???
                 pfi.md5 = reader.ReadBytes(16);
                 pfi.dummy1 = reader.ReadInt32(); // ???
-                pfi.createTime.dwLowDateTime = reader.ReadInt32();
-                pfi.createTime.dwHighDateTime = reader.ReadInt32();
-                pfi.modifyTime.dwLowDateTime = reader.ReadInt32();
-                pfi.modifyTime.dwHighDateTime = reader.ReadInt32();
+                pfi.createTime = reader.ReadInt64();
+                pfi.modifyTime = reader.ReadInt64();
+                //pfi.createTime.dwLowDateTime = reader.ReadInt32();
+                //pfi.createTime.dwHighDateTime = reader.ReadInt32();
+                //pfi.modifyTime.dwLowDateTime = reader.ReadInt32();
+                //pfi.modifyTime.dwHighDateTime = reader.ReadInt32();
                 pfi.dummy2 = reader.ReadInt64(); // ???
 
-                files.Add(pfi);
+                _owner.files.Add(pfi);
             }
             ms.Dispose();
 
@@ -167,7 +177,6 @@ namespace AAPakEditor
             data = EncryptAES(rawData, key, false);
             fileCount = BitConverter.ToUInt32(data, 8);// & 0x00FFFFFF; // High byte doesn't seem to be involved in here, so maybe it's only supposed to be 3 bytes that are used instead of 8 ?
             extraFileCount = BitConverter.ToUInt32(data, 12);// & 0x00FFFFFF;
-            ReadFileTable();
         }
 
         public void Encrypt()
@@ -179,11 +188,15 @@ namespace AAPakEditor
 
     public class AAPak
     {
+        protected AAPakFileInfo nullAAPakFileInfo = new AAPakFileInfo();
+
         public string _gpFilePath { get; private set; }
         public FileStream _gpFileStream { get; private set; }
+        public AAPakFileHeader _header;
         public bool isOpen = false;
         public bool isDirty = false;
-        protected AAPakFileHeader _header ;
+        public List<AAPakFileInfo> files = new List<AAPakFileInfo>();
+        public List<string> folders = new List<string>();
 
         public AAPak(string filePath)
         {
@@ -223,11 +236,13 @@ namespace AAPakEditor
                 _gpFileStream = new FileStream(filePath, FileMode.Open);
                 _gpFilePath = filePath;
                 isDirty = false;
+                isOpen = true;
                 return ReadHeader();
             }
             catch
             {
                 _gpFilePath = null ;
+                isOpen = false;
                 return false;
             }
         }
@@ -257,7 +272,7 @@ namespace AAPakEditor
 
         protected bool ReadHeader()
         {
-            _header.files.Clear();
+            files.Clear();
             // Read the last 512 bytes as raw header data
             _gpFileStream.Seek(-_header.Size, SeekOrigin.End);
             // Mark correct location as header offset location
@@ -265,9 +280,65 @@ namespace AAPakEditor
             _gpFileStream.Read(_header.rawData, 0, _header.Size);
             _header.Decrypt();
             _header.isValid = (_header.data[0] == 'W') && (_header.data[1] == 'I') && (_header.data[2] == 'B') && (_header.data[3] == 'O');
-
+            if (_header.isValid)
+            {
+                _header.ReadFileTable();
+            }
             return _header.isValid ;
         }
+
+        public void GenerateFolderList()
+        {
+            // There is no actual directory info stored in the pak file, so we just generate it based on filenames
+            folders.Clear();
+            if (!isOpen || !_header.isValid) return;
+            foreach(AAPakFileInfo pfi in files)
+            {
+                // Horror function, I know :p
+                string n = Path.GetDirectoryName(pfi.name.ToLower().Replace('/', Path.DirectorySeparatorChar)).Replace(Path.DirectorySeparatorChar, '/');
+                var pos = folders.IndexOf(n);
+                if (pos >= 0) continue;
+                folders.Add(n);
+            }
+            folders.Sort();
+        }
+
+        public List<AAPakFileInfo> GetFilesInDirectory(string dirname)
+        {
+            var res = new List<AAPakFileInfo>();
+            dirname = dirname.ToLower();
+            foreach (AAPakFileInfo pfi in files)
+            {
+                // extract dir name
+                string n = Path.GetDirectoryName(pfi.name.ToLower().Replace('/', Path.DirectorySeparatorChar)).Replace(Path.DirectorySeparatorChar, '/');
+                if (n == dirname)
+                    res.Add(pfi);
+            }
+            return res;
+        }
+
+        public AAPakFileInfo GetFileByName(string filename)
+        {
+            filename = filename.ToLower();
+            foreach (AAPakFileInfo pfi in files)
+            {
+                if (pfi.name == filename)
+                    return pfi;
+            }
+            return nullAAPakFileInfo; // return first file if it fails
+        }
+
+        public SubStream ExportFileAsStream(AAPakFileInfo file)
+        {
+            return new SubStream(_gpFileStream, file.offset, file.size);
+        }
+
+        public SubStream ExportFileAsStream(string fileName)
+        {
+            AAPakFileInfo file = GetFileByName(fileName);
+            return new SubStream(_gpFileStream, file.offset, file.size);
+        }
+
 
     }
 }

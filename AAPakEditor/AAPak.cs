@@ -31,22 +31,22 @@ namespace AAPakEditor
         [FieldOffset(0x000)] [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 0x108)] public string name;
         [FieldOffset(0x108)] public Int64 offset;
         [FieldOffset(0x110)] public Int64 size;
-        [FieldOffset(0x118)] public Int64 xsize; // used for encryption ?
+        [FieldOffset(0x118)] public Int64 sizeDuplicate; // maybe compressed data size ? if used
         [FieldOffset(0x120)] public Int32 zsize; // ??
         [FieldOffset(0x124)] public byte[] md5;
-        [FieldOffset(0x134)] public Int32 dummy1; // ??
+        [FieldOffset(0x134)] public Int32 dummy1; // looks like padding, always 0 ?
         [FieldOffset(0x138)] public Int64 createTime;
         [FieldOffset(0x140)] public Int64 modifyTime;
         //[FieldOffset(0x138)] public System.Runtime.InteropServices.ComTypes.FILETIME createTime ;
         //[FieldOffset(0x140)] public System.Runtime.InteropServices.ComTypes.FILETIME modifyTime ;
-        [FieldOffset(0x148)] public Int64 dummy2; // ??
+        [FieldOffset(0x148)] public Int64 dummy2; // looks like padding, always 0 ?
     }
 
     public class AAPakFileHeader
     {
         private readonly byte[] key = new byte[] { 0x32, 0x1F, 0x2A, 0xEE, 0xAA, 0x58, 0x4A, 0xB4, 0x9A, 0x6C, 0x9E, 0x09, 0xD5, 0x9E, 0x9C, 0x6F }; // AES_128 Key
-        private static int headerSize = 0x200;
-        private static int fileInfoSize = 0x150;
+        protected static readonly int headerSize = 0x200;
+        protected static readonly int fileInfoSize = 0x150;
 
         public AAPak _owner;
         public int Size = headerSize;
@@ -65,7 +65,6 @@ namespace AAPakEditor
         {
             _owner = owner;
             nullHash = new byte[16] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-
         }
 
         // Source:
@@ -154,7 +153,7 @@ namespace AAPakEditor
                 ms.Position = 0x108;
                 pfi.offset = reader.ReadInt64();
                 pfi.size = reader.ReadInt64();
-                pfi.xsize = reader.ReadInt64(); // ???
+                pfi.sizeDuplicate = reader.ReadInt64(); // ???
                 pfi.zsize = reader.ReadInt32(); // ???
                 pfi.md5 = reader.ReadBytes(16);
                 pfi.dummy1 = reader.ReadInt32(); // ???
@@ -169,8 +168,51 @@ namespace AAPakEditor
                 _owner.files.Add(pfi);
             }
             ms.Dispose();
-
         }
+
+
+        public void WriteFileTable()
+        {
+            _owner._gpFileStream.Position = FirstFileInfoOffset; // Mave back to our saved location
+
+
+            int bufSize = Marshal.SizeOf(typeof(AAPakFileInfo));
+            MemoryStream ms = new MemoryStream(bufSize); // Could probably do without the intermediate memorystream, but it's easier to process
+            BinaryWriter writer = new BinaryWriter(ms);
+            for (int i = 0; i < _owner.files.Count; i++)
+            {
+                ms.SetLength(0);
+                AAPakFileInfo pfi = _owner.files[i];
+                // Manually read the string for filename
+
+                for (int c = 0; c < 0x108; c++)
+                {
+                    byte ch = 0;
+                    if (c < pfi.name.Length)
+                        ch = (byte)pfi.name[c];
+                    writer.Write(ch);
+                }
+                writer.Write(pfi.offset);
+                writer.Write(pfi.size);
+                writer.Write(pfi.sizeDuplicate); // ???
+                writer.Write(pfi.zsize); // ???
+                writer.Write(pfi.md5);
+                writer.Write(pfi.dummy1); // ???
+                writer.Write(pfi.createTime);
+                writer.Write(pfi.modifyTime);
+                writer.Write(pfi.dummy2); // ???
+
+                byte[] decryptedFileData = new byte[bufSize]; 
+                ms.Position = 0;
+                ms.Read(decryptedFileData, 0, bufSize);
+                byte[] rawFileData = EncryptAES(decryptedFileData, key, true); // encrypted header data
+
+                _owner._gpFileStream.Write(rawFileData, 0, bufSize);
+            }
+            ms.Dispose();
+        }
+
+
 
         public void Decrypt()
         {
@@ -181,6 +223,24 @@ namespace AAPakEditor
 
         public void Encrypt()
         {
+            MemoryStream ms = new MemoryStream();
+            ms.Write(data, 0, headerSize);
+            ms.Position = 0;
+            BinaryWriter writer = new BinaryWriter(ms);
+            writer.Write((byte)'W');
+            writer.Write((byte)'I');
+            writer.Write((byte)'B');
+            writer.Write((byte)'O');
+            writer.Seek(8, SeekOrigin.Begin);
+            writer.Write(fileCount);
+            writer.Seek(12, SeekOrigin.Begin);
+            writer.Write(extraFileCount);
+
+            ms.Position = 0;
+            ms.Read(data, 0, headerSize);
+
+            ms.Dispose();
+
             rawData = EncryptAES(data, key, true);
         }
 
@@ -261,6 +321,7 @@ namespace AAPakEditor
 
         public void SaveHeader()
         {
+            _header.WriteFileTable();
             _header.Encrypt();
 
             // Move to our expected header location
@@ -337,6 +398,21 @@ namespace AAPakEditor
         {
             AAPakFileInfo file = GetFileByName(fileName);
             return new SubStream(_gpFileStream, file.offset, file.size);
+        }
+
+        public string UpdateMD5(AAPakFileInfo file)
+        {
+            MD5 hash = MD5.Create();
+            var fs = ExportFileAsStream(file);
+            var newHash = hash.ComputeHash(fs);
+            hash.Dispose();
+            if (!file.md5.SequenceEqual(newHash))
+            {
+                // Only update if different
+                newHash.CopyTo(file.md5,0);
+                isDirty = true;
+            }
+            return BitConverter.ToString(file.md5).Replace("-", ""); // Return the (updated) md5 as a string
         }
 
 

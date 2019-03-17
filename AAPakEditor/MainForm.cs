@@ -110,6 +110,9 @@ namespace AAPakEditor
             if ((pak == null) || (!pak.isOpen))
                 return;
 
+            if ((lbFolders.SelectedIndex < 0) || (lbFiles.SelectedIndex < 0))
+                return;
+
             Application.UseWaitCursor = true;
             Cursor.Current = Cursors.WaitCursor;
 
@@ -133,7 +136,8 @@ namespace AAPakEditor
                 }
                 lfiCreateTime.Text = "Created: " + DateTime.FromFileTime(pfi.createTime).ToString();
                 lfiModifyTime.Text = "Modified: " + DateTime.FromFileTime(pfi.modifyTime).ToString();
-                lfiStartOffset.Text = "Start Offset: 0x" + pfi.offset.ToString("X8");
+                lfiStartOffset.Text = "Start Offset: 0x" + pfi.offset.ToString("X16");
+                lfiExtras.Text = "X 0x" + pfi.sizeDuplicate.ToString("X") + "  Z 0x" + pfi.zsize.ToString("X") + "  D1 0x" + pfi.dummy1.ToString("X") + "  D2 0x" + pfi.dummy2.ToString("X");
             }
 
             Cursor.Current = Cursors.Default;
@@ -218,6 +222,62 @@ namespace AAPakEditor
 
             Cursor.Current = Cursors.Default;
             Application.UseWaitCursor = false;
+        }
+
+        private void MMEXtraMD5_Click(object sender, EventArgs e)
+        {
+            if ((pak == null) || (!pak.isOpen))
+                return;
+
+            if ((lbFolders.SelectedIndex < 0) || (lbFiles.SelectedIndex < 0))
+            {
+                MessageBox.Show("No file selected");
+                return;
+            }
+            var d = lbFolders.SelectedItem.ToString();
+            if (d != "") d += "/";
+            d += lbFiles.SelectedItem.ToString();
+
+            AAPakFileInfo pfi = pak.GetFileByName(d);
+            MessageBox.Show("MD5 Hash updated to " + pak.UpdateMD5(pfi));
+        }
+
+        private void MMFileSave_Click(object sender, EventArgs e)
+        {
+            if (pak.isDirty)
+                pak.SaveHeader();
+        }
+
+        private void MMFile_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void MMExport_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void MMExtra_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void MMFile_DropDownOpening(object sender, EventArgs e)
+        {
+            MMFileSave.Enabled = (pak != null) && (pak.isOpen) && (pak.isDirty);
+        }
+
+        private void MMExport_DropDownOpening(object sender, EventArgs e)
+        {
+            MMExportSelectedFile.Enabled = (pak != null) && (pak.isOpen) && (lbFolders.SelectedIndex >= 0) && (lbFiles.SelectedIndex >= 0);
+            MMExportSelectedFolder.Enabled = (pak != null) && (pak.isOpen) && (lbFolders.SelectedIndex >= 0);
+            MMExportAll.Enabled = (pak != null) && (pak.isOpen);
+        }
+
+        private void MMExtra_DropDownOpening(object sender, EventArgs e)
+        {
+            MMExtraMD5.Enabled = (pak != null) && (pak.isOpen) && (lbFolders.SelectedIndex >= 0) && (lbFiles.SelectedIndex >= 0);
         }
     }
 }

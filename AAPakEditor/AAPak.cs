@@ -32,7 +32,7 @@ namespace AAPakEditor
         [FieldOffset(0x108)] public Int64 offset;
         [FieldOffset(0x110)] public Int64 size;
         [FieldOffset(0x118)] public Int64 sizeDuplicate; // maybe compressed data size ? if used
-        [FieldOffset(0x120)] public Int32 zsize; // ??
+        [FieldOffset(0x120)] public Int32 paddingSize; // ??
         [FieldOffset(0x124)] public byte[] md5;
         [FieldOffset(0x134)] public Int32 dummy1; // looks like padding, always 0 ?
         [FieldOffset(0x138)] public Int64 createTime;
@@ -154,7 +154,7 @@ namespace AAPakEditor
                 pfi.offset = reader.ReadInt64();
                 pfi.size = reader.ReadInt64();
                 pfi.sizeDuplicate = reader.ReadInt64(); // ???
-                pfi.zsize = reader.ReadInt32(); // ???
+                pfi.paddingSize = reader.ReadInt32(); // ???
                 pfi.md5 = reader.ReadBytes(16);
                 pfi.dummy1 = reader.ReadInt32(); // ???
                 pfi.createTime = reader.ReadInt64();
@@ -195,7 +195,7 @@ namespace AAPakEditor
                 writer.Write(pfi.offset);
                 writer.Write(pfi.size);
                 writer.Write(pfi.sizeDuplicate); // ???
-                writer.Write(pfi.zsize); // ???
+                writer.Write(pfi.paddingSize); // ???
                 writer.Write(pfi.md5);
                 writer.Write(pfi.dummy1); // ???
                 writer.Write(pfi.createTime);

@@ -50,6 +50,7 @@
             this.lbFiles = new System.Windows.Forms.ListBox();
             this.lFiles = new System.Windows.Forms.Label();
             this.pFileInfo = new System.Windows.Forms.Panel();
+            this.lfiExtras = new System.Windows.Forms.Label();
             this.lfiModifyTime = new System.Windows.Forms.Label();
             this.lfiStartOffset = new System.Windows.Forms.Label();
             this.lfiCreateTime = new System.Windows.Forms.Label();
@@ -58,7 +59,7 @@
             this.lfiName = new System.Windows.Forms.Label();
             this.exportFileDialog = new System.Windows.Forms.SaveFileDialog();
             this.exportFolderDialog = new System.Windows.Forms.FolderBrowserDialog();
-            this.lfiExtras = new System.Windows.Forms.Label();
+            this.MMExtraExportData = new System.Windows.Forms.ToolStripMenuItem();
             this.MM.SuspendLayout();
             this.pFileInfo.SuspendLayout();
             this.SuspendLayout();
@@ -87,31 +88,30 @@
             this.MMFile.Size = new System.Drawing.Size(37, 20);
             this.MMFile.Text = "&File";
             this.MMFile.DropDownOpening += new System.EventHandler(this.MMFile_DropDownOpening);
-            this.MMFile.Click += new System.EventHandler(this.MMFile_Click);
             // 
             // MMFileOpen
             // 
             this.MMFileOpen.Name = "MMFileOpen";
-            this.MMFileOpen.Size = new System.Drawing.Size(180, 22);
+            this.MMFileOpen.Size = new System.Drawing.Size(115, 22);
             this.MMFileOpen.Text = "&Open ...";
             this.MMFileOpen.Click += new System.EventHandler(this.MMFileOpen_Click);
             // 
             // MMFileSave
             // 
             this.MMFileSave.Name = "MMFileSave";
-            this.MMFileSave.Size = new System.Drawing.Size(180, 22);
+            this.MMFileSave.Size = new System.Drawing.Size(115, 22);
             this.MMFileSave.Text = "&Save";
             this.MMFileSave.Click += new System.EventHandler(this.MMFileSave_Click);
             // 
             // MMFileS1
             // 
             this.MMFileS1.Name = "MMFileS1";
-            this.MMFileS1.Size = new System.Drawing.Size(177, 6);
+            this.MMFileS1.Size = new System.Drawing.Size(112, 6);
             // 
             // MMFileExit
             // 
             this.MMFileExit.Name = "MMFileExit";
-            this.MMFileExit.Size = new System.Drawing.Size(180, 22);
+            this.MMFileExit.Size = new System.Drawing.Size(115, 22);
             this.MMFileExit.Text = "E&xit";
             this.MMFileExit.Click += new System.EventHandler(this.MMFileExit_Click);
             // 
@@ -141,12 +141,11 @@
             this.MMExport.Size = new System.Drawing.Size(52, 20);
             this.MMExport.Text = "&Export";
             this.MMExport.DropDownOpening += new System.EventHandler(this.MMExport_DropDownOpening);
-            this.MMExport.Click += new System.EventHandler(this.MMExport_Click);
             // 
             // MMExportSelectedFile
             // 
             this.MMExportSelectedFile.Name = "MMExportSelectedFile";
-            this.MMExportSelectedFile.Size = new System.Drawing.Size(180, 22);
+            this.MMExportSelectedFile.Size = new System.Drawing.Size(154, 22);
             this.MMExportSelectedFile.Text = "Selected &File";
             this.MMExportSelectedFile.Click += new System.EventHandler(this.MMExportSelectedFile_Click);
             // 
@@ -154,30 +153,30 @@
             // 
             this.MMExportSelectedFolder.Enabled = false;
             this.MMExportSelectedFolder.Name = "MMExportSelectedFolder";
-            this.MMExportSelectedFolder.Size = new System.Drawing.Size(180, 22);
+            this.MMExportSelectedFolder.Size = new System.Drawing.Size(154, 22);
             this.MMExportSelectedFolder.Text = "Selected F&older";
             // 
             // MMExportS1
             // 
             this.MMExportS1.Name = "MMExportS1";
-            this.MMExportS1.Size = new System.Drawing.Size(177, 6);
+            this.MMExportS1.Size = new System.Drawing.Size(151, 6);
             // 
             // MMExportAll
             // 
             this.MMExportAll.Name = "MMExportAll";
-            this.MMExportAll.Size = new System.Drawing.Size(180, 22);
+            this.MMExportAll.Size = new System.Drawing.Size(154, 22);
             this.MMExportAll.Text = "&All Files";
             this.MMExportAll.Click += new System.EventHandler(this.MMExportAll_Click);
             // 
             // MMExtra
             // 
             this.MMExtra.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.MMExtraMD5});
+            this.MMExtraMD5,
+            this.MMExtraExportData});
             this.MMExtra.Name = "MMExtra";
             this.MMExtra.Size = new System.Drawing.Size(44, 20);
             this.MMExtra.Text = "E&xtra";
             this.MMExtra.DropDownOpening += new System.EventHandler(this.MMExtra_DropDownOpening);
-            this.MMExtra.Click += new System.EventHandler(this.MMExtra_Click);
             // 
             // MMExtraMD5
             // 
@@ -260,6 +259,15 @@
             this.pFileInfo.Size = new System.Drawing.Size(295, 150);
             this.pFileInfo.TabIndex = 6;
             // 
+            // lfiExtras
+            // 
+            this.lfiExtras.AutoSize = true;
+            this.lfiExtras.Location = new System.Drawing.Point(3, 117);
+            this.lfiExtras.Name = "lfiExtras";
+            this.lfiExtras.Size = new System.Drawing.Size(51, 13);
+            this.lfiExtras.TabIndex = 6;
+            this.lfiExtras.Text = "unknown";
+            // 
             // lfiModifyTime
             // 
             this.lfiModifyTime.AutoSize = true;
@@ -318,14 +326,12 @@
             // 
             this.exportFolderDialog.RootFolder = System.Environment.SpecialFolder.MyComputer;
             // 
-            // lfiExtras
+            // MMExtraExportData
             // 
-            this.lfiExtras.AutoSize = true;
-            this.lfiExtras.Location = new System.Drawing.Point(3, 117);
-            this.lfiExtras.Name = "lfiExtras";
-            this.lfiExtras.Size = new System.Drawing.Size(51, 13);
-            this.lfiExtras.TabIndex = 6;
-            this.lfiExtras.Text = "unknown";
+            this.MMExtraExportData.Name = "MMExtraExportData";
+            this.MMExtraExportData.Size = new System.Drawing.Size(193, 22);
+            this.MMExtraExportData.Text = "Export Debug File Data";
+            this.MMExtraExportData.Click += new System.EventHandler(this.MMExtraExportData_Click);
             // 
             // MainForm
             // 
@@ -386,6 +392,7 @@
         private System.Windows.Forms.ToolStripSeparator MMFileS1;
         private System.Windows.Forms.ToolStripSeparator MMExportS1;
         private System.Windows.Forms.Label lfiExtras;
+        private System.Windows.Forms.ToolStripMenuItem MMExtraExportData;
     }
 }
 

@@ -271,11 +271,8 @@ namespace AAPakEditor
             if ((pak == null) || (!pak.isOpen))
                 return;
 
-            exportFileDialog.FileName = "game_pak_files.csv";
-
-            if (exportFileDialog.ShowDialog() != DialogResult.OK)
-                return;
-
+            DateTime newest = new DateTime(1600, 1, 1);
+            
             List<string> sl = new List<string>();
             string s = "";
             s = "name";
@@ -291,18 +288,28 @@ namespace AAPakEditor
             sl.Add(s);
             foreach (AAPakFileInfo pfi in pak.files)
             {
+                DateTime modTime = DateTime.FromFileTime(pfi.modifyTime);
+                if (modTime > newest)
+                    newest = modTime;
+
                 s = pfi.name;
                 s += ";" + pfi.size.ToString();
                 s += ";" + pfi.offset.ToString();
                 s += ";" + BitConverter.ToString(pfi.md5).Replace("-","").ToUpper();
                 s += ";" + DateTime.FromFileTime(pfi.createTime).ToString();
-                s += ";" + DateTime.FromFileTime(pfi.modifyTime).ToString();
+                s += ";" + modTime.ToString();
                 s += ";" + pfi.sizeDuplicate.ToString();
                 s += ";" + pfi.paddingSize.ToString();
                 s += ";" + pfi.dummy1.ToString();
                 s += ";" + pfi.dummy2.ToString();
                 sl.Add(s);
+
             }
+
+            exportFileDialog.FileName = "game_pak_files_"+ newest.ToString("yyyyMMdd")+".csv";
+
+            if (exportFileDialog.ShowDialog() != DialogResult.OK)
+                return;
 
             File.WriteAllLines(exportFileDialog.FileName, sl);
         }

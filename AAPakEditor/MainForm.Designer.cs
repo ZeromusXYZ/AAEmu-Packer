@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.MM = new System.Windows.Forms.MenuStrip();
             this.MMFile = new System.Windows.Forms.ToolStripMenuItem();
             this.MMFileOpen = new System.Windows.Forms.ToolStripMenuItem();
@@ -43,6 +44,7 @@
             this.MMExportAll = new System.Windows.Forms.ToolStripMenuItem();
             this.MMExtra = new System.Windows.Forms.ToolStripMenuItem();
             this.MMExtraMD5 = new System.Windows.Forms.ToolStripMenuItem();
+            this.MMExtraExportData = new System.Windows.Forms.ToolStripMenuItem();
             this.openGamePakDialog = new System.Windows.Forms.OpenFileDialog();
             this.lbFolders = new System.Windows.Forms.ListBox();
             this.lFileCount = new System.Windows.Forms.Label();
@@ -59,7 +61,6 @@
             this.lfiName = new System.Windows.Forms.Label();
             this.exportFileDialog = new System.Windows.Forms.SaveFileDialog();
             this.exportFolderDialog = new System.Windows.Forms.FolderBrowserDialog();
-            this.MMExtraExportData = new System.Windows.Forms.ToolStripMenuItem();
             this.MM.SuspendLayout();
             this.pFileInfo.SuspendLayout();
             this.SuspendLayout();
@@ -181,9 +182,16 @@
             // MMExtraMD5
             // 
             this.MMExtraMD5.Name = "MMExtraMD5";
-            this.MMExtraMD5.Size = new System.Drawing.Size(180, 22);
+            this.MMExtraMD5.Size = new System.Drawing.Size(193, 22);
             this.MMExtraMD5.Text = "Re-Calculate MD5";
             this.MMExtraMD5.Click += new System.EventHandler(this.MMEXtraMD5_Click);
+            // 
+            // MMExtraExportData
+            // 
+            this.MMExtraExportData.Name = "MMExtraExportData";
+            this.MMExtraExportData.Size = new System.Drawing.Size(193, 22);
+            this.MMExtraExportData.Text = "Export Debug File Data";
+            this.MMExtraExportData.Click += new System.EventHandler(this.MMExtraExportData_Click);
             // 
             // openGamePakDialog
             // 
@@ -326,13 +334,6 @@
             // 
             this.exportFolderDialog.RootFolder = System.Environment.SpecialFolder.MyComputer;
             // 
-            // MMExtraExportData
-            // 
-            this.MMExtraExportData.Name = "MMExtraExportData";
-            this.MMExtraExportData.Size = new System.Drawing.Size(193, 22);
-            this.MMExtraExportData.Text = "Export Debug File Data";
-            this.MMExtraExportData.Click += new System.EventHandler(this.MMExtraExportData_Click);
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -345,6 +346,7 @@
             this.Controls.Add(this.lFileCount);
             this.Controls.Add(this.lbFolders);
             this.Controls.Add(this.MM);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.MM;
             this.Name = "MainForm";
             this.Text = "AAPakEditor";

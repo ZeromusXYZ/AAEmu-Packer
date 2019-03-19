@@ -415,6 +415,85 @@ namespace AAPakEditor
             return BitConverter.ToString(file.md5).Replace("-", ""); // Return the (updated) md5 as a string
         }
 
+        public AAPakFileInfo FindFileByOffset(long offset)
+        {
+            foreach(AAPakFileInfo pfi in files)
+            {
+                if ((offset >= pfi.offset) && (offset <= (pfi.offset + pfi.size + pfi.paddingSize)))
+                {
+                    return pfi;
+                }
+            }
+            return nullAAPakFileInfo;
+        }
+
+        public bool ReplaceFile(ref AAPakFileInfo pfi, Stream sourceStream, DateTime ModifyTime)
+        {
+            // Overwrite a existing file in the pak
+            if (sourceStream.Length > (pfi.size + pfi.paddingSize))
+                return false;
+            long endPos = pfi.offset + pfi.size + pfi.paddingSize;
+
+            // TODO: Actualy test this
+
+            try
+            {
+                _gpFileStream.Position = pfi.offset;
+                sourceStream.Position = 0;
+                sourceStream.CopyTo(_gpFileStream);
+            }
+            catch
+            {
+                return false;
+            }
+
+            pfi.size = sourceStream.Length;
+            pfi.paddingSize = (int)(endPos - pfi.size - pfi.offset);
+
+            return true;
+        }
+
+        public bool DeleteFile(AAPakFileInfo pfi)
+        {
+            // When we detele a file from the pak, we remove the entry from the FileTable and expand the previous file's padding to take up the space
+            // TODO
+            return true;
+        }
+
+        public bool AddAsNewFile(string filename, Stream sourceStream, DateTime CreateTime, DateTime ModifyTime, bool autoSpareSpace, out AAPakFileInfo pfi)
+        {
+            // When we have a new file, or previous space wasn't enough, we will add it where the file table starts, and move the file table
+            // TODO
+            pfi = nullAAPakFileInfo;
+            return true;
+        }
+
+        public bool AddFileFromStream(string filename, Stream sourceStream, DateTime CreateTime, DateTime ModifyTime, bool autoSpareSpace, out AAPakFileInfo pfi)
+        {
+            // Try to find the existing file
+            pfi = GetFileByName(filename);
+            bool addAsNew = (pfi.Equals(nullAAPakFileInfo));
+            long reservedSizeMax = 0x80000000 ;
+            long startOffset = _header.FirstFileInfoOffset;
+            if (!addAsNew)
+            {
+                reservedSizeMax = pfi.size + pfi.paddingSize;
+                startOffset = pfi.offset;
+            }
+            if (sourceStream.Length > reservedSizeMax)
+            {
+                addAsNew = true;
+                reservedSizeMax = 0x80000000;
+                startOffset = _header.FirstFileInfoOffset;
+            }
+
+            // TODO
+
+
+
+            return false;
+        }
+
 
     }
 }

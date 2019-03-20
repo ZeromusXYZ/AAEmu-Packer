@@ -61,6 +61,7 @@
             this.lfiName = new System.Windows.Forms.Label();
             this.exportFileDialog = new System.Windows.Forms.SaveFileDialog();
             this.exportFolderDialog = new System.Windows.Forms.FolderBrowserDialog();
+            this.importFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.MM.SuspendLayout();
             this.pFileInfo.SuspendLayout();
             this.SuspendLayout();
@@ -198,6 +199,7 @@
             this.openGamePakDialog.FileName = "game_pak";
             this.openGamePakDialog.Filter = "ArcheAge Game Pak|game_pak|All Files|*.*";
             this.openGamePakDialog.RestoreDirectory = true;
+            this.openGamePakDialog.ShowReadOnly = true;
             // 
             // lbFolders
             // 
@@ -334,6 +336,12 @@
             // 
             this.exportFolderDialog.RootFolder = System.Environment.SpecialFolder.MyComputer;
             // 
+            // importFileDialog
+            // 
+            this.importFileDialog.AddExtension = false;
+            this.importFileDialog.Filter = "Al Files|*.*";
+            this.importFileDialog.RestoreDirectory = true;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -395,6 +403,7 @@
         private System.Windows.Forms.ToolStripSeparator MMExportS1;
         private System.Windows.Forms.Label lfiExtras;
         private System.Windows.Forms.ToolStripMenuItem MMExtraExportData;
+        private System.Windows.Forms.OpenFileDialog importFileDialog;
     }
 }
 

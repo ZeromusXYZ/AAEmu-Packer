@@ -34,7 +34,7 @@ namespace AAPakEditor
             {
                 Application.UseWaitCursor = true;
                 Cursor.Current = Cursors.WaitCursor;
-                LoadPakFile(openGamePakDialog.FileName);
+                LoadPakFile(openGamePakDialog.FileName, openGamePakDialog.ReadOnlyChecked);
                 Cursor.Current = Cursors.Default;
                 Application.UseWaitCursor = false;
             }
@@ -52,15 +52,15 @@ namespace AAPakEditor
                 pak.ClosePak();
         }
 
-        private void LoadPakFile(string filename)
+        private void LoadPakFile(string filename, bool openAsReadOnly)
         {
             if (pak == null)
             {
-                pak = new AAPak("");
+                pak = new AAPak("",true);
             }
             if (pak.isOpen)
                 pak.ClosePak();
-            var res = pak.OpenPak(filename);
+            var res = pak.OpenPak(filename,openAsReadOnly);
             if (!res)
             {
                 Text = baseTitle;

@@ -257,11 +257,12 @@ namespace AAPakEditor
         public bool isDirty = false;
         public List<AAPakFileInfo> files = new List<AAPakFileInfo>();
         public List<string> folders = new List<string>();
+        public bool readOnly { get; private set; }
 
-        public AAPak(string filePath)
+        public AAPak(string filePath, bool openAsReadOnly)
         {
             _header = new AAPakFileHeader(this);
-            bool isLoaded = OpenPak(filePath);
+            bool isLoaded = OpenPak(filePath,openAsReadOnly);
             if (isLoaded)
             {
                 isOpen = ReadHeader();
@@ -278,7 +279,7 @@ namespace AAPakEditor
                 ClosePak();
         }
 
-        public bool OpenPak(string filePath)
+        public bool OpenPak(string filePath, bool openAsReadOnly)
         {
             // Fail if already open
             if (isOpen)
@@ -297,12 +298,14 @@ namespace AAPakEditor
                 _gpFilePath = filePath;
                 isDirty = false;
                 isOpen = true;
+                readOnly = openAsReadOnly;
                 return ReadHeader();
             }
             catch
             {
                 _gpFilePath = null ;
                 isOpen = false;
+                readOnly = true;
                 return false;
             }
         }
@@ -311,7 +314,7 @@ namespace AAPakEditor
         {
             if (!isOpen)
                 return;
-            if (isDirty)
+            if ((isDirty) && (readOnly == false))
                 SaveHeader();
             _gpFileStream.Close();
             _gpFileStream = null;
@@ -430,14 +433,21 @@ namespace AAPakEditor
         public bool ReplaceFile(ref AAPakFileInfo pfi, Stream sourceStream, DateTime ModifyTime)
         {
             // Overwrite a existing file in the pak
+
+            if (readOnly)
+                return false;
+
+            // Fail if the new file is too big
             if (sourceStream.Length > (pfi.size + pfi.paddingSize))
                 return false;
+
+            // Save endpos for easy calculation later
             long endPos = pfi.offset + pfi.size + pfi.paddingSize;
 
             // TODO: Actualy test this
-
             try
             {
+                // Copy new data over the old data
                 _gpFileStream.Position = pfi.offset;
                 sourceStream.Position = 0;
                 sourceStream.CopyTo(_gpFileStream);
@@ -447,8 +457,12 @@ namespace AAPakEditor
                 return false;
             }
 
+            // Update File Table Info
             pfi.size = sourceStream.Length;
+            // Calculate new Padding size
             pfi.paddingSize = (int)(endPos - pfi.size - pfi.offset);
+            // Mark File Table as dirty
+            isDirty = true;
 
             return true;
         }
@@ -456,6 +470,8 @@ namespace AAPakEditor
         public bool DeleteFile(AAPakFileInfo pfi)
         {
             // When we detele a file from the pak, we remove the entry from the FileTable and expand the previous file's padding to take up the space
+            if (readOnly)
+                return false;
             // TODO
             return true;
         }
@@ -463,13 +479,26 @@ namespace AAPakEditor
         public bool AddAsNewFile(string filename, Stream sourceStream, DateTime CreateTime, DateTime ModifyTime, bool autoSpareSpace, out AAPakFileInfo pfi)
         {
             // When we have a new file, or previous space wasn't enough, we will add it where the file table starts, and move the file table
+            if (readOnly)
+            {
+                pfi = nullAAPakFileInfo;
+                return false;
+            }
+            
             // TODO
+
             pfi = nullAAPakFileInfo;
             return true;
         }
 
         public bool AddFileFromStream(string filename, Stream sourceStream, DateTime CreateTime, DateTime ModifyTime, bool autoSpareSpace, out AAPakFileInfo pfi)
         {
+            if (readOnly)
+            {
+                pfi = nullAAPakFileInfo;
+                return false;
+            }
+
             // Try to find the existing file
             pfi = GetFileByName(filename);
             bool addAsNew = (pfi.Equals(nullAAPakFileInfo));

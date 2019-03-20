@@ -14,7 +14,7 @@ namespace AAPakEditor
 {
     
     [StructLayout(LayoutKind.Explicit)]
-    public struct AAPakFileInfo
+    public struct AAPakFileInfoStruct
     {
         /*
         getdstring NAME 0x108 MEMORY_FILE
@@ -41,6 +41,21 @@ namespace AAPakEditor
         //[FieldOffset(0x140)] public System.Runtime.InteropServices.ComTypes.FILETIME modifyTime ;
         [FieldOffset(0x148)] public Int64 dummy2; // looks like padding, always 0 ?
     }
+
+    public class AAPakFileInfo
+    {
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 0x108)] public string name;
+        public Int64 offset;
+        public Int64 size;
+        public Int64 sizeDuplicate; // maybe compressed data size ? if used
+        public Int32 paddingSize; // ??
+        public byte[] md5;
+        public Int32 dummy1; // looks like padding, always 0 ?
+        public Int64 createTime;
+        public Int64 modifyTime;
+        public Int64 dummy2; // looks like padding, always 0 ?
+    }
+
 
     public class AAPakFileHeader
     {
@@ -126,7 +141,7 @@ namespace AAPakEditor
             _owner._gpFileStream.Position = FirstFileInfoOffset; // This was 0x00000005c66cf200 or 24803865088 on my example pak
 
 
-            int bufSize = Marshal.SizeOf(typeof(AAPakFileInfo));
+            int bufSize = 0x150; // Marshal.SizeOf(typeof(AAPakFileInfo));
             MemoryStream ms = new MemoryStream(bufSize); // Could probably do without the intermediate memorystream, but it's easier to process
             BinaryReader reader = new BinaryReader(ms);
             for (uint i = 0; i < fileCount; i++)
@@ -176,7 +191,7 @@ namespace AAPakEditor
             _owner._gpFileStream.Position = FirstFileInfoOffset; // Mave back to our saved location
 
 
-            int bufSize = Marshal.SizeOf(typeof(AAPakFileInfo));
+            int bufSize = 0x150; // Marshal.SizeOf(typeof(AAPakFileInfo));
             MemoryStream ms = new MemoryStream(bufSize); // Could probably do without the intermediate memorystream, but it's easier to process
             BinaryWriter writer = new BinaryWriter(ms);
             for (int i = 0; i < _owner.files.Count; i++)
@@ -248,7 +263,7 @@ namespace AAPakEditor
 
     public class AAPak
     {
-        protected AAPakFileInfo nullAAPakFileInfo = new AAPakFileInfo();
+        public AAPakFileInfo nullAAPakFileInfo = new AAPakFileInfo();
 
         public string _gpFilePath { get; private set; }
         public FileStream _gpFileStream { get; private set; }
@@ -381,9 +396,9 @@ namespace AAPakEditor
             return res;
         }
 
+        /*
         public AAPakFileInfo GetFileByName(string filename)
         {
-            filename = filename.ToLower();
             foreach (AAPakFileInfo pfi in files)
             {
                 if (pfi.name == filename)
@@ -391,16 +406,38 @@ namespace AAPakEditor
             }
             return nullAAPakFileInfo; // return first file if it fails
         }
+        */
+
+        public bool GetFileByName(string filename, ref AAPakFileInfo fileInfo)
+        {
+            foreach (AAPakFileInfo pfi in files)
+            {
+                if (pfi.name == filename)
+                {
+                    fileInfo = pfi;
+                    return true;
+                }
+            }
+            fileInfo = nullAAPakFileInfo; // return null file if it fails
+            return false;
+        }
 
         public SubStream ExportFileAsStream(AAPakFileInfo file)
         {
             return new SubStream(_gpFileStream, file.offset, file.size);
         }
 
-        public SubStream ExportFileAsStream(string fileName)
+        public Stream ExportFileAsStream(string fileName)
         {
-            AAPakFileInfo file = GetFileByName(fileName);
-            return new SubStream(_gpFileStream, file.offset, file.size);
+            AAPakFileInfo file = nullAAPakFileInfo ;
+            if (GetFileByName(fileName, ref file) == true)
+            {
+                return new SubStream(_gpFileStream, file.offset, file.size);
+            }
+            else
+            {
+                return new MemoryStream();
+            }
         }
 
         public string UpdateMD5(AAPakFileInfo file)
@@ -418,16 +455,18 @@ namespace AAPakEditor
             return BitConverter.ToString(file.md5).Replace("-", ""); // Return the (updated) md5 as a string
         }
 
-        public AAPakFileInfo FindFileByOffset(long offset)
+        public bool FindFileByOffset(long offset, ref AAPakFileInfo fileInfo)
         {
             foreach(AAPakFileInfo pfi in files)
             {
                 if ((offset >= pfi.offset) && (offset <= (pfi.offset + pfi.size + pfi.paddingSize)))
                 {
-                    return pfi;
+                    fileInfo = pfi;
+                    return true;
                 }
             }
-            return nullAAPakFileInfo;
+            fileInfo = nullAAPakFileInfo;
+            return false;
         }
 
         public bool ReplaceFile(ref AAPakFileInfo pfi, Stream sourceStream, DateTime ModifyTime)
@@ -457,10 +496,13 @@ namespace AAPakEditor
                 return false;
             }
 
-            // Update File Table Info
+            // Update File Size in File Table
             pfi.size = sourceStream.Length;
             // Calculate new Padding size
             pfi.paddingSize = (int)(endPos - pfi.size - pfi.offset);
+            // Recalculate the MD5 hash
+            UpdateMD5(pfi); // TODO: optimize this to calculate WHILE we are copying the stream
+
             // Mark File Table as dirty
             isDirty = true;
 
@@ -493,23 +535,28 @@ namespace AAPakEditor
 
         public bool AddFileFromStream(string filename, Stream sourceStream, DateTime CreateTime, DateTime ModifyTime, bool autoSpareSpace, out AAPakFileInfo pfi)
         {
+            pfi = nullAAPakFileInfo;
             if (readOnly)
             {
-                pfi = nullAAPakFileInfo;
                 return false;
             }
 
+            bool addAsNew = false;
+            long reservedSizeMax = 0x80000000;
+            long startOffset = 0;
             // Try to find the existing file
-            pfi = GetFileByName(filename);
-            bool addAsNew = (pfi.Equals(nullAAPakFileInfo));
-            long reservedSizeMax = 0x80000000 ;
-            long startOffset = _header.FirstFileInfoOffset;
-            if (!addAsNew)
+            if (GetFileByName(filename, ref pfi))
             {
                 reservedSizeMax = pfi.size + pfi.paddingSize;
                 startOffset = pfi.offset;
             }
-            if (sourceStream.Length > reservedSizeMax)
+            else
+            {
+                startOffset = _header.FirstFileInfoOffset;
+                addAsNew = true;
+            }
+
+            if ((addAsNew) || (sourceStream.Length > reservedSizeMax))
             {
                 addAsNew = true;
                 reservedSizeMax = 0x80000000;

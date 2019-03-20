@@ -36,6 +36,7 @@
             this.MMFileS1 = new System.Windows.Forms.ToolStripSeparator();
             this.MMFileExit = new System.Windows.Forms.ToolStripMenuItem();
             this.MMImport = new System.Windows.Forms.ToolStripMenuItem();
+            this.MMImportReplace = new System.Windows.Forms.ToolStripMenuItem();
             this.MMImportFiles = new System.Windows.Forms.ToolStripMenuItem();
             this.MMExport = new System.Windows.Forms.ToolStripMenuItem();
             this.MMExportSelectedFile = new System.Windows.Forms.ToolStripMenuItem();
@@ -48,7 +49,6 @@
             this.openGamePakDialog = new System.Windows.Forms.OpenFileDialog();
             this.lbFolders = new System.Windows.Forms.ListBox();
             this.lFileCount = new System.Windows.Forms.Label();
-            this.lFolderList = new System.Windows.Forms.Label();
             this.lbFiles = new System.Windows.Forms.ListBox();
             this.lFiles = new System.Windows.Forms.Label();
             this.pFileInfo = new System.Windows.Forms.Panel();
@@ -62,8 +62,16 @@
             this.exportFileDialog = new System.Windows.Forms.SaveFileDialog();
             this.exportFolderDialog = new System.Windows.Forms.FolderBrowserDialog();
             this.importFileDialog = new System.Windows.Forms.OpenFileDialog();
+            this.tvFolders = new System.Windows.Forms.TreeView();
+            this.tcDirectoryViews = new System.Windows.Forms.TabControl();
+            this.tpTreeView = new System.Windows.Forms.TabPage();
+            this.tpFlatDirView = new System.Windows.Forms.TabPage();
+            this.MMExtraDebugTest = new System.Windows.Forms.ToolStripMenuItem();
             this.MM.SuspendLayout();
             this.pFileInfo.SuspendLayout();
+            this.tcDirectoryViews.SuspendLayout();
+            this.tpTreeView.SuspendLayout();
+            this.tpFlatDirView.SuspendLayout();
             this.SuspendLayout();
             // 
             // MM
@@ -94,42 +102,50 @@
             // MMFileOpen
             // 
             this.MMFileOpen.Name = "MMFileOpen";
-            this.MMFileOpen.Size = new System.Drawing.Size(115, 22);
+            this.MMFileOpen.Size = new System.Drawing.Size(180, 22);
             this.MMFileOpen.Text = "&Open ...";
             this.MMFileOpen.Click += new System.EventHandler(this.MMFileOpen_Click);
             // 
             // MMFileSave
             // 
             this.MMFileSave.Name = "MMFileSave";
-            this.MMFileSave.Size = new System.Drawing.Size(115, 22);
+            this.MMFileSave.Size = new System.Drawing.Size(180, 22);
             this.MMFileSave.Text = "&Save";
             this.MMFileSave.Click += new System.EventHandler(this.MMFileSave_Click);
             // 
             // MMFileS1
             // 
             this.MMFileS1.Name = "MMFileS1";
-            this.MMFileS1.Size = new System.Drawing.Size(112, 6);
+            this.MMFileS1.Size = new System.Drawing.Size(177, 6);
             // 
             // MMFileExit
             // 
             this.MMFileExit.Name = "MMFileExit";
-            this.MMFileExit.Size = new System.Drawing.Size(115, 22);
+            this.MMFileExit.Size = new System.Drawing.Size(180, 22);
             this.MMFileExit.Text = "E&xit";
             this.MMFileExit.Click += new System.EventHandler(this.MMFileExit_Click);
             // 
             // MMImport
             // 
             this.MMImport.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.MMImportReplace,
             this.MMImportFiles});
-            this.MMImport.Enabled = false;
             this.MMImport.Name = "MMImport";
             this.MMImport.Size = new System.Drawing.Size(55, 20);
             this.MMImport.Text = "&Import";
+            this.MMImport.DropDownOpening += new System.EventHandler(this.MMImport_DropDownOpening);
+            // 
+            // MMImportReplace
+            // 
+            this.MMImportReplace.Name = "MMImportReplace";
+            this.MMImportReplace.Size = new System.Drawing.Size(192, 22);
+            this.MMImportReplace.Text = "Replace selected file ...";
+            this.MMImportReplace.Click += new System.EventHandler(this.MMImportReplace_Click);
             // 
             // MMImportFiles
             // 
             this.MMImportFiles.Name = "MMImportFiles";
-            this.MMImportFiles.Size = new System.Drawing.Size(109, 22);
+            this.MMImportFiles.Size = new System.Drawing.Size(192, 22);
             this.MMImportFiles.Text = "&Files ...";
             // 
             // MMExport
@@ -147,7 +163,7 @@
             // MMExportSelectedFile
             // 
             this.MMExportSelectedFile.Name = "MMExportSelectedFile";
-            this.MMExportSelectedFile.Size = new System.Drawing.Size(154, 22);
+            this.MMExportSelectedFile.Size = new System.Drawing.Size(180, 22);
             this.MMExportSelectedFile.Text = "Selected &File";
             this.MMExportSelectedFile.Click += new System.EventHandler(this.MMExportSelectedFile_Click);
             // 
@@ -155,18 +171,18 @@
             // 
             this.MMExportSelectedFolder.Enabled = false;
             this.MMExportSelectedFolder.Name = "MMExportSelectedFolder";
-            this.MMExportSelectedFolder.Size = new System.Drawing.Size(154, 22);
+            this.MMExportSelectedFolder.Size = new System.Drawing.Size(180, 22);
             this.MMExportSelectedFolder.Text = "Selected F&older";
             // 
             // MMExportS1
             // 
             this.MMExportS1.Name = "MMExportS1";
-            this.MMExportS1.Size = new System.Drawing.Size(151, 6);
+            this.MMExportS1.Size = new System.Drawing.Size(177, 6);
             // 
             // MMExportAll
             // 
             this.MMExportAll.Name = "MMExportAll";
-            this.MMExportAll.Size = new System.Drawing.Size(154, 22);
+            this.MMExportAll.Size = new System.Drawing.Size(180, 22);
             this.MMExportAll.Text = "&All Files";
             this.MMExportAll.Click += new System.EventHandler(this.MMExportAll_Click);
             // 
@@ -174,7 +190,8 @@
             // 
             this.MMExtra.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.MMExtraMD5,
-            this.MMExtraExportData});
+            this.MMExtraExportData,
+            this.MMExtraDebugTest});
             this.MMExtra.Name = "MMExtra";
             this.MMExtra.Size = new System.Drawing.Size(44, 20);
             this.MMExtra.Text = "E&xtra";
@@ -207,9 +224,9 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.lbFolders.FormattingEnabled = true;
-            this.lbFolders.Location = new System.Drawing.Point(12, 53);
+            this.lbFolders.Location = new System.Drawing.Point(3, 6);
             this.lbFolders.Name = "lbFolders";
-            this.lbFolders.Size = new System.Drawing.Size(336, 381);
+            this.lbFolders.Size = new System.Drawing.Size(319, 368);
             this.lbFolders.TabIndex = 1;
             this.lbFolders.SelectedIndexChanged += new System.EventHandler(this.lbFolders_SelectedIndexChanged);
             // 
@@ -217,20 +234,11 @@
             // 
             this.lFileCount.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.lFileCount.AutoSize = true;
-            this.lFileCount.Location = new System.Drawing.Point(12, 437);
+            this.lFileCount.Location = new System.Drawing.Point(13, 454);
             this.lFileCount.Name = "lFileCount";
             this.lFileCount.Size = new System.Drawing.Size(40, 13);
             this.lFileCount.TabIndex = 2;
             this.lFileCount.Text = "no files";
-            // 
-            // lFolderList
-            // 
-            this.lFolderList.AutoSize = true;
-            this.lFolderList.Location = new System.Drawing.Point(9, 35);
-            this.lFolderList.Name = "lFolderList";
-            this.lFolderList.Size = new System.Drawing.Size(41, 13);
-            this.lFolderList.TabIndex = 3;
-            this.lFolderList.Text = "Folders";
             // 
             // lbFiles
             // 
@@ -239,7 +247,7 @@
             this.lbFiles.FormattingEnabled = true;
             this.lbFiles.Location = new System.Drawing.Point(354, 53);
             this.lbFiles.Name = "lbFiles";
-            this.lbFiles.Size = new System.Drawing.Size(295, 225);
+            this.lbFiles.Size = new System.Drawing.Size(295, 238);
             this.lbFiles.TabIndex = 4;
             this.lbFiles.SelectedIndexChanged += new System.EventHandler(this.lbFiles_SelectedIndexChanged);
             // 
@@ -264,7 +272,7 @@
             this.pFileInfo.Controls.Add(this.lfiHash);
             this.pFileInfo.Controls.Add(this.lfiSize);
             this.pFileInfo.Controls.Add(this.lfiName);
-            this.pFileInfo.Location = new System.Drawing.Point(354, 284);
+            this.pFileInfo.Location = new System.Drawing.Point(354, 301);
             this.pFileInfo.Name = "pFileInfo";
             this.pFileInfo.Size = new System.Drawing.Size(295, 150);
             this.pFileInfo.TabIndex = 6;
@@ -342,17 +350,70 @@
             this.importFileDialog.Filter = "Al Files|*.*";
             this.importFileDialog.RestoreDirectory = true;
             // 
+            // tvFolders
+            // 
+            this.tvFolders.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.tvFolders.Location = new System.Drawing.Point(6, 6);
+            this.tvFolders.Name = "tvFolders";
+            this.tvFolders.Size = new System.Drawing.Size(316, 378);
+            this.tvFolders.TabIndex = 7;
+            this.tvFolders.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.tvFolders_AfterSelect);
+            this.tvFolders.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.tvFolders_NodeMouseClick);
+            // 
+            // tcDirectoryViews
+            // 
+            this.tcDirectoryViews.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.tcDirectoryViews.Controls.Add(this.tpTreeView);
+            this.tcDirectoryViews.Controls.Add(this.tpFlatDirView);
+            this.tcDirectoryViews.Location = new System.Drawing.Point(12, 35);
+            this.tcDirectoryViews.Name = "tcDirectoryViews";
+            this.tcDirectoryViews.SelectedIndex = 0;
+            this.tcDirectoryViews.Size = new System.Drawing.Size(336, 416);
+            this.tcDirectoryViews.TabIndex = 8;
+            // 
+            // tpTreeView
+            // 
+            this.tpTreeView.Controls.Add(this.tvFolders);
+            this.tpTreeView.Location = new System.Drawing.Point(4, 22);
+            this.tpTreeView.Name = "tpTreeView";
+            this.tpTreeView.Padding = new System.Windows.Forms.Padding(3);
+            this.tpTreeView.Size = new System.Drawing.Size(328, 390);
+            this.tpTreeView.TabIndex = 0;
+            this.tpTreeView.Text = "Tree View";
+            this.tpTreeView.UseVisualStyleBackColor = true;
+            // 
+            // tpFlatDirView
+            // 
+            this.tpFlatDirView.Controls.Add(this.lbFolders);
+            this.tpFlatDirView.Location = new System.Drawing.Point(4, 22);
+            this.tpFlatDirView.Name = "tpFlatDirView";
+            this.tpFlatDirView.Padding = new System.Windows.Forms.Padding(3);
+            this.tpFlatDirView.Size = new System.Drawing.Size(328, 390);
+            this.tpFlatDirView.TabIndex = 1;
+            this.tpFlatDirView.Text = "Flat Folder View";
+            this.tpFlatDirView.UseVisualStyleBackColor = true;
+            // 
+            // MMExtraDebugTest
+            // 
+            this.MMExtraDebugTest.Name = "MMExtraDebugTest";
+            this.MMExtraDebugTest.Size = new System.Drawing.Size(193, 22);
+            this.MMExtraDebugTest.Text = "DebugTest";
+            this.MMExtraDebugTest.Click += new System.EventHandler(this.MMExtraDebugTest_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(661, 476);
+            this.Controls.Add(this.tcDirectoryViews);
             this.Controls.Add(this.pFileInfo);
             this.Controls.Add(this.lFiles);
             this.Controls.Add(this.lbFiles);
-            this.Controls.Add(this.lFolderList);
             this.Controls.Add(this.lFileCount);
-            this.Controls.Add(this.lbFolders);
             this.Controls.Add(this.MM);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.MM;
@@ -364,6 +425,9 @@
             this.MM.PerformLayout();
             this.pFileInfo.ResumeLayout(false);
             this.pFileInfo.PerformLayout();
+            this.tcDirectoryViews.ResumeLayout(false);
+            this.tpTreeView.ResumeLayout(false);
+            this.tpFlatDirView.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -378,7 +442,6 @@
         private System.Windows.Forms.OpenFileDialog openGamePakDialog;
         private System.Windows.Forms.ListBox lbFolders;
         private System.Windows.Forms.Label lFileCount;
-        private System.Windows.Forms.Label lFolderList;
         private System.Windows.Forms.ListBox lbFiles;
         private System.Windows.Forms.Label lFiles;
         private System.Windows.Forms.Panel pFileInfo;
@@ -404,6 +467,12 @@
         private System.Windows.Forms.Label lfiExtras;
         private System.Windows.Forms.ToolStripMenuItem MMExtraExportData;
         private System.Windows.Forms.OpenFileDialog importFileDialog;
+        private System.Windows.Forms.ToolStripMenuItem MMImportReplace;
+        private System.Windows.Forms.TreeView tvFolders;
+        private System.Windows.Forms.TabControl tcDirectoryViews;
+        private System.Windows.Forms.TabPage tpTreeView;
+        private System.Windows.Forms.TabPage tpFlatDirView;
+        private System.Windows.Forms.ToolStripMenuItem MMExtraDebugTest;
     }
 }
 

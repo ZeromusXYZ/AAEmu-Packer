@@ -53,6 +53,76 @@ namespace AAPakEditor
                 pak.ClosePak();
         }
 
+        private void GenerateFolderViews()
+        {
+            lFileCount.Text = "Analyzing folder structure ... ";
+            lFileCount.Refresh();
+
+            pak.GenerateFolderList();
+
+            lFileCount.Text = "Loading ... ";
+            lFileCount.Refresh();
+
+            lbFolders.Items.Clear();
+            lbFiles.Items.Clear();
+            tvFolders.Nodes.Clear();
+            TreeNode rootNode = tvFolders.Nodes.Add("", "root");
+            TreeNode foundNode = null;
+            var c = 0;
+            foreach (string s in pak.folders)
+            {
+                lbFolders.Items.Add(s);
+                c++;
+                if ((c % 250) == 0)
+                {
+                    lFileCount.Text = "Loading folders ... " + c.ToString() + " / " + pak.folders.Count.ToString();
+                    lFileCount.Refresh();
+                    //Thread.Sleep(1);
+                }
+
+
+                if (s != "")
+                {
+                    string[] dirwalk = s.Split('/');
+                    string dd = "";
+                    TreeNode lastNode = rootNode;
+                    foreach (string ds in dirwalk)
+                    {
+                        if (dd != "")
+                            dd += "/";
+                        dd += ds;
+
+                        foundNode = null;
+                        foreach (TreeNode n in lastNode.Nodes)
+                        {
+                            if (n.Name == dd)
+                            {
+                                foundNode = n;
+                                break;
+                            }
+                        }
+
+                        //TreeNode[] nsearch = lastNode.Nodes.Find(ds, false);
+                        // if (nsearch.Length <= 0)
+                        if (foundNode == null)
+                        {
+                            // No node for this yet, make one
+                            lastNode = lastNode.Nodes.Add(dd, ds);
+                        }
+                        else
+                        {
+                            lastNode = foundNode;
+                        }
+                    }
+                }
+
+
+            }
+            rootNode.Expand();
+            lFileCount.Text = pak.files.Count.ToString() + " files in " + pak.folders.Count.ToString() + " folders";
+        }
+
+
         private void LoadPakFile(string filename, bool openAsReadOnly)
         {
             if (pak == null)
@@ -65,6 +135,21 @@ namespace AAPakEditor
                 lFileCount.Refresh();
                 pak.ClosePak();
             }
+
+            if (openAsReadOnly == false)
+            {
+                MessageBox.Show("!!! Warning !!!\r\n" +
+                    "You are opening the pak in read/write mode !\r\n" +
+                    "\r\n" +
+                    "This program comes with absolutly NO warranty.\r\n" +
+                    "It is possible that this program will inreversably damage your game files while editing.\r\n" +
+                    "Please be sure that you have a backup available of the pak file you are editing.\r\n" +
+                    "That being said, I did my best as to avoid possible damage (other than oderered by the user) caused by malfunctions.\r\n" +
+                    "\r\n" +
+                    "Enjoy, and edit responsibly."+
+                    "~ZeromusXYZ");
+            }
+
             lFileCount.Text = "Opening Pak ... ";
             lFileCount.Refresh();
             var res = pak.OpenPak(filename,openAsReadOnly);
@@ -79,68 +164,8 @@ namespace AAPakEditor
             else
             {
                 Text = baseTitle + " - " + pak._gpFilePath;
-                lFileCount.Text = "Analyzing folder structure ... ";
-                lFileCount.Refresh();
-                pak.GenerateFolderList();
-                lFileCount.Text = "Loading ... ";
-                lFileCount.Refresh();
-                lbFolders.Items.Clear();
-                lbFiles.Items.Clear();
-                tvFolders.Nodes.Clear();
-                TreeNode rootNode = tvFolders.Nodes.Add("", "root");
-                TreeNode foundNode = null;
-                var c = 0;
-                foreach (string s in pak.folders)
-                {
-                    lbFolders.Items.Add(s);
-                    c++;
-                    if ((c % 250) == 0)
-                    {
-                        lFileCount.Text = "Loading folders ... " + c.ToString() + " / " + pak.folders.Count.ToString();
-                        lFileCount.Refresh();
-                        //Thread.Sleep(1);
-                    }
 
-
-                    if (s != "")
-                    {
-                        string[] dirwalk = s.Split('/');
-                        string dd = "";
-                        TreeNode lastNode = rootNode;
-                        foreach(string ds in dirwalk)
-                        {
-                            if (dd != "")
-                                dd += "/";
-                            dd += ds;
-
-                            foundNode = null;
-                            foreach(TreeNode n in lastNode.Nodes)
-                            {
-                                if (n.Name == dd)
-                                {
-                                    foundNode = n;
-                                    break;
-                                }
-                            }
-
-                            //TreeNode[] nsearch = lastNode.Nodes.Find(ds, false);
-                            // if (nsearch.Length <= 0)
-                            if (foundNode == null)
-                            {
-                                // No node for this yet, make one
-                                lastNode = lastNode.Nodes.Add(dd, ds);
-                            }
-                            else
-                            {
-                                lastNode = foundNode ;
-                            }
-                        }
-                    }
-
-
-                }
-                rootNode.Expand();
-                lFileCount.Text = pak.files.Count.ToString() + " files in " + pak.folders.Count.ToString() + " folders";
+                GenerateFolderViews();
             }
 
         }
@@ -313,13 +338,13 @@ namespace AAPakEditor
 
         private void MMFileSave_Click(object sender, EventArgs e)
         {
-            if (pak.isDirty)
+            if ((!pak.readOnly) && (pak.isDirty))
                 pak.SaveHeader();
         }
 
         private void MMFile_DropDownOpening(object sender, EventArgs e)
         {
-            MMFileSave.Enabled = (pak != null) && (pak.isOpen) && (pak.isDirty);
+            MMFileSave.Enabled = (pak != null) && (pak.isOpen) && (!pak.readOnly) && (pak.isDirty);
         }
 
         private void MMExport_DropDownOpening(object sender, EventArgs e)
@@ -383,13 +408,13 @@ namespace AAPakEditor
             File.WriteAllLines(exportFileDialog.FileName, sl);
         }
 
-        private void MMImport_DropDownOpening(object sender, EventArgs e)
+        private void MMEdit_DropDownOpening(object sender, EventArgs e)
         {
-            MMImportFiles.Enabled = ((pak != null) && (pak.isOpen) && (pak.readOnly == false));
-            MMImportReplace.Enabled = ((pak != null) && (pak.isOpen) && (pak.readOnly == false) && (lbFiles.SelectedIndex >= 0));
+            MMEditImportFiles.Enabled = ((pak != null) && (pak.isOpen) && (pak.readOnly == false));
+            MMEditReplace.Enabled = ((pak != null) && (pak.isOpen) && (pak.readOnly == false) && (lbFiles.SelectedIndex >= 0));
         }
 
-        private void MMImportReplace_Click(object sender, EventArgs e)
+        private void MMEditReplace_Click(object sender, EventArgs e)
         {
             if ((pak == null) || (!pak.isOpen) || (lbFiles.SelectedIndex < 0))
                 return;
@@ -483,25 +508,46 @@ namespace AAPakEditor
 
         private void MMExtraDebugTest_Click(object sender, EventArgs e)
         {
-
             if ((pak == null) || (!pak.isOpen))
                 return;
 
-            if (lbFiles.SelectedIndex < 0)
+            MessageBox.Show("FAT Location: " + pak._header.FirstFileInfoOffset.ToString());
+        }
+
+        private void MMEditDeleteSelected_Click(object sender, EventArgs e)
+        {
+            if ((pak == null) || (!pak.isOpen) || (lbFiles.SelectedIndex < 0))
+                return;
+
+            if (pak.readOnly)
             {
-                MessageBox.Show("No file selected");
+                MessageBox.Show("Pak is opened in Read-Only mode, cannot delete files.");
                 return;
             }
-            var d = currentFileViewFolder;
-            if (d != "") d += "/";
-            d += lbFiles.SelectedItem.ToString();
+
+            var filename = currentFileViewFolder;
+            if (filename != "") filename += "/";
+            filename += lbFiles.SelectedItem.ToString();
 
             ref AAPakFileInfo pfi = ref pak.nullAAPakFileInfo;
-            if (pak.GetFileByName(d, ref pfi))
+
+            if (!pak.GetFileByName(filename, ref pfi))
+                return;
+
+            if (MessageBox.Show("Are you sure you want to delete this file ?\r\n" + filename, "Delete", MessageBoxButtons.YesNo) != DialogResult.Yes)
+                return;
+
+            if (pak.DeleteFile(pfi))
             {
-                pfi.dummy1++;
-                pfi.dummy2 += 0x10;
+                MessageBox.Show("Reference to " + filename + " has been removed from the pak.");
             }
+
+            if (lbFiles.Items.Count <= 1)
+            {
+                // If this was the last file listed in the directory listing, we will need to re-populate the folder views to update this change
+                GenerateFolderViews();
+            }
+            lbFiles.Items.Clear();
 
         }
     }

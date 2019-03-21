@@ -35,9 +35,9 @@
             this.MMFileSave = new System.Windows.Forms.ToolStripMenuItem();
             this.MMFileS1 = new System.Windows.Forms.ToolStripSeparator();
             this.MMFileExit = new System.Windows.Forms.ToolStripMenuItem();
-            this.MMImport = new System.Windows.Forms.ToolStripMenuItem();
-            this.MMImportReplace = new System.Windows.Forms.ToolStripMenuItem();
-            this.MMImportFiles = new System.Windows.Forms.ToolStripMenuItem();
+            this.MMEdit = new System.Windows.Forms.ToolStripMenuItem();
+            this.MMEditReplace = new System.Windows.Forms.ToolStripMenuItem();
+            this.MMEditImportFiles = new System.Windows.Forms.ToolStripMenuItem();
             this.MMExport = new System.Windows.Forms.ToolStripMenuItem();
             this.MMExportSelectedFile = new System.Windows.Forms.ToolStripMenuItem();
             this.MMExportSelectedFolder = new System.Windows.Forms.ToolStripMenuItem();
@@ -46,6 +46,7 @@
             this.MMExtra = new System.Windows.Forms.ToolStripMenuItem();
             this.MMExtraMD5 = new System.Windows.Forms.ToolStripMenuItem();
             this.MMExtraExportData = new System.Windows.Forms.ToolStripMenuItem();
+            this.MMExtraDebugTest = new System.Windows.Forms.ToolStripMenuItem();
             this.openGamePakDialog = new System.Windows.Forms.OpenFileDialog();
             this.lbFolders = new System.Windows.Forms.ListBox();
             this.lFileCount = new System.Windows.Forms.Label();
@@ -66,7 +67,8 @@
             this.tcDirectoryViews = new System.Windows.Forms.TabControl();
             this.tpTreeView = new System.Windows.Forms.TabPage();
             this.tpFlatDirView = new System.Windows.Forms.TabPage();
-            this.MMExtraDebugTest = new System.Windows.Forms.ToolStripMenuItem();
+            this.MMEditDeleteSelected = new System.Windows.Forms.ToolStripMenuItem();
+            this.MMEditS1 = new System.Windows.Forms.ToolStripSeparator();
             this.MM.SuspendLayout();
             this.pFileInfo.SuspendLayout();
             this.tcDirectoryViews.SuspendLayout();
@@ -78,7 +80,7 @@
             // 
             this.MM.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.MMFile,
-            this.MMImport,
+            this.MMEdit,
             this.MMExport,
             this.MMExtra});
             this.MM.Location = new System.Drawing.Point(0, 0);
@@ -110,7 +112,7 @@
             // 
             this.MMFileSave.Name = "MMFileSave";
             this.MMFileSave.Size = new System.Drawing.Size(180, 22);
-            this.MMFileSave.Text = "&Save";
+            this.MMFileSave.Text = "&Save now";
             this.MMFileSave.Click += new System.EventHandler(this.MMFileSave_Click);
             // 
             // MMFileS1
@@ -125,28 +127,30 @@
             this.MMFileExit.Text = "E&xit";
             this.MMFileExit.Click += new System.EventHandler(this.MMFileExit_Click);
             // 
-            // MMImport
+            // MMEdit
             // 
-            this.MMImport.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.MMImportReplace,
-            this.MMImportFiles});
-            this.MMImport.Name = "MMImport";
-            this.MMImport.Size = new System.Drawing.Size(55, 20);
-            this.MMImport.Text = "&Import";
-            this.MMImport.DropDownOpening += new System.EventHandler(this.MMImport_DropDownOpening);
+            this.MMEdit.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.MMEditReplace,
+            this.MMEditDeleteSelected,
+            this.MMEditS1,
+            this.MMEditImportFiles});
+            this.MMEdit.Name = "MMEdit";
+            this.MMEdit.Size = new System.Drawing.Size(39, 20);
+            this.MMEdit.Text = "&Edit";
+            this.MMEdit.DropDownOpening += new System.EventHandler(this.MMEdit_DropDownOpening);
             // 
-            // MMImportReplace
+            // MMEditReplace
             // 
-            this.MMImportReplace.Name = "MMImportReplace";
-            this.MMImportReplace.Size = new System.Drawing.Size(192, 22);
-            this.MMImportReplace.Text = "Replace selected file ...";
-            this.MMImportReplace.Click += new System.EventHandler(this.MMImportReplace_Click);
+            this.MMEditReplace.Name = "MMEditReplace";
+            this.MMEditReplace.Size = new System.Drawing.Size(192, 22);
+            this.MMEditReplace.Text = "Replace selected file ...";
+            this.MMEditReplace.Click += new System.EventHandler(this.MMEditReplace_Click);
             // 
-            // MMImportFiles
+            // MMEditImportFiles
             // 
-            this.MMImportFiles.Name = "MMImportFiles";
-            this.MMImportFiles.Size = new System.Drawing.Size(192, 22);
-            this.MMImportFiles.Text = "&Files ...";
+            this.MMEditImportFiles.Name = "MMEditImportFiles";
+            this.MMEditImportFiles.Size = new System.Drawing.Size(192, 22);
+            this.MMEditImportFiles.Text = "&Import Files ...";
             // 
             // MMExport
             // 
@@ -163,7 +167,7 @@
             // MMExportSelectedFile
             // 
             this.MMExportSelectedFile.Name = "MMExportSelectedFile";
-            this.MMExportSelectedFile.Size = new System.Drawing.Size(180, 22);
+            this.MMExportSelectedFile.Size = new System.Drawing.Size(154, 22);
             this.MMExportSelectedFile.Text = "Selected &File";
             this.MMExportSelectedFile.Click += new System.EventHandler(this.MMExportSelectedFile_Click);
             // 
@@ -171,18 +175,18 @@
             // 
             this.MMExportSelectedFolder.Enabled = false;
             this.MMExportSelectedFolder.Name = "MMExportSelectedFolder";
-            this.MMExportSelectedFolder.Size = new System.Drawing.Size(180, 22);
+            this.MMExportSelectedFolder.Size = new System.Drawing.Size(154, 22);
             this.MMExportSelectedFolder.Text = "Selected F&older";
             // 
             // MMExportS1
             // 
             this.MMExportS1.Name = "MMExportS1";
-            this.MMExportS1.Size = new System.Drawing.Size(177, 6);
+            this.MMExportS1.Size = new System.Drawing.Size(151, 6);
             // 
             // MMExportAll
             // 
             this.MMExportAll.Name = "MMExportAll";
-            this.MMExportAll.Size = new System.Drawing.Size(180, 22);
+            this.MMExportAll.Size = new System.Drawing.Size(154, 22);
             this.MMExportAll.Text = "&All Files";
             this.MMExportAll.Click += new System.EventHandler(this.MMExportAll_Click);
             // 
@@ -211,10 +215,18 @@
             this.MMExtraExportData.Text = "Export Debug File Data";
             this.MMExtraExportData.Click += new System.EventHandler(this.MMExtraExportData_Click);
             // 
+            // MMExtraDebugTest
+            // 
+            this.MMExtraDebugTest.Name = "MMExtraDebugTest";
+            this.MMExtraDebugTest.Size = new System.Drawing.Size(193, 22);
+            this.MMExtraDebugTest.Text = "DebugTest";
+            this.MMExtraDebugTest.Click += new System.EventHandler(this.MMExtraDebugTest_Click);
+            // 
             // openGamePakDialog
             // 
             this.openGamePakDialog.FileName = "game_pak";
             this.openGamePakDialog.Filter = "ArcheAge Game Pak|game_pak|All Files|*.*";
+            this.openGamePakDialog.ReadOnlyChecked = true;
             this.openGamePakDialog.RestoreDirectory = true;
             this.openGamePakDialog.ShowReadOnly = true;
             // 
@@ -397,12 +409,17 @@
             this.tpFlatDirView.Text = "Flat Folder View";
             this.tpFlatDirView.UseVisualStyleBackColor = true;
             // 
-            // MMExtraDebugTest
+            // MMEditDeleteSelected
             // 
-            this.MMExtraDebugTest.Name = "MMExtraDebugTest";
-            this.MMExtraDebugTest.Size = new System.Drawing.Size(193, 22);
-            this.MMExtraDebugTest.Text = "DebugTest";
-            this.MMExtraDebugTest.Click += new System.EventHandler(this.MMExtraDebugTest_Click);
+            this.MMEditDeleteSelected.Name = "MMEditDeleteSelected";
+            this.MMEditDeleteSelected.Size = new System.Drawing.Size(192, 22);
+            this.MMEditDeleteSelected.Text = "Delete selected file ...";
+            this.MMEditDeleteSelected.Click += new System.EventHandler(this.MMEditDeleteSelected_Click);
+            // 
+            // MMEditS1
+            // 
+            this.MMEditS1.Name = "MMEditS1";
+            this.MMEditS1.Size = new System.Drawing.Size(189, 6);
             // 
             // MainForm
             // 
@@ -451,8 +468,8 @@
         private System.Windows.Forms.Label lfiSize;
         private System.Windows.Forms.Label lfiName;
         private System.Windows.Forms.Label lfiModifyTime;
-        private System.Windows.Forms.ToolStripMenuItem MMImport;
-        private System.Windows.Forms.ToolStripMenuItem MMImportFiles;
+        private System.Windows.Forms.ToolStripMenuItem MMEdit;
+        private System.Windows.Forms.ToolStripMenuItem MMEditImportFiles;
         private System.Windows.Forms.ToolStripMenuItem MMExport;
         private System.Windows.Forms.ToolStripMenuItem MMExportSelectedFile;
         private System.Windows.Forms.SaveFileDialog exportFileDialog;
@@ -467,12 +484,14 @@
         private System.Windows.Forms.Label lfiExtras;
         private System.Windows.Forms.ToolStripMenuItem MMExtraExportData;
         private System.Windows.Forms.OpenFileDialog importFileDialog;
-        private System.Windows.Forms.ToolStripMenuItem MMImportReplace;
+        private System.Windows.Forms.ToolStripMenuItem MMEditReplace;
         private System.Windows.Forms.TreeView tvFolders;
         private System.Windows.Forms.TabControl tcDirectoryViews;
         private System.Windows.Forms.TabPage tpTreeView;
         private System.Windows.Forms.TabPage tpFlatDirView;
         private System.Windows.Forms.ToolStripMenuItem MMExtraDebugTest;
+        private System.Windows.Forms.ToolStripMenuItem MMEditDeleteSelected;
+        private System.Windows.Forms.ToolStripSeparator MMEditS1;
     }
 }
 

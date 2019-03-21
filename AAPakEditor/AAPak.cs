@@ -13,6 +13,7 @@ using SubStreamHelper;
 namespace AAPakEditor
 {
     
+    // We don't use ths struct anymore, but I'm keeping it around for now
     [StructLayout(LayoutKind.Explicit)]
     public struct AAPakFileInfoStruct
     {
@@ -42,6 +43,9 @@ namespace AAPakEditor
         [FieldOffset(0x148)] public Int64 dummy2; // looks like padding, always 0 ?
     }
 
+    /// <summary>
+    /// File Details Block
+    /// </summary>
     public class AAPakFileInfo
     {
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 0x108)] public string name;
@@ -56,7 +60,9 @@ namespace AAPakEditor
         public Int64 dummy2; // looks like padding, always 0 ?
     }
 
-
+    /// <summary>
+    /// Pak Header Information
+    /// </summary>
     public class AAPakFileHeader
     {
         private readonly byte[] key = new byte[] { 0x32, 0x1F, 0x2A, 0xEE, 0xAA, 0x58, 0x4A, 0xB4, 0x9A, 0x6C, 0x9E, 0x09, 0xD5, 0x9E, 0x9C, 0x6F }; // AES_128 Key
@@ -76,6 +82,10 @@ namespace AAPakEditor
         public byte[] nullHash;
         public string nullHashString = "".PadRight(32, '0');
 
+        /// <summary>
+        /// Creates a new Header Block for a Pak file
+        /// </summary>
+        /// <param name="owner">The AAPak that this header belongs to</param>
         public AAPakFileHeader(AAPak owner)
         {
             _owner = owner;
@@ -110,6 +120,9 @@ namespace AAPakEditor
             }
         }
 
+        /// <summary>
+        /// Read and decrypt the File Details Table
+        /// </summary>
         public void ReadFileTable()
         {
             /*
@@ -185,7 +198,9 @@ namespace AAPakEditor
             ms.Dispose();
         }
 
-
+        /// <summary>
+        /// Encrypt and Write the File Details Table
+        /// </summary>
         public void WriteFileTable()
         {
             _owner._gpFileStream.Position = FirstFileInfoOffset; // Mave back to our saved location
@@ -228,7 +243,9 @@ namespace AAPakEditor
         }
 
 
-
+        /// <summary>
+        /// Decrypt the current header data
+        /// </summary>
         public void Decrypt()
         {
             data = EncryptAES(rawData, key, false);
@@ -236,6 +253,9 @@ namespace AAPakEditor
             extraFileCount = BitConverter.ToUInt32(data, 12);// & 0x00FFFFFF;
         }
 
+        /// <summary>
+        /// Encrypt the current header data
+        /// </summary>
         public void Encrypt()
         {
             MemoryStream ms = new MemoryStream();
@@ -261,8 +281,14 @@ namespace AAPakEditor
 
     }
 
+    /// <summary>
+    /// AAPak Class used to handle game_pak from ArcheAge
+    /// </summary>
     public class AAPak
     {
+        /// <summary>
+        /// Virtual data to return as a null value for file details
+        /// </summary>
         public AAPakFileInfo nullAAPakFileInfo = new AAPakFileInfo();
 
         public string _gpFilePath { get; private set; }
@@ -277,10 +303,17 @@ namespace AAPakEditor
         public AAPak(string filePath, bool openAsReadOnly)
         {
             _header = new AAPakFileHeader(this);
-            bool isLoaded = OpenPak(filePath,openAsReadOnly);
-            if (isLoaded)
+            if (filePath != "")
             {
-                isOpen = ReadHeader();
+                bool isLoaded = OpenPak(filePath, openAsReadOnly);
+                if (isLoaded)
+                {
+                    isOpen = ReadHeader();
+                }
+                else
+                {
+                    isOpen = false;
+                }
             }
             else
             {
@@ -337,6 +370,9 @@ namespace AAPakEditor
             isOpen = false;
         }
 
+        /// <summary>
+        /// Encrypts and saves Header and File Information Table
+        /// </summary>
         public void SaveHeader()
         {
             _header.WriteFileTable();
@@ -349,6 +385,10 @@ namespace AAPakEditor
             isDirty = false;
         }
 
+        /// <summary>
+        /// Read Pak Header
+        /// </summary>
+        /// <returns></returns>
         protected bool ReadHeader()
         {
             files.Clear();

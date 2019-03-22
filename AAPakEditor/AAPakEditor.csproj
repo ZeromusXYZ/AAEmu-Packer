@@ -91,6 +91,12 @@
     <Compile Include="ExportAllDlg.Designer.cs">
       <DependentUpon>ExportAllDlg.cs</DependentUpon>
     </Compile>
+    <Compile Include="AddFileDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AddFileDlg.Designer.cs">
+      <DependentUpon>AddFileDlg.cs</DependentUpon>
+    </Compile>
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -102,6 +108,9 @@
     <Compile Include="SubStream.cs" />
     <EmbeddedResource Include="ExportAllDlg.resx">
       <DependentUpon>ExportAllDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="AddFileDlg.resx">
+      <DependentUpon>AddFileDlg.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>

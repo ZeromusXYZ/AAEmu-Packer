@@ -72,7 +72,7 @@ namespace AAPakEditor
 
         public AAPak _owner;
         public int Size = headerSize;
-        public long fatHeaderOffset = 0 ;
+        // public long fatHeaderOffset = 0 ;
         public long FirstFileInfoOffset = 0;
         public long AddFileOffset = 0;
         public byte[] rawData = new byte[headerSize]; // unencrypted header
@@ -151,6 +151,101 @@ namespace AAPakEditor
             return true;
         }
 
+        public bool WriteToFAT()
+        {
+            // Read all File Table Data into Memory
+            FAT.SetLength(0);
+
+            int bufSize = 0x150; // Marshal.SizeOf(typeof(AAPakFileInfo));
+            MemoryStream ms = new MemoryStream(bufSize); // Could probably do without the intermediate memorystream, but it's easier to process
+            BinaryWriter writer = new BinaryWriter(ms);
+
+            // Normal Files
+            for (int i = 0; i < _owner.files.Count; i++)
+            {
+                ms.Position = 0;
+                AAPakFileInfo pfi = _owner.files[i];
+
+                // Manually write the string for filename
+                for (int c = 0; c < 0x108; c++)
+                {
+                    byte ch = 0;
+                    if (c < pfi.name.Length)
+                        ch = (byte)pfi.name[c];
+                    writer.Write(ch);
+                }
+                writer.Write(pfi.offset);
+                writer.Write(pfi.size);
+                writer.Write(pfi.sizeDuplicate);
+                writer.Write(pfi.paddingSize);
+                writer.Write(pfi.md5);
+                writer.Write(pfi.dummy1);
+                writer.Write(pfi.createTime);
+                writer.Write(pfi.modifyTime);
+                writer.Write(pfi.dummy2);
+
+                byte[] decryptedFileData = new byte[bufSize];
+                ms.Position = 0;
+                ms.Read(decryptedFileData, 0, bufSize);
+                byte[] rawFileData = EncryptAES(decryptedFileData, key, true); // encrypt header data
+
+                FAT.Write(rawFileData, 0, bufSize);
+            }
+
+            // "Extra" Files
+            for (int i = 0; i < _owner.extraFiles.Count; i++)
+            {
+                ms.Position = 0;
+                AAPakFileInfo pfi = _owner.extraFiles[i];
+
+                // Manually write the string for filename
+                for (int c = 0; c < 0x108; c++)
+                {
+                    byte ch = 0;
+                    if (c < pfi.name.Length)
+                        ch = (byte)pfi.name[c];
+                    writer.Write(ch);
+                }
+                writer.Write(pfi.offset);
+                writer.Write(pfi.size);
+                writer.Write(pfi.sizeDuplicate);
+                writer.Write(pfi.paddingSize);
+                writer.Write(pfi.md5);
+                writer.Write(pfi.dummy1);
+                writer.Write(pfi.createTime);
+                writer.Write(pfi.modifyTime);
+                writer.Write(pfi.dummy2);
+
+                byte[] decryptedFileData = new byte[bufSize];
+                ms.Position = 0;
+                ms.Read(decryptedFileData, 0, bufSize);
+                byte[] rawFileData = EncryptAES(decryptedFileData, key, true); // encrypt header data
+
+                FAT.Write(rawFileData, 0, bufSize);
+            }
+            ms.Dispose();
+
+            var dif = (FAT.Length % 0x200);
+            if (dif > 0)
+            {
+                var pad = (0x200 - dif);
+                FAT.SetLength(FAT.Length + pad);
+                FAT.Position = FAT.Length;
+            }
+
+            fileCount = (uint)_owner.files.Count;
+            extraFileCount = (uint)_owner.extraFiles.Count;
+
+            FAT.SetLength(FAT.Length + headerSize);
+
+            EncryptHeaderData();
+
+            FAT.Write(rawData, 0, 0x20);
+
+            return true;
+        }
+
+
         /// <summary>
         /// Read and decrypt the File Details Table
         /// </summary>
@@ -172,6 +267,7 @@ namespace AAPakEditor
             next
             print "FileTable offset:   %INFO_OFF|x%"
             */
+            /*
             long TotalFileInfoSize = (fileCount + extraFileCount) * fileInfoSize;
             _owner._gpFileStream.Seek(0, SeekOrigin.End);
             FirstFileInfoOffset = _owner._gpFileStream.Position ;
@@ -181,6 +277,7 @@ namespace AAPakEditor
             FirstFileInfoOffset -= TotalFileInfoSize;
             var dif = FirstFileInfoOffset % 0x200;
             FirstFileInfoOffset -= dif;
+            */
 
             //_owner._gpFileStream.Position = FirstFileInfoOffset;
             FAT.Position = 0;
@@ -290,12 +387,14 @@ namespace AAPakEditor
                 FirstFileInfoOffset += (0x200 - dif);
             }
 
+            /*
             fatHeaderOffset = FirstFileInfoOffset + TotalFileInfoSize ;
             dif = (fatHeaderOffset % 0x200);
             if (dif > 0)
             {
                 fatHeaderOffset = (0x200 - dif);
             }
+            */
 
             _owner._gpFileStream.Position = FirstFileInfoOffset; // Move stream to location
 
@@ -372,7 +471,7 @@ namespace AAPakEditor
             fileCount = (uint)_owner.files.Count;
             extraFileCount = (uint)_owner.extraFiles.Count;
 
-            _owner._gpFileStream.Position = fatHeaderOffset;
+            _owner._gpFileStream.Position = FirstFileInfoOffset;
         }
 
 
@@ -423,7 +522,6 @@ namespace AAPakEditor
         /// Virtual data to return as a null value for file details
         /// </summary>
         public AAPakFileInfo nullAAPakFileInfo = new AAPakFileInfo();
-
         public string _gpFilePath { get; private set; }
         public FileStream _gpFileStream { get; private set; }
         public AAPakFileHeader _header;
@@ -433,6 +531,10 @@ namespace AAPakEditor
         public List<AAPakFileInfo> extraFiles = new List<AAPakFileInfo>();
         public List<string> folders = new List<string>();
         public bool readOnly { get; private set; }
+        /// <summary>
+        /// If set to true, adds the freed space from a delete to the previous file's padding. If false (default), it "moves" the file to extrefiles for freeing up space, allowing it to be reused.
+        /// </summary>
+        public bool paddingDeleteMode = false;
 
         public AAPak(string filePath, bool openAsReadOnly)
         {
@@ -505,19 +607,17 @@ namespace AAPakEditor
         }
 
         /// <summary>
-        /// Encrypts and saves Header and File Information Table
+        /// Encrypts and saves Header and File Information Table back to the pak. 
+        /// This is also automatically called one ClosePak() if changes where made.
+        /// Warning: Failing to save might corrupt your pak if files were added or deleted !
         /// </summary>
         public void SaveHeader()
         {
-            _header.WriteFileTable();
-            _header.EncryptHeaderData();
-            
-            // Move to our expected header location
-            _gpFileStream.Position = _header.fatHeaderOffset ;
-            //_gpFileStream.Write(_header.rawData, 0, _header.Size);
-            _gpFileStream.Write(_header.rawData, 0, 0x20);
-            _gpFileStream.SetLength(_header.fatHeaderOffset + 0x20); // Trim
-            _gpFileStream.SetLength(_header.fatHeaderOffset + 0x200); // zero-padding
+            _header.WriteToFAT();
+            _gpFileStream.Position = _header.FirstFileInfoOffset;
+            _header.FAT.Position = 0;
+            _header.FAT.CopyTo(_gpFileStream);
+            _gpFileStream.SetLength(_gpFileStream.Position);
 
             isDirty = false;
         }
@@ -532,24 +632,33 @@ namespace AAPakEditor
             extraFiles.Clear();
             folders.Clear();
 
-            _header.LoadFAT();
-            
             // Read the last 512 bytes as raw header data
-            _header.FAT.Seek(-_header.Size, SeekOrigin.End);
+            _gpFileStream.Seek(-_header.Size, SeekOrigin.End);
             
             // Mark correct location as header offset location
-            _header.fatHeaderOffset = _header.FAT.Position;
-            _header.FAT.Read(_header.rawData, 0, 0x20);
+            _gpFileStream.Read(_header.rawData, 0, 0x20); // We don't need to read the entire thing, just the first 32 bytes contain data
             // _gpFileStream.Read(_header.rawData, 0, _header.Size);
+
             _header.DecryptHeaderData();
+
+            // A valid header/footer starts with "WIBO" after decryption
             _header.isValid = (_header.data[0] == 'W') && (_header.data[1] == 'I') && (_header.data[2] == 'B') && (_header.data[3] == 'O');
             if (_header.isValid)
             {
+                _header.LoadFAT();
                 _header.ReadFileTable();
             }
+            else
+            {
+                _header.FAT.SetLength(0);
+            }
+
             return _header.isValid ;
         }
 
+        /// <summary>
+        /// Populate the folders string list with virual folder names derived from the files found inside the pak
+        /// </summary>
         public void GenerateFolderList()
         {
             // There is no actual directory info stored in the pak file, so we just generate it based on filenames
@@ -580,6 +689,12 @@ namespace AAPakEditor
             return res;
         }
 
+        /// <summary>
+        /// Find a file information inside the pak by it's filename
+        /// </summary>
+        /// <param name="filename">filename inside the pak of the requested file</param>
+        /// <param name="fileInfo">Returns the AAPakFile info of the requested file or nullAAPakFileInfo if it does not exist</param>
+        /// <returns>Returns true if the file was found</returns>
         public bool GetFileByName(string filename, ref AAPakFileInfo fileInfo)
         {
             foreach (AAPakFileInfo pfi in files)
@@ -594,11 +709,21 @@ namespace AAPakEditor
             return false;
         }
 
-        public SubStream ExportFileAsStream(AAPakFileInfo file)
+        /// <summary>
+        /// Exports a given file as stream
+        /// </summary>
+        /// <param name="file">AAPakFileInfo of the file to be exported</param>
+        /// <returns>Returns a SubStream of file within the pak</returns>
+        public Stream ExportFileAsStream(AAPakFileInfo file)
         {
             return new SubStream(_gpFileStream, file.offset, file.size);
         }
 
+        /// <summary>
+        /// Exports a given file as stream
+        /// </summary>
+        /// <param name="fileName">filename inside the pak of the file to be exported</param>
+        /// <returns>Returns a SubStream of file within the pak</returns>
         public Stream ExportFileAsStream(string fileName)
         {
             AAPakFileInfo file = nullAAPakFileInfo ;
@@ -612,6 +737,11 @@ namespace AAPakEditor
             }
         }
 
+        /// <summary>
+        /// Calculates and set the MD5 Hash of a given file
+        /// </summary>
+        /// <param name="file">AAPakFileInfo of the file to be updated</param>
+        /// <returns>Returns the new hash as a string (with removed dashes)</returns>
         public string UpdateMD5(AAPakFileInfo file)
         {
             MD5 hash = MD5.Create();
@@ -655,7 +785,6 @@ namespace AAPakEditor
             // Save endpos for easy calculation later
             long endPos = pfi.offset + pfi.size + pfi.paddingSize;
 
-            // TODO: Actualy test this
             try
             {
                 // Copy new data over the old data
@@ -682,19 +811,42 @@ namespace AAPakEditor
             return true;
         }
 
+        /// <summary>
+        /// Delete a file from pak. Behaves differenly depending on the paddingDeleteMode setting
+        /// </summary>
+        /// <param name="pfi">AAPakFileInfo of the file that is to be deleted</param>
+        /// <returns></returns>
         public bool DeleteFile(AAPakFileInfo pfi)
         {
             // When we detele a file from the pak, we remove the entry from the FileTable and expand the previous file's padding to take up the space
             if (readOnly)
                 return false;
 
-            AAPakFileInfo prevPfi = nullAAPakFileInfo;
-            if (FindFileByOffset(pfi.offset - 1, ref prevPfi))
+            if (paddingDeleteMode)
             {
-                // If we have a previous file, expand it's padding are with the free space from this file
-                prevPfi.paddingSize += (int)pfi.size + pfi.paddingSize;
+                AAPakFileInfo prevPfi = nullAAPakFileInfo;
+                if (FindFileByOffset(pfi.offset - 1, ref prevPfi))
+                {
+                    // If we have a previous file, expand it's padding are with the free space from this file
+                    prevPfi.paddingSize += (int)pfi.size + pfi.paddingSize;
+                }
+                files.Remove(pfi);
             }
-            files.Remove(pfi);
+            else
+            {
+                // "move" offset and size data to extrafiles
+                AAPakFileInfo eFile = new AAPakFileInfo();
+                eFile.name = "__unused__";
+                eFile.offset = pfi.offset;
+                eFile.size = pfi.size + pfi.paddingSize;
+                eFile.sizeDuplicate = eFile.size;
+                eFile.paddingSize = 0 ;
+                eFile.md5 = new byte[16];
+
+                extraFiles.Add(eFile);
+
+                files.Remove(pfi);
+            }
             isDirty = true;
             return true;
         }
@@ -707,13 +859,82 @@ namespace AAPakEditor
                 pfi = nullAAPakFileInfo;
                 return false;
             }
-            
-            // TODO
+            bool addedAtTheEnd = true;
 
-            pfi = nullAAPakFileInfo;
+            AAPakFileInfo newFile = new AAPakFileInfo();
+            newFile.name = filename;
+            newFile.offset = _header.FirstFileInfoOffset;
+            newFile.size = sourceStream.Length;
+            newFile.sizeDuplicate = newFile.size;
+            newFile.createTime = CreateTime.ToFileTime();
+            newFile.modifyTime = ModifyTime.ToFileTime();
+            newFile.paddingSize = 0;
+            newFile.md5 = new byte[16];
+
+            // check if we have "unused" space in extraFiles that we can use
+            for(int i = 0; i < extraFiles.Count;i++)
+            {
+                if (newFile.size <= extraFiles[i].size)
+                {
+                    // Copy the spare file's properties and remove it from extraFiles
+                    newFile.offset = extraFiles[i].offset;
+                    newFile.paddingSize = (int)(extraFiles[i].size - newFile.size); // This should already be aligned
+                    addedAtTheEnd = false;
+                    extraFiles.Remove(extraFiles[i]);
+                    break;
+                }
+            }
+
+            if (addedAtTheEnd)
+            {
+                // Only need to calculate padding if we are adding at the end
+                var dif = (newFile.size % 0x200);
+                if (dif > 0)
+                {
+                    newFile.paddingSize = (int)(0x200 - dif);
+                }
+                if (autoSpareSpace)
+                {
+                    // If autSpareSpace is used to add files, we will reserve some extra space as padding
+                    // Add 25% by default
+                    var spareSpace = (newFile.size / 4);
+                    spareSpace -= (spareSpace % 0x200); // Align the spare space
+                    newFile.paddingSize += (int)spareSpace;
+                }
+            }
+
+            // Add to files list
+            files.Add(newFile);
+
+            isDirty = true;
+
+            // Add File Data
+            _gpFileStream.Position = newFile.offset;
+            sourceStream.Position = 0;
+            sourceStream.CopyTo(_gpFileStream);
+
+            if (addedAtTheEnd)
+            {
+                _header.FirstFileInfoOffset = newFile.offset + newFile.size + newFile.paddingSize;
+            }
+
+            UpdateMD5(newFile); // TODO: optimize this to calculate WHILE we are copying the stream
+
+            // Set output
+            pfi = newFile;
             return true;
         }
 
+        /// <summary>
+        /// Adds or replace a given file with name filename with data from sourceStream
+        /// </summary>
+        /// <param name="filename">The filename used inside the pak</param>
+        /// <param name="sourceStream">Source Stream of file to be added</param>
+        /// <param name="CreateTime">Time to use as original file creation time</param>
+        /// <param name="ModifyTime">Time to use as last modified time</param>
+        /// <param name="autoSpareSpace">Enable adding 25% of the sourceStream size as padding when not replacing a file</param>
+        /// <param name="pfi">AAPakFileInfo of the newly added or modified file</param>
+        /// <returns></returns>
         public bool AddFileFromStream(string filename, Stream sourceStream, DateTime CreateTime, DateTime ModifyTime, bool autoSpareSpace, out AAPakFileInfo pfi)
         {
             pfi = nullAAPakFileInfo;
@@ -722,35 +943,23 @@ namespace AAPakEditor
                 return false;
             }
 
-            bool addAsNew = false;
-            long reservedSizeMax = 0x80000000;
-            long startOffset = 0;
+            bool addAsNew = true;
             // Try to find the existing file
             if (GetFileByName(filename, ref pfi))
             {
-                reservedSizeMax = pfi.size + pfi.paddingSize;
-                startOffset = pfi.offset;
+                var reservedSizeMax = pfi.size + pfi.paddingSize;
+                addAsNew = (sourceStream.Length > reservedSizeMax);
+            }
+
+            if (addAsNew)
+            {
+                return AddAsNewFile(filename, sourceStream, CreateTime, ModifyTime, autoSpareSpace, out pfi);
             }
             else
             {
-                startOffset = _header.FirstFileInfoOffset;
-                addAsNew = true;
+                return ReplaceFile(ref pfi, sourceStream, ModifyTime);
             }
-
-            if ((addAsNew) || (sourceStream.Length > reservedSizeMax))
-            {
-                addAsNew = true;
-                reservedSizeMax = 0x80000000;
-                startOffset = _header.FirstFileInfoOffset;
-            }
-
-            // TODO
-
-
-
-            return false;
         }
-
 
     }
 }

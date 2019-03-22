@@ -146,8 +146,9 @@ namespace AAPakEditor
                     "Please be sure that you have a backup available of the pak file you are editing.\r\n" +
                     "That being said, I did my best as to avoid possible damage (other than oderered by the user) caused by malfunctions.\r\n" +
                     "\r\n" +
-                    "Enjoy, and edit responsibly."+
-                    "~ZeromusXYZ");
+                    "Enjoy, and edit responsibly.\r\n"+
+                    "~ZeromusXYZ",
+                    "Warning",MessageBoxButtons.OK,MessageBoxIcon.Warning);
             }
 
             lFileCount.Text = "Opening Pak ... ";
@@ -410,7 +411,9 @@ namespace AAPakEditor
 
         private void MMEdit_DropDownOpening(object sender, EventArgs e)
         {
+            MMEditAddFile.Enabled = ((pak != null) && (pak.isOpen) && (pak.readOnly == false));
             MMEditImportFiles.Enabled = ((pak != null) && (pak.isOpen) && (pak.readOnly == false));
+            MMEditDeleteSelected.Enabled = ((pak != null) && (pak.isOpen) && (pak.readOnly == false) && (lbFiles.SelectedIndex >= 0));
             MMEditReplace.Enabled = ((pak != null) && (pak.isOpen) && (pak.readOnly == false) && (lbFiles.SelectedIndex >= 0));
         }
 
@@ -483,11 +486,15 @@ namespace AAPakEditor
 
             var list = pak.GetFilesInDirectory(currentFileViewFolder);
             lFiles.Text = list.Count.ToString() + " files in " + currentFileViewFolder;
+            List<string> sl = new List<string>();
             foreach (AAPakFileInfo pfi in list)
             {
                 var f = Path.GetFileName(pfi.name);
-                lbFiles.Items.Add(f);
+                // lbFiles.Items.Add(f);
+                sl.Add(f);
             }
+            sl.Sort();
+            lbFiles.Items.AddRange(sl.ToArray());
             Cursor.Current = Cursors.Default;
             Application.UseWaitCursor = false;
 
@@ -510,6 +517,12 @@ namespace AAPakEditor
         {
             if ((pak == null) || (!pak.isOpen))
                 return;
+
+            pak._header.WriteToFAT();
+            FileStream fs = new FileStream("FAT-write.bin", FileMode.Create);
+            pak._header.FAT.Position = 0;
+            pak._header.FAT.CopyTo(fs);
+            fs.Dispose();
 
             MessageBox.Show("FAT Location: " + pak._header.FirstFileInfoOffset.ToString());
         }
@@ -548,6 +561,48 @@ namespace AAPakEditor
                 GenerateFolderViews();
             }
             lbFiles.Items.Clear();
+
+        }
+
+        private void MMEditAddFile_Click(object sender, EventArgs e)
+        {
+            // open add dialog
+            AddFileDialog addDlg = new AddFileDialog();
+            if (currentFileViewFolder != "")
+            addDlg.suggestedDir = currentFileViewFolder + '/' ;
+            if (addDlg.ShowDialog(this) == DialogResult.OK)
+            {
+                string diskfn = addDlg.eDiskFileName.Text.ToLower();
+                string pakfn = addDlg.ePakFileName.Text;
+                addDlg.Dispose();
+
+                if (File.Exists(diskfn))
+                {
+                    DateTime cTime = File.GetCreationTime(diskfn);
+                    DateTime mTime = File.GetLastWriteTime(diskfn);
+                    AAPakFileInfo pfi = pak.nullAAPakFileInfo;
+                    FileStream fs = new FileStream(diskfn, FileMode.Open,FileAccess.Read);
+                    var res = pak.AddFileFromStream(pakfn, fs, cTime, mTime, true, out pfi);
+                    fs.Dispose();
+                    if (res == true)
+                    {
+                        MessageBox.Show("File: " + diskfn + "\r\nadded as: " + pfi.name);
+                    }
+                    else
+                    {
+                        MessageBox.Show("Failed to add file: " + diskfn);
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("File not found: " + diskfn);
+                }
+
+            }
+            else
+            {
+                addDlg.Dispose();
+            }
 
         }
     }

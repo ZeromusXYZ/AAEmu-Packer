@@ -37,6 +37,8 @@
             this.MMFileExit = new System.Windows.Forms.ToolStripMenuItem();
             this.MMEdit = new System.Windows.Forms.ToolStripMenuItem();
             this.MMEditReplace = new System.Windows.Forms.ToolStripMenuItem();
+            this.MMEditDeleteSelected = new System.Windows.Forms.ToolStripMenuItem();
+            this.MMEditS1 = new System.Windows.Forms.ToolStripSeparator();
             this.MMEditImportFiles = new System.Windows.Forms.ToolStripMenuItem();
             this.MMExport = new System.Windows.Forms.ToolStripMenuItem();
             this.MMExportSelectedFile = new System.Windows.Forms.ToolStripMenuItem();
@@ -67,8 +69,8 @@
             this.tcDirectoryViews = new System.Windows.Forms.TabControl();
             this.tpTreeView = new System.Windows.Forms.TabPage();
             this.tpFlatDirView = new System.Windows.Forms.TabPage();
-            this.MMEditDeleteSelected = new System.Windows.Forms.ToolStripMenuItem();
-            this.MMEditS1 = new System.Windows.Forms.ToolStripSeparator();
+            this.MMEditAddFile = new System.Windows.Forms.ToolStripMenuItem();
+            this.MMEditS2 = new System.Windows.Forms.ToolStripSeparator();
             this.MM.SuspendLayout();
             this.pFileInfo.SuspendLayout();
             this.tcDirectoryViews.SuspendLayout();
@@ -130,7 +132,9 @@
             // MMEdit
             // 
             this.MMEdit.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.MMEditAddFile,
             this.MMEditReplace,
+            this.MMEditS2,
             this.MMEditDeleteSelected,
             this.MMEditS1,
             this.MMEditImportFiles});
@@ -145,6 +149,18 @@
             this.MMEditReplace.Size = new System.Drawing.Size(192, 22);
             this.MMEditReplace.Text = "Replace selected file ...";
             this.MMEditReplace.Click += new System.EventHandler(this.MMEditReplace_Click);
+            // 
+            // MMEditDeleteSelected
+            // 
+            this.MMEditDeleteSelected.Name = "MMEditDeleteSelected";
+            this.MMEditDeleteSelected.Size = new System.Drawing.Size(192, 22);
+            this.MMEditDeleteSelected.Text = "Delete selected file ...";
+            this.MMEditDeleteSelected.Click += new System.EventHandler(this.MMEditDeleteSelected_Click);
+            // 
+            // MMEditS1
+            // 
+            this.MMEditS1.Name = "MMEditS1";
+            this.MMEditS1.Size = new System.Drawing.Size(189, 6);
             // 
             // MMEditImportFiles
             // 
@@ -409,17 +425,17 @@
             this.tpFlatDirView.Text = "Flat Folder View";
             this.tpFlatDirView.UseVisualStyleBackColor = true;
             // 
-            // MMEditDeleteSelected
+            // MMEditAddFile
             // 
-            this.MMEditDeleteSelected.Name = "MMEditDeleteSelected";
-            this.MMEditDeleteSelected.Size = new System.Drawing.Size(192, 22);
-            this.MMEditDeleteSelected.Text = "Delete selected file ...";
-            this.MMEditDeleteSelected.Click += new System.EventHandler(this.MMEditDeleteSelected_Click);
+            this.MMEditAddFile.Name = "MMEditAddFile";
+            this.MMEditAddFile.Size = new System.Drawing.Size(192, 22);
+            this.MMEditAddFile.Text = "Add File ...";
+            this.MMEditAddFile.Click += new System.EventHandler(this.MMEditAddFile_Click);
             // 
-            // MMEditS1
+            // MMEditS2
             // 
-            this.MMEditS1.Name = "MMEditS1";
-            this.MMEditS1.Size = new System.Drawing.Size(189, 6);
+            this.MMEditS2.Name = "MMEditS2";
+            this.MMEditS2.Size = new System.Drawing.Size(189, 6);
             // 
             // MainForm
             // 
@@ -492,6 +508,8 @@
         private System.Windows.Forms.ToolStripMenuItem MMExtraDebugTest;
         private System.Windows.Forms.ToolStripMenuItem MMEditDeleteSelected;
         private System.Windows.Forms.ToolStripSeparator MMEditS1;
+        private System.Windows.Forms.ToolStripMenuItem MMEditAddFile;
+        private System.Windows.Forms.ToolStripSeparator MMEditS2;
     }
 }
 

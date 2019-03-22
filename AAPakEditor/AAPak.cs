@@ -68,10 +68,11 @@ namespace AAPakEditor
         private readonly byte[] key = new byte[] { 0x32, 0x1F, 0x2A, 0xEE, 0xAA, 0x58, 0x4A, 0xB4, 0x9A, 0x6C, 0x9E, 0x09, 0xD5, 0x9E, 0x9C, 0x6F }; // AES_128 Key
         protected static readonly int headerSize = 0x200;
         protected static readonly int fileInfoSize = 0x150;
+        public MemoryStream FAT = new MemoryStream();
 
         public AAPak _owner;
         public int Size = headerSize;
-        public long headerOffset = 0 ;
+        public long fatHeaderOffset = 0 ;
         public long FirstFileInfoOffset = 0;
         public long AddFileOffset = 0;
         public byte[] rawData = new byte[headerSize]; // unencrypted header
@@ -91,6 +92,11 @@ namespace AAPakEditor
         {
             _owner = owner;
             nullHash = new byte[16] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        }
+
+        ~AAPakFileHeader()
+        {
+            FAT.Dispose();
         }
 
         // Source:
@@ -119,6 +125,30 @@ namespace AAPakEditor
             {
                 return null;
             }
+        }
+
+        public bool LoadFAT()
+        {
+            // Read all File Table Data into Memory
+            FAT.SetLength(0);
+
+            long TotalFileInfoSize = (fileCount + extraFileCount) * fileInfoSize;
+            _owner._gpFileStream.Seek(0, SeekOrigin.End);
+            FirstFileInfoOffset = _owner._gpFileStream.Position;
+
+            // Search for the first file location, it needs to be alligned to a 0x200 size block
+            FirstFileInfoOffset -= headerSize;
+            FirstFileInfoOffset -= TotalFileInfoSize;
+            var dif = FirstFileInfoOffset % 0x200;
+            // Align to previous block of 512 bytes
+            FirstFileInfoOffset -= dif;
+
+            _owner._gpFileStream.Position = FirstFileInfoOffset;
+
+            SubStream _fat = new SubStream(_owner._gpFileStream, FirstFileInfoOffset, _owner._gpFileStream.Length - FirstFileInfoOffset);
+            _fat.CopyTo(FAT);
+
+            return true;
         }
 
         /// <summary>
@@ -152,8 +182,8 @@ namespace AAPakEditor
             var dif = FirstFileInfoOffset % 0x200;
             FirstFileInfoOffset -= dif;
 
-            _owner._gpFileStream.Position = FirstFileInfoOffset;
-
+            //_owner._gpFileStream.Position = FirstFileInfoOffset;
+            FAT.Position = 0;
 
             int bufSize = 0x150; // Marshal.SizeOf(typeof(AAPakFileInfo));
             MemoryStream ms = new MemoryStream(bufSize); // Could probably do without the intermediate memorystream, but it's easier to process
@@ -164,7 +194,7 @@ namespace AAPakEditor
             for (uint i = 0; i < fileCount; i++)
             {
                 byte[] rawFileData = new byte[bufSize]; // decrypted header data
-                _owner._gpFileStream.Read(rawFileData, 0, bufSize);
+                FAT.Read(rawFileData, 0, bufSize);
                 byte[] decryptedFileData = EncryptAES(rawFileData, key, false);
                 ms.SetLength(0);
                 ms.Write(decryptedFileData, 0, bufSize);
@@ -206,7 +236,7 @@ namespace AAPakEditor
             for (uint i = 0; i < extraFileCount; i++)
             {
                 byte[] rawFileData = new byte[bufSize]; // decrypted header data
-                _owner._gpFileStream.Read(rawFileData, 0, bufSize);
+                FAT.Read(rawFileData, 0, bufSize);
                 byte[] decryptedFileData = EncryptAES(rawFileData, key, false);
                 ms.SetLength(0);
                 ms.Write(decryptedFileData, 0, bufSize);
@@ -236,6 +266,11 @@ namespace AAPakEditor
                 pfi.dummy2 = reader.ReadInt64(); // ???
 
                 _owner.extraFiles.Add(pfi);
+
+                if ((pfi.offset + pfi.size + pfi.paddingSize) > AddFileOffset)
+                {
+                    AddFileOffset = pfi.offset + pfi.size + pfi.paddingSize;
+                }
             }
             ms.Dispose();
         }
@@ -246,7 +281,7 @@ namespace AAPakEditor
         public void WriteFileTable()
         {
             long TotalFileInfoSize = (fileCount + extraFileCount) * fileInfoSize;
-            long TotalFileInfoPadding = 0 ;
+            
             // Check if we are alligned to a block, this should normally already be done when adding files, but let's make sure we are correct
             var dif = FirstFileInfoOffset % 0x200;
             if (dif > 0)
@@ -254,13 +289,13 @@ namespace AAPakEditor
                 // If not, align to the next block offset
                 FirstFileInfoOffset += (0x200 - dif);
             }
-            dif = (TotalFileInfoSize % 0x200);
+
+            fatHeaderOffset = FirstFileInfoOffset + TotalFileInfoSize ;
+            dif = (fatHeaderOffset % 0x200);
             if (dif > 0)
             {
-                TotalFileInfoPadding = (0x200 - dif);
+                fatHeaderOffset = (0x200 - dif);
             }
-
-            headerOffset = FirstFileInfoOffset + TotalFileInfoSize + TotalFileInfoPadding;
 
             _owner._gpFileStream.Position = FirstFileInfoOffset; // Move stream to location
 
@@ -271,7 +306,7 @@ namespace AAPakEditor
             // Normal Files
             for (int i = 0; i < _owner.files.Count; i++)
             {
-                ms.SetLength(0);
+                ms.Position = 0;
                 AAPakFileInfo pfi = _owner.files[i];
 
                 // Manually write the string for filename
@@ -303,7 +338,7 @@ namespace AAPakEditor
             // "Extra" Files
             for (int i = 0; i < _owner.extraFiles.Count; i++)
             {
-                ms.SetLength(0);
+                ms.Position = 0;
                 AAPakFileInfo pfi = _owner.extraFiles[i];
 
                 // Manually write the string for filename
@@ -337,14 +372,14 @@ namespace AAPakEditor
             fileCount = (uint)_owner.files.Count;
             extraFileCount = (uint)_owner.extraFiles.Count;
 
-            _owner._gpFileStream.Position = headerOffset;
+            _owner._gpFileStream.Position = fatHeaderOffset;
         }
 
 
         /// <summary>
         /// Decrypt the current header data
         /// </summary>
-        public void Decrypt()
+        public void DecryptHeaderData()
         {
             data = EncryptAES(rawData, key, false);
             fileCount = BitConverter.ToUInt32(data, 8);
@@ -354,7 +389,7 @@ namespace AAPakEditor
         /// <summary>
         /// Encrypt the current header data
         /// </summary>
-        public void Encrypt()
+        public void EncryptHeaderData()
         {
             MemoryStream ms = new MemoryStream();
             ms.Write(data, 0, headerSize);
@@ -475,14 +510,14 @@ namespace AAPakEditor
         public void SaveHeader()
         {
             _header.WriteFileTable();
-            _header.Encrypt();
+            _header.EncryptHeaderData();
             
             // Move to our expected header location
-            _gpFileStream.Position = _header.headerOffset ;
+            _gpFileStream.Position = _header.fatHeaderOffset ;
             //_gpFileStream.Write(_header.rawData, 0, _header.Size);
             _gpFileStream.Write(_header.rawData, 0, 0x20);
-            _gpFileStream.SetLength(_header.headerOffset + 0x20); // Trim
-            _gpFileStream.SetLength(_header.headerOffset + 0x200); // zero-padding
+            _gpFileStream.SetLength(_header.fatHeaderOffset + 0x20); // Trim
+            _gpFileStream.SetLength(_header.fatHeaderOffset + 0x200); // zero-padding
 
             isDirty = false;
         }
@@ -494,13 +529,19 @@ namespace AAPakEditor
         protected bool ReadHeader()
         {
             files.Clear();
+            extraFiles.Clear();
+            folders.Clear();
+
+            _header.LoadFAT();
+            
             // Read the last 512 bytes as raw header data
-            _gpFileStream.Seek(-_header.Size, SeekOrigin.End);
+            _header.FAT.Seek(-_header.Size, SeekOrigin.End);
+            
             // Mark correct location as header offset location
-            _header.headerOffset = _gpFileStream.Position;
-            _gpFileStream.Read(_header.rawData, 0, 0x20);
+            _header.fatHeaderOffset = _header.FAT.Position;
+            _header.FAT.Read(_header.rawData, 0, 0x20);
             // _gpFileStream.Read(_header.rawData, 0, _header.Size);
-            _header.Decrypt();
+            _header.DecryptHeaderData();
             _header.isValid = (_header.data[0] == 'W') && (_header.data[1] == 'I') && (_header.data[2] == 'B') && (_header.data[3] == 'O');
             if (_header.isValid)
             {

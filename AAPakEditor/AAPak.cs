@@ -536,12 +536,26 @@ namespace AAPakEditor
         /// </summary>
         public bool paddingDeleteMode = false;
 
-        public AAPak(string filePath, bool openAsReadOnly)
+        /// <summary>
+        /// Creates and/or opens a game_pak file
+        /// </summary>
+        /// <param name="filePath">Filename of the pak</param>
+        /// <param name="openAsReadOnly">Open pak in readOnly Mode if true. Ignored it createAsNewPak is set</param>
+        /// <param name="createAsNewPak">If true, will create a new pak at filePath location. Warning: This will overwrite any existing pak at that location !</param>
+        public AAPak(string filePath, bool openAsReadOnly = true, bool createAsNewPak = false)
         {
             _header = new AAPakFileHeader(this);
             if (filePath != "")
             {
-                bool isLoaded = OpenPak(filePath, openAsReadOnly);
+                bool isLoaded = false;
+                if (createAsNewPak)
+                {
+                    isLoaded = NewPak(filePath);
+                }
+                else
+                {
+                    isLoaded = OpenPak(filePath, openAsReadOnly);
+                }
                 if (isLoaded)
                 {
                     isOpen = ReadHeader();
@@ -578,7 +592,14 @@ namespace AAPakEditor
             try
             {
                 // Open stream
-                _gpFileStream = new FileStream(filePath, FileMode.Open);
+                if (openAsReadOnly)
+                {
+                    _gpFileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+                }
+                else
+                {
+                    _gpFileStream = new FileStream(filePath, FileMode.Open, FileAccess.ReadWrite);
+                }
                 _gpFilePath = filePath;
                 isDirty = false;
                 isOpen = true;
@@ -588,6 +609,32 @@ namespace AAPakEditor
             catch
             {
                 _gpFilePath = null ;
+                isOpen = false;
+                readOnly = true;
+                return false;
+            }
+        }
+
+        public bool NewPak(string filePath)
+        {
+            // Fail if already open
+            if (isOpen)
+                return false;
+
+            try
+            {
+                // Create new file stream
+                _gpFileStream = new FileStream(filePath, FileMode.Create,FileAccess.ReadWrite);
+                _gpFilePath = filePath;
+                readOnly = false;
+                isOpen = true;
+                isDirty = true;
+                SaveHeader(); // Save blank data
+                return ReadHeader(); // read blank data to confirm
+            }
+            catch
+            {
+                _gpFilePath = null;
                 isOpen = false;
                 readOnly = true;
                 return false;

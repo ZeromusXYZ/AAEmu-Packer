@@ -25,7 +25,7 @@
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>1</ApplicationRevision>
-    <ApplicationVersion>0.1.0.%2a</ApplicationVersion>
+    <ApplicationVersion>0.2.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
@@ -68,7 +68,7 @@
     <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>charge_package.ico</ApplicationIcon>
+    <ApplicationIcon>aapakeditor_icon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -91,6 +91,12 @@
     <Compile Include="ExportAllDlg.Designer.cs">
       <DependentUpon>ExportAllDlg.cs</DependentUpon>
     </Compile>
+    <Compile Include="AddFileDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AddFileDlg.Designer.cs">
+      <DependentUpon>AddFileDlg.cs</DependentUpon>
+    </Compile>
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -102,6 +108,9 @@
     <Compile Include="SubStream.cs" />
     <EmbeddedResource Include="ExportAllDlg.resx">
       <DependentUpon>ExportAllDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="AddFileDlg.resx">
+      <DependentUpon>AddFileDlg.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
@@ -144,6 +153,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="aapakeditor_icon.ico" />
     <Content Include="charge_package.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

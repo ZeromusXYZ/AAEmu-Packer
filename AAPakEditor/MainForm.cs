@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Diagnostics;
 using System.Windows.Forms;
 using System.IO;
 using System.Threading;
@@ -16,12 +17,55 @@ namespace AAPakEditor
     public partial class MainForm : Form
     {
         public AAPak pak;
+        private string versionString = "0.2";
+        private string urlGitHub = "https://github.com/ZeromusXYZ/AAEmu-Packer";
         private string baseTitle = "";
+        private string currentFileViewFolder = "";
 
         public MainForm()
         {
             InitializeComponent();
         }
+
+        private void UpdateMM()
+        {
+            MMFileSave.Enabled = (pak != null) && (pak.isOpen) && (!pak.readOnly) && (pak.isDirty);
+            MMFileClose.Enabled = (pak != null) && (pak.isOpen);
+
+            MMEditAddFile.Enabled = ((pak != null) && (pak.isOpen) && (pak.readOnly == false));
+            MMEditImportFiles.Enabled = ((pak != null) && (pak.isOpen) && (pak.readOnly == false));
+            MMEditDeleteSelected.Enabled = ((pak != null) && (pak.isOpen) && (pak.readOnly == false) && (lbFiles.SelectedIndex >= 0));
+            MMEditReplace.Enabled = ((pak != null) && (pak.isOpen) && (pak.readOnly == false) && (lbFiles.SelectedIndex >= 0));
+            MMEdit.Visible = (pak != null) && (pak.isOpen) && (!pak.readOnly);
+
+            MMExportSelectedFile.Enabled = (pak != null) && (pak.isOpen) && (lbFiles.SelectedIndex >= 0);
+            MMExportSelectedFolder.Enabled = (pak != null) && (pak.isOpen);
+            MMExportAll.Enabled = (pak != null) && (pak.isOpen);
+            MMExport.Visible = (pak != null) && (pak.isOpen);
+
+            MMExtraMD5.Enabled = (pak != null) && (pak.isOpen) && (pak.readOnly == false) && (lbFiles.SelectedIndex >= 0);
+            MMExtraExportData.Enabled = (pak != null) && (pak.isOpen);
+            MMExtra.Visible = (pak != null) && (pak.isOpen);
+
+            MMVersion.Text = "&Version " + versionString;
+
+            if ((pak != null) && (pak.isOpen))
+            {
+                if (pak.isDirty)
+                {
+                    Text = baseTitle + " - *" + pak._gpFilePath;
+                }
+                else
+                {
+                    Text = baseTitle + " - " + pak._gpFilePath;
+                }
+            }
+            else
+            {
+                Text = baseTitle;
+            }
+        }
+
 
         private void MMFileExit_Click(object sender, EventArgs e)
         {
@@ -30,57 +74,156 @@ namespace AAPakEditor
 
         private void MMFileOpen_Click(object sender, EventArgs e)
         {
+            openGamePakDialog.CheckFileExists = false;
+            openGamePakDialog.ShowReadOnly = true;
+            openGamePakDialog.Title = "Open EXISTING Pak file";
             if (openGamePakDialog.ShowDialog() == DialogResult.OK)
             {
                 Application.UseWaitCursor = true;
                 Cursor.Current = Cursors.WaitCursor;
-                LoadPakFile(openGamePakDialog.FileName);
+                LoadPakFile(openGamePakDialog.FileName, openGamePakDialog.ReadOnlyChecked);
                 Cursor.Current = Cursors.Default;
                 Application.UseWaitCursor = false;
             }
+            UpdateMM();
         }
 
         private void MainForm_Load(object sender, EventArgs e)
         {
             baseTitle = Text;
+            UpdateMM();
             // LoadPakFile("C:\\ArcheAge\\Working\\game_pak");
         }
 
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             if ((pak != null) && (pak.isOpen))
+            {
                 pak.ClosePak();
+                pak = null;
+            }
+            UpdateMM();
         }
 
-        private void LoadPakFile(string filename)
+        private void GenerateFolderViews()
+        {
+            lFileCount.Text = "Analyzing folder structure ... ";
+            lFileCount.Refresh();
+
+            pak.GenerateFolderList();
+
+            lFileCount.Text = "Loading ... ";
+            lFileCount.Refresh();
+
+            lbFolders.Items.Clear();
+            lbFiles.Items.Clear();
+            tvFolders.Nodes.Clear();
+            TreeNode rootNode = tvFolders.Nodes.Add("", "root");
+            TreeNode foundNode = null;
+            var c = 0;
+            foreach (string s in pak.folders)
+            {
+                lbFolders.Items.Add(s);
+                c++;
+                if ((c % 250) == 0)
+                {
+                    lFileCount.Text = "Loading folders ... " + c.ToString() + " / " + pak.folders.Count.ToString();
+                    lFileCount.Refresh();
+                    //Thread.Sleep(1);
+                }
+
+
+                if (s != "")
+                {
+                    string[] dirwalk = s.Split('/');
+                    string dd = "";
+                    TreeNode lastNode = rootNode;
+                    foreach (string ds in dirwalk)
+                    {
+                        if (dd != "")
+                            dd += "/";
+                        dd += ds;
+
+                        foundNode = null;
+                        foreach (TreeNode n in lastNode.Nodes)
+                        {
+                            if (n.Name == dd)
+                            {
+                                foundNode = n;
+                                break;
+                            }
+                        }
+
+                        //TreeNode[] nsearch = lastNode.Nodes.Find(ds, false);
+                        // if (nsearch.Length <= 0)
+                        if (foundNode == null)
+                        {
+                            // No node for this yet, make one
+                            lastNode = lastNode.Nodes.Add(dd, ds);
+                        }
+                        else
+                        {
+                            lastNode = foundNode;
+                        }
+                    }
+                }
+
+
+            }
+            rootNode.Expand();
+            lFileCount.Text = pak.files.Count.ToString() + " files in " + pak.folders.Count.ToString() + " folders";
+            UpdateMM();
+        }
+
+        private void LoadPakFile(string filename, bool openAsReadOnly)
         {
             if (pak == null)
             {
-                pak = new AAPak("");
+                pak = new AAPak("",true);
             }
             if (pak.isOpen)
+            {
+                lFileCount.Text = "Closing pak ... ";
+                lFileCount.Refresh();
                 pak.ClosePak();
-            var res = pak.OpenPak(filename);
+            }
+
+            lFileCount.Text = "Opening Pak ... ";
+            lFileCount.Refresh();
+            var res = pak.OpenPak(filename,openAsReadOnly);
             if (!res)
             {
                 Text = baseTitle;
                 lFileCount.Text = "no files";
                 lbFolders.Items.Clear();
                 lbFiles.Items.Clear();
+                UpdateMM();
                 MessageBox.Show("Failed to open " + openGamePakDialog.FileName);
             }
             else
             {
                 Text = baseTitle + " - " + pak._gpFilePath;
-                pak.GenerateFolderList();
-                lFileCount.Text = pak.files.Count.ToString() + " files in " + pak.folders.Count.ToString() + " folders";
-                lbFolders.Items.Clear();
-                lbFiles.Items.Clear();
-                foreach (string s in pak.folders)
+
+                GenerateFolderViews();
+
+                // Only show this waring if this is not a new pak file
+                if ((openAsReadOnly == false) && (pak.files.Count > 0))
                 {
-                    lbFolders.Items.Add(s);
+                    MessageBox.Show("!!! Warning !!!\r\n" +
+                        "You have opened this pak in read/write mode !\r\n" +
+                        "\r\n" +
+                        "This program comes with absolutly NO warranty.\r\n" +
+                        "It is possible that this program will inreversably damage your game files while editing.\r\n" +
+                        "Please be sure that you have a backup available of the pak file you are editing.\r\n" +
+                        "That being said, I did my best as to avoid possible damage (other than oderered by the user) caused by malfunctions.\r\n" +
+                        "\r\n" +
+                        "Enjoy, and edit responsibly.\r\n" +
+                        "~ ZeromusXYZ",
+                        "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
+
             }
+
         }
 
         private void lbFolders_SelectedIndexChanged(object sender, EventArgs e)
@@ -89,20 +232,9 @@ namespace AAPakEditor
             if ((pak == null) || (!pak.isOpen))
                 return;
 
-            Application.UseWaitCursor = true;
-            Cursor.Current = Cursors.WaitCursor;
-
             var d = (sender as ListBox).SelectedItem.ToString();
-            var list = pak.GetFilesInDirectory(d);
-            lFiles.Text = list.Count.ToString() + " files in " + d;
-            foreach (AAPakFileInfo pfi in list)
-            {
-                var f = Path.GetFileName(pfi.name);
-                lbFiles.Items.Add(f);
-            }
-
-            Cursor.Current = Cursors.Default;
-            Application.UseWaitCursor = false;
+            PopulateFilesList(d);
+            UpdateMM();
         }
 
         private void lbFiles_SelectedIndexChanged(object sender, EventArgs e)
@@ -110,21 +242,25 @@ namespace AAPakEditor
             if ((pak == null) || (!pak.isOpen))
                 return;
 
-            if ((lbFolders.SelectedIndex < 0) || (lbFiles.SelectedIndex < 0))
+            if (lbFiles.SelectedIndex < 0)
                 return;
 
             Application.UseWaitCursor = true;
             Cursor.Current = Cursors.WaitCursor;
 
-            var d = lbFolders.SelectedItem.ToString();
+            var d = currentFileViewFolder ;
             if (d != "") d += "/";
             d += lbFiles.SelectedItem.ToString();
-            AAPakFileInfo pfi = pak.GetFileByName(d);
+            ref AAPakFileInfo pfi = ref pak.nullAAPakFileInfo;
 
-            if (pfi.name != "")
+            //if (pfi.name != "")
+            if (pak.GetFileByName(d, ref pfi))
             {
                 lfiName.Text = pfi.name;
                 lfiSize.Text = "Size: " + pfi.size.ToString() + " byte(s)";
+                if (pfi.paddingSize > 0)
+                    lfiSize.Text += "  + " + pfi.paddingSize + " padding";
+
                 var h = BitConverter.ToString(pfi.md5).ToUpper().Replace("-", "");
                 if (h == pak._header.nullHashString)
                 {
@@ -137,8 +273,10 @@ namespace AAPakEditor
                 lfiCreateTime.Text = "Created: " + DateTime.FromFileTime(pfi.createTime).ToString();
                 lfiModifyTime.Text = "Modified: " + DateTime.FromFileTime(pfi.modifyTime).ToString();
                 lfiStartOffset.Text = "Start Offset: 0x" + pfi.offset.ToString("X16");
-                lfiExtras.Text = "X 0x" + pfi.sizeDuplicate.ToString("X") + "  Z 0x" + pfi.paddingSize.ToString("X") + "  D1 0x" + pfi.dummy1.ToString("X") + "  D2 0x" + pfi.dummy2.ToString("X");
+                lfiExtras.Text = "D1 0x" + pfi.dummy1.ToString("X") + "  D2 0x" + pfi.dummy2.ToString("X");
             }
+
+            UpdateMM();
 
             Cursor.Current = Cursors.Default;
             Application.UseWaitCursor = false;
@@ -149,12 +287,12 @@ namespace AAPakEditor
             if ((pak == null) || (!pak.isOpen))
                 return;
 
-            if ((lbFolders.SelectedIndex < 0) || (lbFiles.SelectedIndex < 0))
+            if (lbFiles.SelectedIndex < 0)
             {
                 MessageBox.Show("No file selected");
                 return;
             }
-            var d = lbFolders.SelectedItem.ToString();
+            var d = currentFileViewFolder ;
             if (d != "") d += "/";
             d += lbFiles.SelectedItem.ToString();
             exportFileDialog.FileName = Path.GetFileName(d.Replace('/', Path.DirectorySeparatorChar));
@@ -196,8 +334,15 @@ namespace AAPakEditor
 
         public bool ExportFile(string sourceName, string destName)
         {
-            AAPakFileInfo pfi = pak.GetFileByName(sourceName);
-            return ExportFile(pfi, destName);
+            ref AAPakFileInfo pfi = ref pak.nullAAPakFileInfo;
+            if (pak.GetFileByName(sourceName, ref pfi))
+            {
+                return ExportFile(pfi, destName);
+            }
+            else
+            {
+                return false;
+            }
         }
 
         private void MMExportAll_Click(object sender, EventArgs e)
@@ -205,6 +350,7 @@ namespace AAPakEditor
             if ((pak == null) || (!pak.isOpen))
                 return;
 
+            exportFolderDialog.SelectedPath = Path.GetDirectoryName(pak._gpFilePath);
             if (exportFolderDialog.ShowDialog() != DialogResult.OK)
                 return;
 
@@ -229,42 +375,41 @@ namespace AAPakEditor
             if ((pak == null) || (!pak.isOpen))
                 return;
 
-            if ((lbFolders.SelectedIndex < 0) || (lbFiles.SelectedIndex < 0))
+            if (lbFiles.SelectedIndex < 0)
             {
                 MessageBox.Show("No file selected");
                 return;
             }
-            var d = lbFolders.SelectedItem.ToString();
+            var d = currentFileViewFolder ;
             if (d != "") d += "/";
             d += lbFiles.SelectedItem.ToString();
 
-            AAPakFileInfo pfi = pak.GetFileByName(d);
-            MessageBox.Show("MD5 Hash updated to " + pak.UpdateMD5(pfi));
+            ref AAPakFileInfo pfi = ref pak.nullAAPakFileInfo;
+            if (pak.GetFileByName(d, ref pfi))
+            {
+                MessageBox.Show("MD5 Hash updated to " + pak.UpdateMD5(pfi));
+            }
+            else
+            {
+                MessageBox.Show("ERROR: No file");
+            }
+            UpdateMM();
+       
         }
 
         private void MMFileSave_Click(object sender, EventArgs e)
         {
-            if (pak.isDirty)
+            if ((!pak.readOnly) && (pak.isDirty))
+            {
+                Application.UseWaitCursor = true;
+                Cursor.Current = Cursors.WaitCursor;
                 pak.SaveHeader();
+                Cursor.Current = Cursors.Default;
+                Application.UseWaitCursor = false;
+            }
+            UpdateMM();
         }
 
-        private void MMFile_DropDownOpening(object sender, EventArgs e)
-        {
-            MMFileSave.Enabled = (pak != null) && (pak.isOpen) && (pak.isDirty);
-        }
-
-        private void MMExport_DropDownOpening(object sender, EventArgs e)
-        {
-            MMExportSelectedFile.Enabled = (pak != null) && (pak.isOpen) && (lbFolders.SelectedIndex >= 0) && (lbFiles.SelectedIndex >= 0);
-            MMExportSelectedFolder.Enabled = (pak != null) && (pak.isOpen) && (lbFolders.SelectedIndex >= 0);
-            MMExportAll.Enabled = (pak != null) && (pak.isOpen);
-        }
-
-        private void MMExtra_DropDownOpening(object sender, EventArgs e)
-        {
-            MMExtraMD5.Enabled = (pak != null) && (pak.isOpen) && (lbFolders.SelectedIndex >= 0) && (lbFiles.SelectedIndex >= 0);
-            MMExtraExportData.Enabled = (pak != null) && (pak.isOpen);
-        }
 
         private void MMExtraExportData_Click(object sender, EventArgs e)
         {
@@ -306,12 +451,281 @@ namespace AAPakEditor
 
             }
 
-            exportFileDialog.FileName = "game_pak_files_"+ newest.ToString("yyyyMMdd")+".csv";
+            exportFileDialog.FileName = Path.GetFileName(pak._gpFilePath) + "_files_"+ newest.ToString("yyyyMMdd")+".csv";
 
             if (exportFileDialog.ShowDialog() != DialogResult.OK)
                 return;
 
             File.WriteAllLines(exportFileDialog.FileName, sl);
+        }
+
+        private void MMEditReplace_Click(object sender, EventArgs e)
+        {
+            if ((pak == null) || (!pak.isOpen) || (lbFiles.SelectedIndex < 0))
+                return;
+
+            if (pak.readOnly)
+            {
+                MessageBox.Show("Pak is opened in Read-Only mode, cannot add/replace files.");
+                return;
+            }
+
+            var filename = currentFileViewFolder ;
+            if (filename != "") filename += "/";
+            filename += lbFiles.SelectedItem.ToString();
+
+            ref AAPakFileInfo pfi = ref pak.nullAAPakFileInfo;
+
+            if (!pak.GetFileByName(filename, ref pfi))
+                return;
+            /*
+            if (pfi.Equals(pak.nullAAPakFileInfo))
+                return;
+            */
+
+            var maxSize = pfi.size + pfi.paddingSize;
+
+            importFileDialog.FileName = lbFiles.SelectedItem.ToString();
+            if (importFileDialog.ShowDialog() != DialogResult.OK)
+                return;
+
+            // DateTime createTime = File.GetCreationTime(importFileDialog.FileName);
+            DateTime modifyTime = File.GetLastWriteTime(importFileDialog.FileName);
+
+            try
+            {
+                FileStream fs = new FileStream(importFileDialog.FileName, FileMode.Open, FileAccess.Read);
+                if (fs.Length > (maxSize))
+                {
+                    fs.Dispose();
+                    MessageBox.Show(string.Format("File is too big!\r\n{0}\r\nCan only be replaced with a file with the \r\nmaximum size of {1} bytes",filename,maxSize));
+                }
+                fs.Position = 0;
+                if (pak.ReplaceFile(ref pfi, fs, modifyTime) == false)
+                {
+                    MessageBox.Show(string.Format("Failed to replace file !\r\n{0}\r\nPak or File might damaged !!", filename));
+                }
+                fs.Dispose();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("ERROR: " + ex.Message);
+            }
+            UpdateMM();
+
+        }
+
+        private void PopulateFilesList(string withdir)
+        {
+            currentFileViewFolder = withdir;
+
+            lbFiles.Items.Clear();
+            Application.UseWaitCursor = true;
+            Cursor.Current = Cursors.WaitCursor;
+
+            var list = pak.GetFilesInDirectory(currentFileViewFolder);
+            if (currentFileViewFolder == "")
+                lFiles.Text = list.Count.ToString() + " files in <root>";
+            else
+                lFiles.Text = list.Count.ToString() + " files in \"" + currentFileViewFolder + "\"";
+            List<string> sl = new List<string>();
+            foreach (AAPakFileInfo pfi in list)
+            {
+                var f = Path.GetFileName(pfi.name);
+                // lbFiles.Items.Add(f);
+                sl.Add(f);
+            }
+            sl.Sort();
+            lbFiles.Items.AddRange(sl.ToArray());
+            Cursor.Current = Cursors.Default;
+            Application.UseWaitCursor = false;
+            UpdateMM();
+        }
+
+        private void tvFolders_AfterSelect(object sender, TreeViewEventArgs e)
+        {
+            if ((pak == null) || (!pak.isOpen))
+                return;
+
+
+            if ((e == null) || (e.Node == null))
+                return;
+
+            PopulateFilesList(e.Node.Name);
+            e.Node.Expand();
+            UpdateMM();
+        }
+
+        private void MMExtraDebugTest_Click(object sender, EventArgs e)
+        {
+            if ((pak == null) || (!pak.isOpen))
+                return;
+
+            pak._header.WriteToFAT();
+            FileStream fs = new FileStream("FAT-write.bin", FileMode.Create);
+            pak._header.FAT.Position = 0;
+            pak._header.FAT.CopyTo(fs);
+            fs.Dispose();
+
+            MessageBox.Show("FAT Location: " + pak._header.FirstFileInfoOffset.ToString());
+            UpdateMM();
+        }
+
+        private void MMEditDeleteSelected_Click(object sender, EventArgs e)
+        {
+            if ((pak == null) || (!pak.isOpen) || (lbFiles.SelectedIndex < 0))
+                return;
+
+            if (pak.readOnly)
+            {
+                MessageBox.Show("Pak is opened in Read-Only mode, cannot delete files.");
+                return;
+            }
+
+            var filename = currentFileViewFolder;
+            if (filename != "") filename += "/";
+            filename += lbFiles.SelectedItem.ToString();
+
+            ref AAPakFileInfo pfi = ref pak.nullAAPakFileInfo;
+
+            if (!pak.GetFileByName(filename, ref pfi))
+                return;
+
+            if (MessageBox.Show("Are you sure you want to delete this file ?\r\n" + filename, "Delete", MessageBoxButtons.YesNo) != DialogResult.Yes)
+                return;
+
+            if (pak.DeleteFile(pfi))
+            {
+                MessageBox.Show("Reference to " + filename + " has been removed from the pak.");
+            }
+
+            if (lbFiles.Items.Count <= 1)
+            {
+                // If this was the last file listed in the directory listing, we will need to re-populate the folder views to update this change
+                GenerateFolderViews();
+            }
+            lbFiles.Items.Clear();
+            PopulateFilesList(currentFileViewFolder);
+
+            UpdateMM();
+        }
+
+        private void MMEditAddFile_Click(object sender, EventArgs e)
+        {
+            // open add dialog
+            AddFileDialog addDlg = new AddFileDialog();
+            if (currentFileViewFolder != "")
+            addDlg.suggestedDir = currentFileViewFolder + '/' ;
+            if (addDlg.ShowDialog(this) == DialogResult.OK)
+            {
+                string diskfn = addDlg.eDiskFileName.Text;
+                string pakfn = addDlg.ePakFileName.Text.ToLower().Replace("\\","/"); // You just know people will put this wrong, so pre-emptive replace
+                addDlg.Dispose();
+
+                // virual directory to the new file
+                var newpakfilepath = Path.GetDirectoryName(pakfn.Replace("/","\\")).Replace("\\","/");
+
+                if (File.Exists(diskfn))
+                {
+                    DateTime cTime = File.GetCreationTime(diskfn);
+                    DateTime mTime = File.GetLastWriteTime(diskfn);
+                    AAPakFileInfo pfi = pak.nullAAPakFileInfo;
+                    FileStream fs = new FileStream(diskfn, FileMode.Open,FileAccess.Read);
+                    var res = pak.AddFileFromStream(pakfn, fs, cTime, mTime, true, out pfi);
+                    fs.Dispose();
+                    if (res == true)
+                    {
+                        MessageBox.Show("File:\r\n" + diskfn + "\r\n\r\nadded as:\r\n" + pfi.name);
+
+                        if (pak.folders.IndexOf(newpakfilepath) < 0)
+                        {
+                            // We added to a new folder
+                            GenerateFolderViews();
+                        }
+
+                        lbFolders.SelectedIndex = lbFolders.Items.IndexOf(newpakfilepath);
+                        tvFolders.SelectedNode = tvFolders.Nodes.Find(newpakfilepath, true)[0];
+
+                        PopulateFilesList(newpakfilepath);
+                    }
+                    else
+                    {
+                        MessageBox.Show("Failed to add file: " + diskfn);
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("File not found: " + diskfn);
+                }
+
+            }
+            else
+            {
+                addDlg.Dispose();
+            }
+
+            PopulateFilesList(currentFileViewFolder);
+            UpdateMM();
+
+        }
+
+        private void MMFileClose_Click(object sender, EventArgs e)
+        {
+            Application.UseWaitCursor = true;
+            Cursor.Current = Cursors.WaitCursor;
+            lbFiles.Items.Clear();
+            lbFolders.Items.Clear();
+            tvFolders.Nodes.Clear();
+            lFiles.Text = "";
+            lFileCount.Text = "Closing pak";
+            lFileCount.Refresh();
+            pak.ClosePak();
+            lFileCount.Text = "Pak Closed";
+            Cursor.Current = Cursors.Default;
+            Application.UseWaitCursor = false;
+            UpdateMM();
+        }
+
+        private void MMFileNew_Click(object sender, EventArgs e)
+        {
+            openGamePakDialog.CheckFileExists = false;
+            openGamePakDialog.ShowReadOnly = false;
+            openGamePakDialog.Title = "Create NEW Pak file";
+            if (openGamePakDialog.ShowDialog() != DialogResult.OK)
+                return;
+
+            Application.UseWaitCursor = true;
+            Cursor.Current = Cursors.WaitCursor;
+            if (pak != null)
+            {
+                pak.ClosePak();
+            }
+            // Create and a new pakfile
+            pak = new AAPak(openGamePakDialog.FileName, false, true);
+            pak.ClosePak();
+            // Re-open it in read/write mode
+            LoadPakFile(openGamePakDialog.FileName, false);
+
+            Cursor.Current = Cursors.Default;
+            Application.UseWaitCursor = false;
+            UpdateMM();
+        }
+
+        private void MMExportSelectedFolder_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("Not Yet Implemented!");
+            UpdateMM();
+        }
+
+        private void MMEditImportFiles_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("Not Yet Implemented!");
+            UpdateMM();
+        }
+
+        private void MMVersionSourceCode_Click(object sender, EventArgs e)
+        {
+            Process.Start(urlGitHub);
         }
     }
 }

@@ -29,6 +29,8 @@ namespace AAPakEditor
         private void ExportAllDlg_Load(object sender, EventArgs e)
         {
             bgwExport.RunWorkerAsync();
+            btnCancel.Enabled = true;
+            btnCancel.Text = "Cancel";
         }
 
         public bool ExportFile(AAPakFileInfo pfi, string destName)
@@ -64,12 +66,17 @@ namespace AAPakEditor
             foreach (AAPakFileInfo pfi in pak.files)
             {
                 TotalSize += pfi.size;
+                if (bgwExport.CancellationPending)
+                    return;
             }
 
             filesDone = 0;
 
             foreach (AAPakFileInfo pfi in pak.files)
             {
+                if (bgwExport.CancellationPending)
+                    break;
+
                 var destName = TargetDir + Path.DirectorySeparatorChar;
                 destName += pfi.name.Replace('/', Path.DirectorySeparatorChar);
 
@@ -77,6 +84,9 @@ namespace AAPakEditor
                 var destFolder = Path.GetDirectoryName(destName);
                 if (!Directory.Exists(destFolder))
                     Directory.CreateDirectory(destFolder);
+
+                if (bgwExport.CancellationPending)
+                    break;
 
                 // Export the file
                 if (ExportFile(pfi, destName))
@@ -88,6 +98,11 @@ namespace AAPakEditor
                     var p = TotalExportedSize * 100 / TotalSize;
                     bgwExport.ReportProgress((int)p);
                 }
+            }
+
+            if (bgwExport.CancellationPending)
+            {
+                MessageBox.Show("Remaining export cancelled !");
             }
 
         }
@@ -105,6 +120,30 @@ namespace AAPakEditor
             MessageBox.Show("Done exporting " + TotalExportedSize.ToString() + " bytes (" + (TotalExportedSize / 1024 / 1024).ToString() + " MB)");
             DialogResult = DialogResult.OK;
             //Close();
+        }
+
+        private void btnCancel_Click(object sender, EventArgs e)
+        {
+            if (MessageBox.Show("Are you sure you want to cancel exporting ?","Cancel Export",MessageBoxButtons.YesNo,MessageBoxIcon.Question) == DialogResult.Yes)
+            {
+                btnCancel.Enabled = false;
+                btnCancel.Text = "Cancelling";
+                bgwExport.CancelAsync();
+            }
+        }
+
+        private void ExportAllDlg_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (bgwExport.IsBusy)
+            {
+                this.DialogResult = DialogResult.None;
+                e.Cancel = true;
+                if (bgwExport.CancellationPending == false)
+                {
+                    btnCancel_Click(null, null);
+                }
+            }
+
         }
     }
 }

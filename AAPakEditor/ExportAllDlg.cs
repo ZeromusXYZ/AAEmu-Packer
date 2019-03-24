@@ -20,6 +20,8 @@ namespace AAPakEditor
         public long TotalExportedSize = 0 ;
         public long TotalSize = 0;
         public int filesDone = 0;
+        public int TotalFileCountToExport = 0;
+        public string masterRoot = "";
 
         public ExportAllDlg()
         {
@@ -63,11 +65,17 @@ namespace AAPakEditor
             // Calculate Total Size
             TotalSize = 0;
             TotalExportedSize = 0;
+            TotalFileCountToExport = 0;
             foreach (AAPakFileInfo pfi in pak.files)
             {
-                TotalSize += pfi.size;
                 if (bgwExport.CancellationPending)
                     return;
+
+                if ((masterRoot != "") && (pfi.name.Length > masterRoot.Length) && (pfi.name.Substring(0, masterRoot.Length) != masterRoot))
+                    continue;
+
+                TotalSize += pfi.size;
+                TotalFileCountToExport++;
             }
 
             filesDone = 0;
@@ -77,8 +85,12 @@ namespace AAPakEditor
                 if (bgwExport.CancellationPending)
                     break;
 
+                if ((masterRoot != "") && (pfi.name.Length > masterRoot.Length) && (pfi.name.Substring(0, masterRoot.Length) != masterRoot))
+                    continue;
+
                 var destName = TargetDir + Path.DirectorySeparatorChar;
-                destName += pfi.name.Replace('/', Path.DirectorySeparatorChar);
+                var exportedFileName = pfi.name.Substring(masterRoot.Length);
+                destName += exportedFileName.Replace('/', Path.DirectorySeparatorChar);
 
                 // Check if target directory exists
                 var destFolder = Path.GetDirectoryName(destName);
@@ -112,12 +124,12 @@ namespace AAPakEditor
             pbExport.Minimum = 0;
             pbExport.Maximum = (int)(TotalSize / 1024);
             pbExport.Value = (int)(TotalExportedSize / 1024);
-            lInfo.Text = "Exported " + filesDone.ToString() + " / " + pak.files.Count.ToString() + " files";
+            lInfo.Text = "Exported " + filesDone.ToString() + " / " + TotalFileCountToExport.ToString() + " files";
         }
 
         private void bgwExport_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            MessageBox.Show("Done exporting " + TotalExportedSize.ToString() + " bytes (" + (TotalExportedSize / 1024 / 1024).ToString() + " MB)");
+            MessageBox.Show("Done exporting " + TotalExportedSize.ToString() + " bytes (" + (TotalExportedSize / 1024 / 1024).ToString() + " MB)","Export completed");
             DialogResult = DialogResult.OK;
             //Close();
         }

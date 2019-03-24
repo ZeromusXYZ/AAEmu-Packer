@@ -17,10 +17,12 @@ namespace AAPakEditor
     public partial class MainForm : Form
     {
         public AAPak pak;
-        private string versionString = "0.2";
+        private string versionString = "0.3";
         private string urlGitHub = "https://github.com/ZeromusXYZ/AAEmu-Packer";
         private string baseTitle = "";
         private string currentFileViewFolder = "";
+        private bool useDBKey = false;
+        private byte[] dbKey = new byte[16] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
         public MainForm()
         {
@@ -39,8 +41,11 @@ namespace AAPakEditor
             MMEdit.Visible = (pak != null) && (pak.isOpen) && (!pak.readOnly);
 
             MMExportSelectedFile.Enabled = (pak != null) && (pak.isOpen) && (lbFiles.SelectedIndex >= 0);
-            MMExportSelectedFolder.Enabled = (pak != null) && (pak.isOpen);
+            MMExportSelectedFolder.Enabled = (pak != null) && (pak.isOpen) && (currentFileViewFolder != "");
             MMExportAll.Enabled = (pak != null) && (pak.isOpen);
+            MMExportDB.Enabled = (pak != null) && (pak.isOpen) && (lbFiles.SelectedIndex >= 0) && (useDBKey) && (Path.GetExtension(lbFiles.SelectedItem.ToString()) == ".sqlite3");
+            MMExportDB.Visible = (pak != null) && (pak.isOpen) && (useDBKey);
+            MMExportS2.Visible = MMExportDB.Visible;
             MMExport.Visible = (pak != null) && (pak.isOpen);
 
             MMExtraMD5.Enabled = (pak != null) && (pak.isOpen) && (pak.readOnly == false) && (lbFiles.SelectedIndex >= 0);
@@ -175,6 +180,26 @@ namespace AAPakEditor
             UpdateMM();
         }
 
+        private void LoadPakKeys()
+        {
+            useDBKey = false;
+
+            var fn = Path.GetDirectoryName(pak._gpFilePath) + Path.DirectorySeparatorChar + "decrypted.data";
+            if (!File.Exists(fn))
+            {
+                return;
+            }
+            FileStream fs = new FileStream(fn, FileMode.Open, FileAccess.Read);
+            if (fs.Length != 16)
+            {
+                fs.Dispose();
+                return;
+            }
+            fs.Read(dbKey, 0, 16);
+            fs.Dispose();
+            useDBKey = true;
+        }
+
         private void LoadPakFile(string filename, bool openAsReadOnly)
         {
             if (pak == null)
@@ -221,7 +246,7 @@ namespace AAPakEditor
                         "~ ZeromusXYZ",
                         "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
-
+                LoadPakKeys();
             }
 
         }
@@ -350,6 +375,7 @@ namespace AAPakEditor
             if ((pak == null) || (!pak.isOpen))
                 return;
 
+            exportFolderDialog.Description = "Select a folder to where to export all files to";
             exportFolderDialog.SelectedPath = Path.GetDirectoryName(pak._gpFilePath);
             if (exportFolderDialog.ShowDialog() != DialogResult.OK)
                 return;
@@ -363,8 +389,17 @@ namespace AAPakEditor
             ExportAllDlg export = new ExportAllDlg();
             export.pak = this.pak;
             export.TargetDir = exportFolderDialog.SelectedPath;
+            export.Text = "Export All Files";
+            export.masterRoot = "";
 
-            export.ShowDialog(this);
+            try
+            {
+                export.ShowDialog(this);
+            }
+            catch (Exception x)
+            {
+                MessageBox.Show("ERROR: " + x.Message, "Exception", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
 
             Cursor.Current = Cursors.Default;
             Application.UseWaitCursor = false;
@@ -561,13 +596,6 @@ namespace AAPakEditor
             if ((pak == null) || (!pak.isOpen))
                 return;
 
-            pak._header.WriteToFAT();
-            FileStream fs = new FileStream("FAT-write.bin", FileMode.Create);
-            pak._header.FAT.Position = 0;
-            pak._header.FAT.CopyTo(fs);
-            fs.Dispose();
-
-            MessageBox.Show("FAT Location: " + pak._header.FirstFileInfoOffset.ToString());
             UpdateMM();
         }
 
@@ -627,10 +655,49 @@ namespace AAPakEditor
 
                 if (File.Exists(diskfn))
                 {
+                    var sourceIsDBFile = (Path.GetExtension(diskfn).ToLower() == ".sqlite3");
+
+                    bool doEncrypt = false;
+                    if (sourceIsDBFile && useDBKey)
+                    {
+                        if (MessageBox.Show("Import of DB detected, do you want to encrypt before importing using the provided key ?", "Import as DB", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                            doEncrypt = true;
+                    }
+
+
                     DateTime cTime = File.GetCreationTime(diskfn);
                     DateTime mTime = File.GetLastWriteTime(diskfn);
                     AAPakFileInfo pfi = pak.nullAAPakFileInfo;
-                    FileStream fs = new FileStream(diskfn, FileMode.Open,FileAccess.Read);
+                    Stream fs;
+                    FileStream fStream = new FileStream(diskfn, FileMode.Open,FileAccess.Read);
+                    MemoryStream mStream = new MemoryStream();
+
+                    if (doEncrypt)
+                    {
+                        while (fStream.Position < fStream.Length)
+                        {
+                            var rest = (int)(fStream.Length - fStream.Position);
+                            // reading blocks doesn't end too well, comment for now :p
+                            /*
+                            if (rest > 4096)
+                                rest = 4096;
+                            */
+                            byte[] buf = new byte[rest];
+                            byte[] decBuf = new byte[rest];
+                            fStream.Read(buf, 0, rest);
+                            decBuf = AAPakFileHeader.EncryptAES(buf, dbKey, true);
+                            mStream.Write(decBuf, 0, decBuf.Length);
+                        }
+                        fStream.Dispose();
+                        mStream.Position = 0;
+                        fs = mStream;
+                    }
+                    else
+                    {
+                        mStream.Dispose();
+                        fs = fStream;
+                    }
+
                     var res = pak.AddFileFromStream(pakfn, fs, cTime, mTime, true, out pfi);
                     fs.Dispose();
                     if (res == true)
@@ -694,6 +761,12 @@ namespace AAPakEditor
             if (openGamePakDialog.ShowDialog() != DialogResult.OK)
                 return;
 
+            if (File.Exists(openGamePakDialog.FileName))
+            {
+                if (MessageBox.Show("Overwrite and erase the existing pak file ?\r\n" + openGamePakDialog.FileName, "Overwrite", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
+                    return;
+            }
+
             Application.UseWaitCursor = true;
             Cursor.Current = Cursors.WaitCursor;
             if (pak != null)
@@ -713,19 +786,110 @@ namespace AAPakEditor
 
         private void MMExportSelectedFolder_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Not Yet Implemented!");
+            if ((pak == null) || (!pak.isOpen))
+                return;
+
+            exportFolderDialog.Description = "Select a folder to where to export \r\n" + currentFileViewFolder;
+            exportFolderDialog.SelectedPath = Path.GetDirectoryName(pak._gpFilePath);
+            if (exportFolderDialog.ShowDialog() != DialogResult.OK)
+                return;
+
+            if (MessageBox.Show("Are you sure you want to export \""+ currentFileViewFolder +"\" and all of it's sub-folders ?\r\nAll files in destination will be overwritten !", "Export Folder", MessageBoxButtons.YesNo) != DialogResult.Yes)
+                return;
+
+            Application.UseWaitCursor = true;
+            Cursor.Current = Cursors.WaitCursor;
+
+            ExportAllDlg export = new ExportAllDlg();
+            export.pak = this.pak;
+            export.TargetDir = exportFolderDialog.SelectedPath;
+            export.masterRoot = currentFileViewFolder + "/" ;
+            export.Text = "Export "+currentFileViewFolder ;
+
+            try
+            {
+                export.ShowDialog(this);
+            }
+            catch (Exception x)
+            {
+                MessageBox.Show("ERROR: " + x.Message, "Exception", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+
+            Cursor.Current = Cursors.Default;
+            Application.UseWaitCursor = false;
             UpdateMM();
         }
 
         private void MMEditImportFiles_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Not Yet Implemented!");
+            ImportFolderDlg importFolder = new ImportFolderDlg();
+            importFolder.ePakFolder.Text = currentFileViewFolder;
+            importFolder.eDiskFolder.Text = Path.GetDirectoryName(pak._gpFilePath);
+            importFolder.pak = this.pak;
+            try
+            {
+                if (importFolder.ShowDialog() == DialogResult.OK)
+                {
+                    GenerateFolderViews();
+                    PopulateFilesList(currentFileViewFolder);
+                }
+            }
+            catch (Exception x)
+            {
+                MessageBox.Show("ERROR: " + x.Message+" \r\n\r\nDo not forget to save your file to prevent further corruption !", 
+                    "Exception", 
+                    MessageBoxButtons.OK, 
+                    MessageBoxIcon.Error);
+            }
+            importFolder.Dispose();
             UpdateMM();
         }
 
         private void MMVersionSourceCode_Click(object sender, EventArgs e)
         {
             Process.Start(urlGitHub);
+        }
+
+        private void MMExportDB_Click(object sender, EventArgs e)
+        {
+            if ((pak == null) || (!pak.isOpen))
+                return;
+
+            var d = currentFileViewFolder;
+            if (d != "") d += "/";
+            d += lbFiles.SelectedItem.ToString();
+            exportFileDialog.FileName = Path.GetFileName(d.Replace('/', Path.DirectorySeparatorChar));
+
+            if (exportFileDialog.ShowDialog() != DialogResult.OK)
+                return;
+
+            var pf = pak.ExportFileAsStream(d);
+            MemoryStream ms = new MemoryStream();
+            pf.CopyTo(ms);
+            pf.Dispose();
+
+            ms.Position = 0;
+            
+
+            FileStream fs = new FileStream(exportFileDialog.FileName, FileMode.Create);
+            while (ms.Position < ms.Length)
+            {
+                var rest = (int)(ms.Length - ms.Position);
+                // reading blocks doesn't end to well, comment for now :p
+                /*
+                if (rest > 4096)
+                    rest = 4096;
+                */
+                byte[] buf = new byte[rest];
+                byte[] decBuf = new byte[rest];
+                ms.Read(buf, 0, rest);
+                decBuf = AAPakFileHeader.EncryptAES(buf, dbKey, false);
+                fs.Write(decBuf, 0, decBuf.Length);
+            }
+            fs.Dispose();
+            ms.Dispose();
+            MessageBox.Show("Debug: Done");
+            UpdateMM();
         }
     }
 }

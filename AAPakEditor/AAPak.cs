@@ -102,7 +102,7 @@ namespace AAPakEditor
         // Source:
         // https://stackoverflow.com/questions/44782910/aes128-decryption-in-c-sharp
 
-        private static byte[] EncryptAES(byte[] message, byte[] key, bool doEncryption)
+        public static byte[] EncryptAES(byte[] message, byte[] key, bool doEncryption)
         {
             try
             {

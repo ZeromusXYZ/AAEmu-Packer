@@ -17,7 +17,7 @@ namespace AAPakEditor
     public partial class MainForm : Form
     {
         public AAPak pak;
-        private string versionString = "0.3";
+        private string versionString = "0.3.1";
         private string urlGitHub = "https://github.com/ZeromusXYZ/AAEmu-Packer";
         private string baseTitle = "";
         private string currentFileViewFolder = "";

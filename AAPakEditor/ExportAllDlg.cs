@@ -71,8 +71,11 @@ namespace AAPakEditor
                 if (bgwExport.CancellationPending)
                     return;
 
-                if ((masterRoot != "") && (pfi.name.Length > masterRoot.Length) && (pfi.name.Substring(0, masterRoot.Length) != masterRoot))
-                    continue;
+                if (masterRoot != "")
+                {
+                    if ((pfi.name.Length <= masterRoot.Length) || (pfi.name.Substring(0, masterRoot.Length) != masterRoot))
+                        continue;
+                }
 
                 TotalSize += pfi.size;
                 TotalFileCountToExport++;
@@ -85,8 +88,11 @@ namespace AAPakEditor
                 if (bgwExport.CancellationPending)
                     break;
 
-                if ((masterRoot != "") && (pfi.name.Length > masterRoot.Length) && (pfi.name.Substring(0, masterRoot.Length) != masterRoot))
-                    continue;
+                if (masterRoot != "")
+                {
+                    if ((pfi.name.Length <= masterRoot.Length) || (pfi.name.Substring(0, masterRoot.Length) != masterRoot))
+                        continue;
+                }
 
                 var destName = TargetDir + Path.DirectorySeparatorChar;
                 var exportedFileName = pfi.name.Substring(masterRoot.Length);

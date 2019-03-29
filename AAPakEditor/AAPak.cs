@@ -757,6 +757,23 @@ namespace AAPakEditor
         }
 
         /// <summary>
+        /// Check if file exists within the pak
+        /// </summary>
+        /// <param name="filename">filename of the file to check</param>
+        /// <returns>Returns true if the file was found</returns>
+        public bool FileExists(string filename)
+        {
+            foreach (AAPakFileInfo pfi in files)
+            {
+                if (pfi.name == filename)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
         /// Exports a given file as stream
         /// </summary>
         /// <param name="file">AAPakFileInfo of the file to be exported</param>
@@ -996,6 +1013,11 @@ namespace AAPakEditor
             {
                 var reservedSizeMax = pfi.size + pfi.paddingSize;
                 addAsNew = (sourceStream.Length > reservedSizeMax);
+                // Bugfix: If we have inssuficient space, make sure to delete the old file first as well
+                if (addAsNew)
+                {
+                    DeleteFile(pfi);
+                }
             }
 
             if (addAsNew)

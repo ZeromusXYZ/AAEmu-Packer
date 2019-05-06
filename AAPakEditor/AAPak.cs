@@ -65,7 +65,8 @@ namespace AAPakEditor
     /// </summary>
     public class AAPakFileHeader
     {
-        private readonly byte[] key = new byte[] { 0x32, 0x1F, 0x2A, 0xEE, 0xAA, 0x58, 0x4A, 0xB4, 0x9A, 0x6C, 0x9E, 0x09, 0xD5, 0x9E, 0x9C, 0x6F }; // AES_128 Key
+        private readonly byte[] XLGamesKey = new byte[] { 0x32, 0x1F, 0x2A, 0xEE, 0xAA, 0x58, 0x4A, 0xB4, 0x9A, 0x6C, 0x9E, 0x09, 0xD5, 0x9E, 0x9C, 0x6F }; // AES_128 Key XLGames
+        private byte[] key ;
         protected static readonly int headerSize = 0x200;
         protected static readonly int fileInfoSize = 0x150;
         public MemoryStream FAT = new MemoryStream();
@@ -91,12 +92,19 @@ namespace AAPakEditor
         public AAPakFileHeader(AAPak owner)
         {
             _owner = owner;
+            SetCustomKey(XLGamesKey);
             nullHash = new byte[16] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
         }
 
         ~AAPakFileHeader()
         {
             FAT.Dispose();
+        }
+
+        public void SetCustomKey(byte[] newKey)
+        {
+            key = new byte[newKey.Length];
+            newKey.CopyTo(key, 0);
         }
 
         // Source:
@@ -690,6 +698,7 @@ namespace AAPakEditor
 
             // A valid header/footer starts with "WIBO" after decryption
             _header.isValid = (_header.data[0] == 'W') && (_header.data[1] == 'I') && (_header.data[2] == 'B') && (_header.data[3] == 'O');
+            //_header.isValid = true;
             if (_header.isValid)
             {
                 _header.LoadFAT();
@@ -753,6 +762,23 @@ namespace AAPakEditor
                 }
             }
             fileInfo = nullAAPakFileInfo; // return null file if it fails
+            return false;
+        }
+
+        /// <summary>
+        /// Check if file exists within the pak
+        /// </summary>
+        /// <param name="filename">filename of the file to check</param>
+        /// <returns>Returns true if the file was found</returns>
+        public bool FileExists(string filename)
+        {
+            foreach (AAPakFileInfo pfi in files)
+            {
+                if (pfi.name == filename)
+                {
+                    return true;
+                }
+            }
             return false;
         }
 
@@ -996,6 +1022,11 @@ namespace AAPakEditor
             {
                 var reservedSizeMax = pfi.size + pfi.paddingSize;
                 addAsNew = (sourceStream.Length > reservedSizeMax);
+                // Bugfix: If we have inssuficient space, make sure to delete the old file first as well
+                if (addAsNew)
+                {
+                    DeleteFile(pfi);
+                }
             }
 
             if (addAsNew)

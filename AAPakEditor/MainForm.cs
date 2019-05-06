@@ -17,12 +17,14 @@ namespace AAPakEditor
     public partial class MainForm : Form
     {
         public AAPak pak;
-        private string versionString = "0.3.1";
+        private string versionString = "0.4";
         private string urlGitHub = "https://github.com/ZeromusXYZ/AAEmu-Packer";
         private string baseTitle = "";
         private string currentFileViewFolder = "";
         private bool useDBKey = false;
+        private bool useCustomKey = false;
         private byte[] dbKey = new byte[16] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+        private byte[] customKey = new byte[16] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
         public MainForm()
         {
@@ -180,24 +182,42 @@ namespace AAPakEditor
             UpdateMM();
         }
 
-        private void LoadPakKeys()
+        private void LoadPakKeys(string fromDirectory)
         {
             useDBKey = false;
+            useCustomKey = false;
+            string fn ;
 
-            var fn = Path.GetDirectoryName(pak._gpFilePath) + Path.DirectorySeparatorChar + "decrypted.data";
-            if (!File.Exists(fn))
+            // DB key
+            fn = fromDirectory + "game_db.key";
+            if (File.Exists(fn))
             {
-                return;
-            }
-            FileStream fs = new FileStream(fn, FileMode.Open, FileAccess.Read);
-            if (fs.Length != 16)
-            {
+                FileStream fs = new FileStream(fn, FileMode.Open, FileAccess.Read);
+                if (fs.Length != 16)
+                {
+                    fs.Dispose();
+                    return;
+                }
+                fs.Read(dbKey, 0, 16);
                 fs.Dispose();
-                return;
+                useDBKey = true;
             }
-            fs.Read(dbKey, 0, 16);
-            fs.Dispose();
-            useDBKey = true;
+
+            // PAK-Header Key
+            fn = fromDirectory + "game_pak.key";
+            if (File.Exists(fn))
+            {
+                FileStream fs = new FileStream(fn, FileMode.Open, FileAccess.Read);
+                if (fs.Length != 16)
+                {
+                    fs.Dispose();
+                    return;
+                }
+                fs.Read(customKey, 0, 16);
+                fs.Dispose();
+                useCustomKey = true;
+                pak._header.SetCustomKey(customKey);
+            }
         }
 
         private void LoadPakFile(string filename, bool openAsReadOnly)
@@ -215,6 +235,14 @@ namespace AAPakEditor
 
             lFileCount.Text = "Opening Pak ... ";
             lFileCount.Refresh();
+            try
+            {
+                LoadPakKeys(Path.GetDirectoryName(filename).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar);
+            }
+            catch
+            {
+                MessageBox.Show("Error loading custom keys");
+            }
             var res = pak.OpenPak(filename,openAsReadOnly);
             if (!res)
             {
@@ -223,7 +251,10 @@ namespace AAPakEditor
                 lbFolders.Items.Clear();
                 lbFiles.Items.Clear();
                 UpdateMM();
-                MessageBox.Show("Failed to open " + openGamePakDialog.FileName);
+                if (useCustomKey)
+                    MessageBox.Show("Custom  game_pak.key  does not seem valid for " + openGamePakDialog.FileName,"OpenPak Key Error");
+                else
+                    MessageBox.Show("Failed to open " + openGamePakDialog.FileName,"OpenPak Error");
             }
             else
             {
@@ -246,7 +277,6 @@ namespace AAPakEditor
                         "~ ZeromusXYZ",
                         "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
-                LoadPakKeys();
             }
 
         }

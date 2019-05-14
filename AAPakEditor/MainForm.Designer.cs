@@ -78,6 +78,8 @@
             this.tcDirectoryViews = new System.Windows.Forms.TabControl();
             this.tpTreeView = new System.Windows.Forms.TabPage();
             this.tpFlatDirView = new System.Windows.Forms.TabPage();
+            this.MMVersionDiscord = new System.Windows.Forms.ToolStripMenuItem();
+            this.MMExtraMakeMod = new System.Windows.Forms.ToolStripMenuItem();
             this.MM.SuspendLayout();
             this.pFileInfo.SuspendLayout();
             this.tcDirectoryViews.SuspendLayout();
@@ -117,7 +119,7 @@
             // 
             this.MMFileOpen.Name = "MMFileOpen";
             this.MMFileOpen.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-            this.MMFileOpen.Size = new System.Drawing.Size(164, 22);
+            this.MMFileOpen.Size = new System.Drawing.Size(180, 22);
             this.MMFileOpen.Text = "&Open ...";
             this.MMFileOpen.Click += new System.EventHandler(this.MMFileOpen_Click);
             // 
@@ -125,20 +127,20 @@
             // 
             this.MMFileSave.Name = "MMFileSave";
             this.MMFileSave.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-            this.MMFileSave.Size = new System.Drawing.Size(164, 22);
+            this.MMFileSave.Size = new System.Drawing.Size(180, 22);
             this.MMFileSave.Text = "&Save now";
             this.MMFileSave.Click += new System.EventHandler(this.MMFileSave_Click);
             // 
             // MMFileS1
             // 
             this.MMFileS1.Name = "MMFileS1";
-            this.MMFileS1.Size = new System.Drawing.Size(161, 6);
+            this.MMFileS1.Size = new System.Drawing.Size(177, 6);
             // 
             // MMFileNew
             // 
             this.MMFileNew.Name = "MMFileNew";
             this.MMFileNew.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.N)));
-            this.MMFileNew.Size = new System.Drawing.Size(164, 22);
+            this.MMFileNew.Size = new System.Drawing.Size(180, 22);
             this.MMFileNew.Text = "New ...";
             this.MMFileNew.Click += new System.EventHandler(this.MMFileNew_Click);
             // 
@@ -146,20 +148,20 @@
             // 
             this.MMFileClose.Name = "MMFileClose";
             this.MMFileClose.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.W)));
-            this.MMFileClose.Size = new System.Drawing.Size(164, 22);
+            this.MMFileClose.Size = new System.Drawing.Size(180, 22);
             this.MMFileClose.Text = "&Close";
             this.MMFileClose.Click += new System.EventHandler(this.MMFileClose_Click);
             // 
             // MMFileS2
             // 
             this.MMFileS2.Name = "MMFileS2";
-            this.MMFileS2.Size = new System.Drawing.Size(161, 6);
+            this.MMFileS2.Size = new System.Drawing.Size(177, 6);
             // 
             // MMFileExit
             // 
             this.MMFileExit.Name = "MMFileExit";
             this.MMFileExit.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.X)));
-            this.MMFileExit.Size = new System.Drawing.Size(164, 22);
+            this.MMFileExit.Size = new System.Drawing.Size(180, 22);
             this.MMFileExit.Text = "E&xit";
             this.MMFileExit.Click += new System.EventHandler(this.MMFileExit_Click);
             // 
@@ -277,7 +279,8 @@
             this.MMExtra.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.MMExtraMD5,
             this.MMExtraExportData,
-            this.MMExtraDebugTest});
+            this.MMExtraDebugTest,
+            this.MMExtraMakeMod});
             this.MMExtra.Name = "MMExtra";
             this.MMExtra.Size = new System.Drawing.Size(44, 20);
             this.MMExtra.Text = "E&xtra";
@@ -307,7 +310,8 @@
             // MMVersion
             // 
             this.MMVersion.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.MMVersionSourceCode});
+            this.MMVersionSourceCode,
+            this.MMVersionDiscord});
             this.MMVersion.Name = "MMVersion";
             this.MMVersion.Size = new System.Drawing.Size(57, 20);
             this.MMVersion.Text = "&Version";
@@ -315,7 +319,7 @@
             // MMVersionSourceCode
             // 
             this.MMVersionSourceCode.Name = "MMVersionSourceCode";
-            this.MMVersionSourceCode.Size = new System.Drawing.Size(141, 22);
+            this.MMVersionSourceCode.Size = new System.Drawing.Size(180, 22);
             this.MMVersionSourceCode.Text = "Source Code";
             this.MMVersionSourceCode.Click += new System.EventHandler(this.MMVersionSourceCode_Click);
             // 
@@ -505,6 +509,20 @@
             this.tpFlatDirView.Text = "Flat Folder View";
             this.tpFlatDirView.UseVisualStyleBackColor = true;
             // 
+            // MMVersionDiscord
+            // 
+            this.MMVersionDiscord.Name = "MMVersionDiscord";
+            this.MMVersionDiscord.Size = new System.Drawing.Size(180, 22);
+            this.MMVersionDiscord.Text = "Visit Discord";
+            this.MMVersionDiscord.Click += new System.EventHandler(this.VisitDiscordToolStripMenuItem_Click);
+            // 
+            // MMExtraMakeMod
+            // 
+            this.MMExtraMakeMod.Name = "MMExtraMakeMod";
+            this.MMExtraMakeMod.Size = new System.Drawing.Size(205, 22);
+            this.MMExtraMakeMod.Text = "Export pak as mod";
+            this.MMExtraMakeMod.Click += new System.EventHandler(this.MMExtraMakeMod_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -587,6 +605,8 @@
         private System.Windows.Forms.ToolStripMenuItem MMVersionSourceCode;
         private System.Windows.Forms.ToolStripSeparator MMExportS2;
         private System.Windows.Forms.ToolStripMenuItem MMExportDB;
+        private System.Windows.Forms.ToolStripMenuItem MMVersionDiscord;
+        private System.Windows.Forms.ToolStripMenuItem MMExtraMakeMod;
     }
 }
 

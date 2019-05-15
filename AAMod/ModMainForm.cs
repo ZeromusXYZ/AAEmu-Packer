@@ -18,6 +18,7 @@ namespace AAMod
         static string DefaultModPak = "mod.aamod";
         static string DefaultRestorePak = "mod.aarestore";
         private string DefaultTitle;
+        private string helpText = "";
         private AAPak gamepak;
         private AAPak modpak;
         private AAPak restorepak;
@@ -30,6 +31,75 @@ namespace AAMod
         private void ModMainForm_Load(object sender, EventArgs e)
         {
             DefaultTitle = Text;
+        }
+
+        private bool HandleArgs()
+        {
+            bool showHelp = false;
+            string customModPak = "";
+            string customGamePak = "";
+            string customRstorePak = "";
+
+            var args = Environment.GetCommandLineArgs();
+            for (int i = 1; i < args.Length;i++)
+            {
+                var larg = arg.ToLower();
+                string nextArg = "";
+                if (i < args.Length-1)
+                {
+                    nextArg = args[i + 1];
+                }
+
+
+                switch(larg)
+                {
+                    case "-m":
+                        // Mod source
+                        customModPak = nextArg;
+                        i++;
+                        break;
+                    case "-g":
+                        // Game_Pak
+                        customGamePak = nextArg;
+                        i++;
+                        break;
+                    case "-r":
+                        // restore pak
+                        customRstorePak = nextArg;
+                        i++;
+                        break;
+                    case "-?":
+                    case "-h":
+                    case "-help":
+                    case "/?":
+                    case "/h":
+                    case "/help":
+                        // Help
+                        showHelp = true;
+                        break;
+                }
+
+            }
+            if (showHelp)
+            {
+                MessageBox.Show(helpText, "Help", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                Close();
+                return false;
+            }
+
+            return true;
+        }
+
+        private bool OpenModProject(string aamodFileName, string gamepakFileName)
+        {
+            return true;
+        }
+
+        private void ModMainForm_Shown(object sender, EventArgs e)
+        {
+            // returns false if errors in initialization
+            if (!HandleArgs())
+                return;
             // Try to open self as a mod first
             modpak = new AAPak(Application.ExecutablePath);
             if (!modpak.isOpen)
@@ -55,11 +125,6 @@ namespace AAMod
                 gamepak = new AAPak(DefaultGamePak, false);
             if (File.Exists(DefaultRestorePak))
                 restorepak = new AAPak(DefaultRestorePak, true);
-        }
-
-        private bool OpenModProject(string aamodFileName, string gamepakFileName)
-        {
-            return true;
         }
     }
 }

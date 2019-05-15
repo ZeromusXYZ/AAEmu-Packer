@@ -39,6 +39,7 @@
             // 
             // btnInstall
             // 
+            this.btnInstall.Enabled = false;
             this.btnInstall.Location = new System.Drawing.Point(12, 41);
             this.btnInstall.Name = "btnInstall";
             this.btnInstall.Size = new System.Drawing.Size(115, 23);
@@ -48,6 +49,7 @@
             // 
             // btnUninstall
             // 
+            this.btnUninstall.Enabled = false;
             this.btnUninstall.Location = new System.Drawing.Point(12, 70);
             this.btnUninstall.Name = "btnUninstall";
             this.btnUninstall.Size = new System.Drawing.Size(115, 23);
@@ -81,6 +83,7 @@
             this.tDescription.Location = new System.Drawing.Point(133, 43);
             this.tDescription.Multiline = true;
             this.tDescription.Name = "tDescription";
+            this.tDescription.ReadOnly = true;
             this.tDescription.Size = new System.Drawing.Size(363, 118);
             this.tDescription.TabIndex = 4;
             // 
@@ -108,6 +111,7 @@
             this.Name = "ModMainForm";
             this.Text = "AAMod";
             this.Load += new System.EventHandler(this.ModMainForm_Load);
+            this.Shown += new System.EventHandler(this.ModMainForm_Shown);
             this.ResumeLayout(false);
             this.PerformLayout();
 

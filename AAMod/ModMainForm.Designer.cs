@@ -35,6 +35,8 @@
             this.lInstallLocation = new System.Windows.Forms.Label();
             this.tDescription = new System.Windows.Forms.TextBox();
             this.pb = new System.Windows.Forms.ProgressBar();
+            this.gameFolderDlg = new System.Windows.Forms.FolderBrowserDialog();
+            this.openGamePakDlg = new System.Windows.Forms.OpenFileDialog();
             this.SuspendLayout();
             // 
             // btnInstall
@@ -44,8 +46,9 @@
             this.btnInstall.Name = "btnInstall";
             this.btnInstall.Size = new System.Drawing.Size(115, 23);
             this.btnInstall.TabIndex = 0;
-            this.btnInstall.Text = "Install Mod";
+            this.btnInstall.Text = "Install";
             this.btnInstall.UseVisualStyleBackColor = true;
+            this.btnInstall.UseWaitCursor = true;
             // 
             // btnUninstall
             // 
@@ -54,8 +57,9 @@
             this.btnUninstall.Name = "btnUninstall";
             this.btnUninstall.Size = new System.Drawing.Size(115, 23);
             this.btnUninstall.TabIndex = 1;
-            this.btnUninstall.Text = "Uninstall Mod";
+            this.btnUninstall.Text = "Uninstall";
             this.btnUninstall.UseVisualStyleBackColor = true;
+            this.btnUninstall.UseWaitCursor = true;
             // 
             // label1
             // 
@@ -65,6 +69,7 @@
             this.label1.Size = new System.Drawing.Size(84, 13);
             this.label1.TabIndex = 2;
             this.label1.Text = "Install Location: ";
+            this.label1.UseWaitCursor = true;
             // 
             // lInstallLocation
             // 
@@ -74,6 +79,7 @@
             this.lInstallLocation.Size = new System.Drawing.Size(25, 13);
             this.lInstallLocation.TabIndex = 3;
             this.lInstallLocation.Text = "???";
+            this.lInstallLocation.UseWaitCursor = true;
             // 
             // tDescription
             // 
@@ -86,6 +92,7 @@
             this.tDescription.ReadOnly = true;
             this.tDescription.Size = new System.Drawing.Size(363, 118);
             this.tDescription.TabIndex = 4;
+            this.tDescription.UseWaitCursor = true;
             // 
             // pb
             // 
@@ -95,6 +102,22 @@
             this.pb.Name = "pb";
             this.pb.Size = new System.Drawing.Size(484, 23);
             this.pb.TabIndex = 5;
+            this.pb.UseWaitCursor = true;
+            // 
+            // gameFolderDlg
+            // 
+            this.gameFolderDlg.Description = "Please locate your ArcheAge installation folder";
+            this.gameFolderDlg.RootFolder = System.Environment.SpecialFolder.MyComputer;
+            this.gameFolderDlg.SelectedPath = "C:\\ArcheAge\\Working";
+            this.gameFolderDlg.ShowNewFolderButton = false;
+            // 
+            // openGamePakDlg
+            // 
+            this.openGamePakDlg.FileName = "game_pak";
+            this.openGamePakDlg.Filter = "ArcheAge game pak|game_pak|All Files|*.*";
+            this.openGamePakDlg.InitialDirectory = "C:\\ArcheAge\\Working";
+            this.openGamePakDlg.RestoreDirectory = true;
+            this.openGamePakDlg.Title = "Locate game_pak";
             // 
             // ModMainForm
             // 
@@ -110,6 +133,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "ModMainForm";
             this.Text = "AAMod";
+            this.UseWaitCursor = true;
             this.Load += new System.EventHandler(this.ModMainForm_Load);
             this.Shown += new System.EventHandler(this.ModMainForm_Shown);
             this.ResumeLayout(false);
@@ -125,6 +149,8 @@
         private System.Windows.Forms.Label lInstallLocation;
         private System.Windows.Forms.TextBox tDescription;
         private System.Windows.Forms.ProgressBar pb;
+        private System.Windows.Forms.FolderBrowserDialog gameFolderDlg;
+        private System.Windows.Forms.OpenFileDialog openGamePakDlg;
     }
 }
 

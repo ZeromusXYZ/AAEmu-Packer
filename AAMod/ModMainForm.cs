@@ -28,6 +28,7 @@ namespace AAMod
         private AAPak gamepak = new AAPak("");
         private AAPak modpak = new AAPak("");
         private AAPak restorepak = new AAPak("");
+        private List<string> FilesToMod = new List<string>();
 
         public ModMainForm()
         {
@@ -165,11 +166,6 @@ namespace AAMod
             return true;
         }
 
-        private bool OpenModProject(string aamodFileName)
-        {
-            return true;
-        }
-
         private void ModMainForm_Load(object sender, EventArgs e)
         {
             DefaultTitle = Text;
@@ -215,6 +211,28 @@ namespace AAMod
         private void ValidateInstallOptions()
         {
             // TODO: Enabled buttons depending on the state of game_pak and restore_pak compared to the aamod pak
+            // Get file list from mod pak
+            FilesToMod.Clear();
+            foreach(var fi in modpak.files)
+            {
+                if (fi.name.StartsWith("aamod/"))
+                {
+                    // Don't include own mod files
+                }
+                else
+                {
+                    // TODO: compare to gamepak to check if installed or not
+                    FilesToMod.Add(fi.name);
+                }
+            }
+            if (FilesToMod.Count > 0)
+            {
+                btnInstall.Enabled = true;
+            }
+
+            // Check if these same files are all present in the restore pak
+            // If not, disable the uninstall option (likely not installed)
+            // TODO: 
 
         }
     }

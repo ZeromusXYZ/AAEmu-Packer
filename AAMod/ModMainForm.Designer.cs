@@ -37,25 +37,29 @@
             this.pb = new System.Windows.Forms.ProgressBar();
             this.gameFolderDlg = new System.Windows.Forms.FolderBrowserDialog();
             this.openGamePakDlg = new System.Windows.Forms.OpenFileDialog();
+            this.modIcon = new System.Windows.Forms.PictureBox();
+            this.lInstallInfo = new System.Windows.Forms.Label();
+            ((System.ComponentModel.ISupportInitialize)(this.modIcon)).BeginInit();
             this.SuspendLayout();
             // 
             // btnInstall
             // 
             this.btnInstall.Enabled = false;
-            this.btnInstall.Location = new System.Drawing.Point(12, 41);
+            this.btnInstall.Location = new System.Drawing.Point(12, 54);
             this.btnInstall.Name = "btnInstall";
-            this.btnInstall.Size = new System.Drawing.Size(115, 23);
+            this.btnInstall.Size = new System.Drawing.Size(128, 23);
             this.btnInstall.TabIndex = 0;
             this.btnInstall.Text = "Install";
             this.btnInstall.UseVisualStyleBackColor = true;
             this.btnInstall.UseWaitCursor = true;
+            this.btnInstall.Click += new System.EventHandler(this.BtnInstall_Click);
             // 
             // btnUninstall
             // 
             this.btnUninstall.Enabled = false;
-            this.btnUninstall.Location = new System.Drawing.Point(12, 70);
+            this.btnUninstall.Location = new System.Drawing.Point(12, 81);
             this.btnUninstall.Name = "btnUninstall";
-            this.btnUninstall.Size = new System.Drawing.Size(115, 23);
+            this.btnUninstall.Size = new System.Drawing.Size(128, 23);
             this.btnUninstall.TabIndex = 1;
             this.btnUninstall.Text = "Uninstall";
             this.btnUninstall.UseVisualStyleBackColor = true;
@@ -73,12 +77,15 @@
             // 
             // lInstallLocation
             // 
-            this.lInstallLocation.AutoSize = true;
+            this.lInstallLocation.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.lInstallLocation.AutoEllipsis = true;
             this.lInstallLocation.Location = new System.Drawing.Point(102, 9);
             this.lInstallLocation.Name = "lInstallLocation";
-            this.lInstallLocation.Size = new System.Drawing.Size(25, 13);
+            this.lInstallLocation.Size = new System.Drawing.Size(389, 13);
             this.lInstallLocation.TabIndex = 3;
             this.lInstallLocation.Text = "???";
+            this.lInstallLocation.TextAlign = System.Drawing.ContentAlignment.TopRight;
             this.lInstallLocation.UseWaitCursor = true;
             // 
             // tDescription
@@ -86,21 +93,21 @@
             this.tDescription.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.tDescription.Location = new System.Drawing.Point(133, 43);
+            this.tDescription.Location = new System.Drawing.Point(146, 83);
             this.tDescription.Multiline = true;
             this.tDescription.Name = "tDescription";
             this.tDescription.ReadOnly = true;
-            this.tDescription.Size = new System.Drawing.Size(363, 118);
+            this.tDescription.Size = new System.Drawing.Size(345, 155);
             this.tDescription.TabIndex = 4;
             this.tDescription.UseWaitCursor = true;
             // 
             // pb
             // 
-            this.pb.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            this.pb.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.pb.Location = new System.Drawing.Point(12, 167);
+            this.pb.Location = new System.Drawing.Point(12, 25);
             this.pb.Name = "pb";
-            this.pb.Size = new System.Drawing.Size(484, 23);
+            this.pb.Size = new System.Drawing.Size(479, 23);
             this.pb.TabIndex = 5;
             this.pb.UseWaitCursor = true;
             // 
@@ -119,11 +126,31 @@
             this.openGamePakDlg.RestoreDirectory = true;
             this.openGamePakDlg.Title = "Locate game_pak";
             // 
+            // modIcon
+            // 
+            this.modIcon.Location = new System.Drawing.Point(12, 110);
+            this.modIcon.Name = "modIcon";
+            this.modIcon.Size = new System.Drawing.Size(128, 128);
+            this.modIcon.TabIndex = 6;
+            this.modIcon.TabStop = false;
+            this.modIcon.UseWaitCursor = true;
+            // 
+            // lInstallInfo
+            // 
+            this.lInstallInfo.AutoSize = true;
+            this.lInstallInfo.Location = new System.Drawing.Point(146, 59);
+            this.lInstallInfo.Name = "lInstallInfo";
+            this.lInstallInfo.Size = new System.Drawing.Size(25, 13);
+            this.lInstallInfo.TabIndex = 7;
+            this.lInstallInfo.Text = "???";
+            // 
             // ModMainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(508, 198);
+            this.ClientSize = new System.Drawing.Size(503, 244);
+            this.Controls.Add(this.lInstallInfo);
+            this.Controls.Add(this.modIcon);
             this.Controls.Add(this.pb);
             this.Controls.Add(this.tDescription);
             this.Controls.Add(this.lInstallLocation);
@@ -136,6 +163,7 @@
             this.UseWaitCursor = true;
             this.Load += new System.EventHandler(this.ModMainForm_Load);
             this.Shown += new System.EventHandler(this.ModMainForm_Shown);
+            ((System.ComponentModel.ISupportInitialize)(this.modIcon)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -151,6 +179,8 @@
         private System.Windows.Forms.ProgressBar pb;
         private System.Windows.Forms.FolderBrowserDialog gameFolderDlg;
         private System.Windows.Forms.OpenFileDialog openGamePakDlg;
+        private System.Windows.Forms.PictureBox modIcon;
+        private System.Windows.Forms.Label lInstallInfo;
     }
 }
 

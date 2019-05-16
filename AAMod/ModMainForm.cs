@@ -28,7 +28,11 @@ namespace AAMod
         private AAPak gamepak = new AAPak("");
         private AAPak modpak = new AAPak("");
         private AAPak restorepak = new AAPak("");
-        private List<string> FilesToMod = new List<string>();
+        private List<AAPakFileInfo> FilesToMod = new List<AAPakFileInfo>();
+        private List<AAPakFileInfo> FilesToInstall = new List<AAPakFileInfo>();
+        private List<AAPakFileInfo> FilesToUnInstall = new List<AAPakFileInfo>();
+        private List<AAPakFileInfo> FilesAddedWithInstall = new List<AAPakFileInfo>();
+        private List<string> RestoreNewFilesList = new List<string>();
 
         public ModMainForm()
         {
@@ -119,7 +123,8 @@ namespace AAMod
                     return false;
                 }
             }
-            lInstallLocation.Text = "... opening pak, please wait ...";
+            Refresh();
+            lInstallLocation.Text = "Loading, please wait ...";
             lInstallLocation.Refresh();
             if (gamepak.OpenPak(GamePakFileName, false))
             {
@@ -163,6 +168,17 @@ namespace AAMod
                 }
             }
 
+            RestoreNewFilesList.Clear();
+            AAPakFileInfo rnfl = restorepak.nullAAPakFileInfo;
+            if (restorepak.GetFileByName("aamod/newfiles.txt",ref rnfl))
+            {
+                var rf = restorepak.ExportFileAsStream(rnfl);
+                var s = StreamToString(rf);
+                RestoreNewFilesList.AddRange(s.Split('\n').ToArray());
+            }
+
+            // TODO: continue work here
+
             return true;
         }
 
@@ -192,6 +208,21 @@ namespace AAMod
             {
                 tDescription.Text = "No description provided for this mod file.";
             }
+            tDescription.SelectionLength = 0;
+
+            if (modpak.FileExists("aamod/aamod.png"))
+            {
+                var picStream = modpak.ExportFileAsStream("aamod/aamod.png");
+                var img = Image.FromStream(picStream);
+                modIcon.Image = img;
+            }
+            else
+            if (modpak.FileExists("aamod/aamod.jpg"))
+            {
+                var picStream = modpak.ExportFileAsStream("aamod/aamod.jpg");
+                var img = Image.FromStream(picStream);
+                modIcon.Image = img;
+            }
 
             ValidateInstallOptions();
 
@@ -208,6 +239,12 @@ namespace AAMod
             }
         }
 
+        public static Stream StringToStream(string src)
+        {
+            byte[] byteArray = Encoding.UTF8.GetBytes(src);
+            return new MemoryStream(byteArray);
+        }
+
         private void ValidateInstallOptions()
         {
             // TODO: Enabled buttons depending on the state of game_pak and restore_pak compared to the aamod pak
@@ -222,18 +259,92 @@ namespace AAMod
                 else
                 {
                     // TODO: compare to gamepak to check if installed or not
-                    FilesToMod.Add(fi.name);
+                    FilesToMod.Add(fi);
                 }
             }
-            if (FilesToMod.Count > 0)
+
+            FilesToInstall.Clear();
+            FilesAddedWithInstall.Clear();
+            foreach (var fi in FilesToMod)
+            {
+                AAPakFileInfo gfi = gamepak.nullAAPakFileInfo ;
+                if (gamepak.GetFileByName(fi.name, ref gfi))
+                {
+                    if ( (fi.size != gfi.size) || (fi.md5 != gfi.md5) )
+                    {
+                        FilesToInstall.Add(fi);
+                    }
+                }
+                else
+                {
+                    FilesToInstall.Add(fi);
+                    FilesAddedWithInstall.Add(fi);
+                }
+            }
+
+            FilesToUnInstall.Clear();
+            foreach (var fi in FilesToMod)
+            {
+                if (restorepak.FileExists(fi.name))
+                    FilesToUnInstall.Add(fi);
+            }
+
+            if (FilesToInstall.Count > 0)
             {
                 btnInstall.Enabled = true;
+                string s = string.Empty;
+                if (FilesToMod.Count != 1)
+                    s += "Mod " + FilesToMod.Count.ToString() + " file(s)";
+                else
+                    s += "Mod " + FilesToMod.Count.ToString() + " file";
+                if (FilesAddedWithInstall.Count > 0)
+                    s += ", with " + FilesAddedWithInstall.Count.ToString() + " new";
+                lInstallInfo.Text = s;
             }
 
             // Check if these same files are all present in the restore pak
             // If not, disable the uninstall option (likely not installed)
             // TODO: 
 
+        }
+
+        private void BtnInstall_Click(object sender, EventArgs e)
+        {
+            btnInstall.Enabled = false;
+            pb.Minimum = 0;
+            pb.Maximum = (FilesToMod.Count * 2) - FilesAddedWithInstall.Count + 1 ;
+            pb.Step = 1;
+            lInstallInfo.Text = "Creating restore files";
+            foreach(var fi in FilesToInstall)
+            {
+                // If file exists in gamepak, make a backup
+                if (gamepak.FileExists(fi.name))
+                {
+                    var expStream = gamepak.ExportFileAsStream(fi.name);
+                    expStream.Position = 0;
+                    if (restorepak.AddFileFromStream(fi.name, expStream, DateTime.FromFileTime(fi.createTime), DateTime.FromFileTime(fi.modifyTime), false, out AAPakFileInfo newFile))
+                    {
+                        pb.PerformStep();
+                    }
+                }
+
+                pb.PerformStep();
+                pb.Refresh();
+                System.Threading.Thread.Sleep(500);
+            }
+
+            // Add newly added files to the newfiles.txt
+            foreach (var fi in FilesAddedWithInstall)
+            {
+                if (RestoreNewFilesList.IndexOf(fi.name) >= 0)
+                    RestoreNewFilesList.Add(fi.name);
+            }
+            var ms = StringToStream(string.Join("\n",RestoreNewFilesList.ToArray()));
+
+            restorepak.AddFileFromStream("aamod/newfiles.txt", ms, DateTime.Now, DateTime.Now, false, out var pfi);
+            
+            MessageBox.Show("Mod has been installed", "Install", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            ValidateInstallOptions();
         }
     }
 }

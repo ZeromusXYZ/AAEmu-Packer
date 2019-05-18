@@ -17,8 +17,8 @@ namespace AAPakEditor
     public partial class MainForm : Form
     {
         public AAPak pak;
-        private string versionString = "0.4";
         private string urlGitHub = "https://github.com/ZeromusXYZ/AAEmu-Packer";
+        private string urlDiscord = "https://discord.gg/GhVfDtK";
         private string baseTitle = "";
         private string currentFileViewFolder = "";
         private bool useDBKey = false;
@@ -53,8 +53,6 @@ namespace AAPakEditor
             MMExtraMD5.Enabled = (pak != null) && (pak.isOpen) && (pak.readOnly == false) && (lbFiles.SelectedIndex >= 0);
             MMExtraExportData.Enabled = (pak != null) && (pak.isOpen);
             MMExtra.Visible = (pak != null) && (pak.isOpen);
-
-            MMVersion.Text = "&Version " + versionString;
 
             if ((pak != null) && (pak.isOpen))
             {
@@ -98,6 +96,15 @@ namespace AAPakEditor
         private void MainForm_Load(object sender, EventArgs e)
         {
             baseTitle = Text;
+            var AppVer = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+            string v = "Version ";
+            v += AppVer.Major.ToString();
+            v += "." + AppVer.Minor.ToString();
+            if ((AppVer.Build > 0) || (AppVer.MinorRevision > 0))
+                v += "." + AppVer.Build.ToString();
+            if (AppVer.MinorRevision > 0)
+                v += "." + AppVer.MinorRevision.ToString();
+            MMVersion.Text = v ;
             UpdateMM();
             // LoadPakFile("C:\\ArcheAge\\Working\\game_pak");
         }
@@ -920,6 +927,42 @@ namespace AAPakEditor
             ms.Dispose();
             MessageBox.Show("Debug: Done");
             UpdateMM();
+        }
+
+        private void VisitDiscordToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Process.Start(urlDiscord);
+        }
+
+        private void MMExtraMakeMod_Click(object sender, EventArgs e)
+        {
+            // Basically, what we'll make here, is just a simple pak file, but the first file added is going to be our modding tool's executable
+            // Because of the way that XL's pak file format works, it's not encrypting or compressing the files.
+            // Adding a executable as first file, and renaming that pak to .exe, would effectively create a executeable with the rest of the
+            // Pak's data attached to it. If you also mark that executeable with a special tag that the executable knows to ignore, you can effectively
+            // make a "self-extracting pak file" in the same way that the old Self Extractiong Zip files work, except, that this time, the executeable
+            // is INSIDE it's own pak and not just in front of it, so you don't even need to account for the offset where the data starts.
+            // Pretty sure this was originally made by design, neat ^_^
+
+            using (var MakeModDlg = new MakeModForm())
+            {
+                MakeModDlg.mainPak = pak;
+                MakeModDlg.ShowDialog();
+            }
+            
+        }
+
+        private void MainForm_Shown(object sender, EventArgs e)
+        {
+            var args = Environment.GetCommandLineArgs();
+            for(int i = 1; i < args.Length;i++)
+            {
+                var arg = args[i];
+                if (File.Exists(arg))
+                {
+                    LoadPakFile(arg, true);
+                }
+            }
         }
     }
 }

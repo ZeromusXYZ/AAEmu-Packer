@@ -56,8 +56,10 @@
             this.MMExtraMD5 = new System.Windows.Forms.ToolStripMenuItem();
             this.MMExtraExportData = new System.Windows.Forms.ToolStripMenuItem();
             this.MMExtraDebugTest = new System.Windows.Forms.ToolStripMenuItem();
+            this.MMExtraMakeMod = new System.Windows.Forms.ToolStripMenuItem();
             this.MMVersion = new System.Windows.Forms.ToolStripMenuItem();
             this.MMVersionSourceCode = new System.Windows.Forms.ToolStripMenuItem();
+            this.MMVersionDiscord = new System.Windows.Forms.ToolStripMenuItem();
             this.openGamePakDialog = new System.Windows.Forms.OpenFileDialog();
             this.lbFolders = new System.Windows.Forms.ListBox();
             this.lFileCount = new System.Windows.Forms.Label();
@@ -235,7 +237,7 @@
             // 
             this.MMExportSelectedFile.Name = "MMExportSelectedFile";
             this.MMExportSelectedFile.ShortcutKeys = System.Windows.Forms.Keys.F5;
-            this.MMExportSelectedFile.Size = new System.Drawing.Size(180, 22);
+            this.MMExportSelectedFile.Size = new System.Drawing.Size(160, 22);
             this.MMExportSelectedFile.Text = "Selected &File";
             this.MMExportSelectedFile.Click += new System.EventHandler(this.MMExportSelectedFile_Click);
             // 
@@ -243,32 +245,32 @@
             // 
             this.MMExportSelectedFolder.Enabled = false;
             this.MMExportSelectedFolder.Name = "MMExportSelectedFolder";
-            this.MMExportSelectedFolder.Size = new System.Drawing.Size(180, 22);
+            this.MMExportSelectedFolder.Size = new System.Drawing.Size(160, 22);
             this.MMExportSelectedFolder.Text = "Selected F&older";
             this.MMExportSelectedFolder.Click += new System.EventHandler(this.MMExportSelectedFolder_Click);
             // 
             // MMExportS1
             // 
             this.MMExportS1.Name = "MMExportS1";
-            this.MMExportS1.Size = new System.Drawing.Size(177, 6);
+            this.MMExportS1.Size = new System.Drawing.Size(157, 6);
             // 
             // MMExportAll
             // 
             this.MMExportAll.Name = "MMExportAll";
             this.MMExportAll.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F5)));
-            this.MMExportAll.Size = new System.Drawing.Size(180, 22);
+            this.MMExportAll.Size = new System.Drawing.Size(160, 22);
             this.MMExportAll.Text = "&All Files";
             this.MMExportAll.Click += new System.EventHandler(this.MMExportAll_Click);
             // 
             // MMExportS2
             // 
             this.MMExportS2.Name = "MMExportS2";
-            this.MMExportS2.Size = new System.Drawing.Size(177, 6);
+            this.MMExportS2.Size = new System.Drawing.Size(157, 6);
             // 
             // MMExportDB
             // 
             this.MMExportDB.Name = "MMExportDB";
-            this.MMExportDB.Size = new System.Drawing.Size(180, 22);
+            this.MMExportDB.Size = new System.Drawing.Size(160, 22);
             this.MMExportDB.Text = "Export DB";
             this.MMExportDB.Click += new System.EventHandler(this.MMExportDB_Click);
             // 
@@ -277,7 +279,8 @@
             this.MMExtra.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.MMExtraMD5,
             this.MMExtraExportData,
-            this.MMExtraDebugTest});
+            this.MMExtraDebugTest,
+            this.MMExtraMakeMod});
             this.MMExtra.Name = "MMExtra";
             this.MMExtra.Size = new System.Drawing.Size(44, 20);
             this.MMExtra.Text = "E&xtra";
@@ -304,10 +307,18 @@
             this.MMExtraDebugTest.Visible = false;
             this.MMExtraDebugTest.Click += new System.EventHandler(this.MMExtraDebugTest_Click);
             // 
+            // MMExtraMakeMod
+            // 
+            this.MMExtraMakeMod.Name = "MMExtraMakeMod";
+            this.MMExtraMakeMod.Size = new System.Drawing.Size(205, 22);
+            this.MMExtraMakeMod.Text = "Export pak as mod";
+            this.MMExtraMakeMod.Click += new System.EventHandler(this.MMExtraMakeMod_Click);
+            // 
             // MMVersion
             // 
             this.MMVersion.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.MMVersionSourceCode});
+            this.MMVersionSourceCode,
+            this.MMVersionDiscord});
             this.MMVersion.Name = "MMVersion";
             this.MMVersion.Size = new System.Drawing.Size(57, 20);
             this.MMVersion.Text = "&Version";
@@ -319,9 +330,17 @@
             this.MMVersionSourceCode.Text = "Source Code";
             this.MMVersionSourceCode.Click += new System.EventHandler(this.MMVersionSourceCode_Click);
             // 
+            // MMVersionDiscord
+            // 
+            this.MMVersionDiscord.Name = "MMVersionDiscord";
+            this.MMVersionDiscord.Size = new System.Drawing.Size(141, 22);
+            this.MMVersionDiscord.Text = "Visit Discord";
+            this.MMVersionDiscord.Click += new System.EventHandler(this.VisitDiscordToolStripMenuItem_Click);
+            // 
             // openGamePakDialog
             // 
-            this.openGamePakDialog.Filter = "ArcheAge Game Pak|*_pak;*_pak.*|All Files|*.*";
+            this.openGamePakDialog.Filter = "Known pak file types|*_pak;*_pak.*;*.aamod|ArcheAge Game Pak|*_pak;*_pak.*|All Fi" +
+    "les|*.*";
             this.openGamePakDialog.ReadOnlyChecked = true;
             this.openGamePakDialog.RestoreDirectory = true;
             this.openGamePakDialog.ShowReadOnly = true;
@@ -524,6 +543,7 @@
             this.Text = "AAPakEditor";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MainForm_FormClosed);
             this.Load += new System.EventHandler(this.MainForm_Load);
+            this.Shown += new System.EventHandler(this.MainForm_Shown);
             this.MM.ResumeLayout(false);
             this.MM.PerformLayout();
             this.pFileInfo.ResumeLayout(false);
@@ -587,6 +607,8 @@
         private System.Windows.Forms.ToolStripMenuItem MMVersionSourceCode;
         private System.Windows.Forms.ToolStripSeparator MMExportS2;
         private System.Windows.Forms.ToolStripMenuItem MMExportDB;
+        private System.Windows.Forms.ToolStripMenuItem MMVersionDiscord;
+        private System.Windows.Forms.ToolStripMenuItem MMExtraMakeMod;
     }
 }
 

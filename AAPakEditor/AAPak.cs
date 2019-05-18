@@ -98,7 +98,7 @@ namespace AAPakEditor
 
         ~AAPakFileHeader()
         {
-            FAT.Dispose();
+            // FAT.Dispose();
         }
 
         public void SetCustomKey(byte[] newKey)
@@ -1038,6 +1038,22 @@ namespace AAPakEditor
                 return ReplaceFile(ref pfi, sourceStream, ModifyTime);
             }
         }
+
+        static public string StreamToString(Stream stream)
+        {
+            stream.Position = 0;
+            using (StreamReader reader = new StreamReader(stream, Encoding.UTF8))
+            {
+                return reader.ReadToEnd();
+            }
+        }
+
+        static public Stream StringToStream(string src)
+        {
+            byte[] byteArray = Encoding.UTF8.GetBytes(src);
+            return new MemoryStream(byteArray);
+        }
+
 
     }
 }

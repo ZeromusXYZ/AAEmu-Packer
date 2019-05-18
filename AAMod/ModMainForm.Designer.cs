@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ModMainForm));
             this.btnInstall = new System.Windows.Forms.Button();
             this.btnUninstall = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
@@ -57,13 +56,14 @@
             // btnUninstall
             // 
             this.btnUninstall.Enabled = false;
-            this.btnUninstall.Location = new System.Drawing.Point(12, 81);
+            this.btnUninstall.Location = new System.Drawing.Point(12, 215);
             this.btnUninstall.Name = "btnUninstall";
             this.btnUninstall.Size = new System.Drawing.Size(128, 23);
             this.btnUninstall.TabIndex = 1;
             this.btnUninstall.Text = "Uninstall";
             this.btnUninstall.UseVisualStyleBackColor = true;
             this.btnUninstall.UseWaitCursor = true;
+            this.btnUninstall.Click += new System.EventHandler(this.BtnUninstall_Click);
             // 
             // label1
             // 
@@ -93,6 +93,7 @@
             this.tDescription.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.tDescription.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.tDescription.Location = new System.Drawing.Point(146, 83);
             this.tDescription.Multiline = true;
             this.tDescription.Name = "tDescription";
@@ -128,9 +129,10 @@
             // 
             // modIcon
             // 
-            this.modIcon.Location = new System.Drawing.Point(12, 110);
+            this.modIcon.Location = new System.Drawing.Point(12, 83);
             this.modIcon.Name = "modIcon";
             this.modIcon.Size = new System.Drawing.Size(128, 128);
+            this.modIcon.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.modIcon.TabIndex = 6;
             this.modIcon.TabStop = false;
             this.modIcon.UseWaitCursor = true;
@@ -143,6 +145,7 @@
             this.lInstallInfo.Size = new System.Drawing.Size(25, 13);
             this.lInstallInfo.TabIndex = 7;
             this.lInstallInfo.Text = "???";
+            this.lInstallInfo.UseWaitCursor = true;
             // 
             // ModMainForm
             // 
@@ -157,12 +160,14 @@
             this.Controls.Add(this.label1);
             this.Controls.Add(this.btnUninstall);
             this.Controls.Add(this.btnInstall);
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.KeyPreview = true;
             this.Name = "ModMainForm";
             this.Text = "AAMod";
             this.UseWaitCursor = true;
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.ModMainForm_FormClosed);
             this.Load += new System.EventHandler(this.ModMainForm_Load);
             this.Shown += new System.EventHandler(this.ModMainForm_Shown);
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.ModMainForm_KeyDown);
             ((System.ComponentModel.ISupportInitialize)(this.modIcon)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();

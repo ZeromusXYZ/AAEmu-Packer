@@ -944,7 +944,25 @@ namespace AAPakEditor
             // is INSIDE it's own pak and not just in front of it, so you don't even need to account for the offset where the data starts.
             // Pretty sure this was originally made by design, neat ^_^
 
-            // TODO: Make modding tool and add it as a resource to be able to add this to the "mod installer"
+            using (var MakeModDlg = new MakeModForm())
+            {
+                MakeModDlg.mainPak = pak;
+                MakeModDlg.ShowDialog();
+            }
+            
+        }
+
+        private void MainForm_Shown(object sender, EventArgs e)
+        {
+            var args = Environment.GetCommandLineArgs();
+            for(int i = 1; i < args.Length;i++)
+            {
+                var arg = args[i];
+                if (File.Exists(arg))
+                {
+                    LoadPakFile(arg, true);
+                }
+            }
         }
     }
 }

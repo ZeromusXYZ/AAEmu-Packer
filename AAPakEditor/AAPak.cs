@@ -488,7 +488,11 @@ namespace AAPakEditor
         /// </summary>
         public void DecryptHeaderData()
         {
-            data = EncryptAES(rawData, key, false);
+            //data = EncryptAES(rawData, key, false);
+            byte[] TestKey1 = new byte[] { 0x6F, 0xF6, 0x6A, 0xB5, 0x11, 0xC0, 0x42, 0x69, 0xEA, 0x96, 0x97, 0x9D, 0x51, 0x82, 0x98, 0x14 };
+            byte[] TestKey2 = new byte[] { 0x32, 0x1F, 0x2A, 0xEE, 0xAA, 0x58, 0x4A, 0xB4, 0x9A, 0x6C, 0x9E, 0x09, 0xD5, 0x9E, 0x9C, 0x6F };
+            var data2 = EncryptAES(rawData, TestKey1, false);
+            data = EncryptAES(data2, TestKey2, false);
             fileCount = BitConverter.ToUInt32(data, 8);
             extraFileCount = BitConverter.ToUInt32(data, 12);
         }

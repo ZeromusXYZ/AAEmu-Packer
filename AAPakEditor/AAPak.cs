@@ -135,7 +135,32 @@ namespace AAPakEditor
             }
         }
 
-        public bool LoadFAT()
+        public static byte[] EncryptAESUsingIV(byte[] message, byte[] key, byte[] customIV, bool doEncryption)
+        {
+            try
+            {
+                Aes aes = new AesManaged();
+                aes.Key = key;
+                aes.IV = customIV;
+                aes.Mode = CipherMode.CBC;
+                aes.Padding = PaddingMode.None;
+
+                ICryptoTransform cipher;
+
+                if (doEncryption == true)
+                    cipher = aes.CreateEncryptor();
+                else
+                    cipher = aes.CreateDecryptor();
+
+                return cipher.TransformFinalBlock(message, 0, message.Length);
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+        public bool LoadRawFAT()
         {
             // Read all File Table Data into Memory
             FAT.SetLength(0);
@@ -301,6 +326,8 @@ namespace AAPakEditor
                 byte[] rawFileData = new byte[bufSize]; // decrypted header data
                 FAT.Read(rawFileData, 0, bufSize);
                 byte[] decryptedFileData = EncryptAES(rawFileData, key, false);
+
+
                 ms.SetLength(0);
                 ms.Write(decryptedFileData, 0, bufSize);
                 ms.Position = 0;
@@ -308,27 +335,72 @@ namespace AAPakEditor
                 //AAPakFileInfo pfi = (AAPakFileInfo)formatter.Deserialize(_owner._gpFileStream);
                 AAPakFileInfo pfi = new AAPakFileInfo();
                 // Manually read the string for filename
-                pfi.name = "";
-                for (int c = 0; c < 0x108;c++)
+
+                if (_owner.PakType == PakFileType.PakTypeA)
                 {
-                    byte ch = reader.ReadByte();
-                    if (ch != 0)
-                        pfi.name += (char)ch;
-                    else
-                        break;
+                    pfi.name = "";
+                    for (int c = 0; c < 0x108; c++)
+                    {
+                        byte ch = reader.ReadByte();
+                        if (ch != 0)
+                            pfi.name += (char)ch;
+                        else
+                            break;
+                    }
+                    ms.Position = 0x108;
+                    pfi.offset = reader.ReadInt64();
+                    pfi.size = reader.ReadInt64();
+                    pfi.sizeDuplicate = reader.ReadInt64();
+                    pfi.paddingSize = reader.ReadInt32();
+                    pfi.md5 = reader.ReadBytes(16);
+                    pfi.dummy1 = reader.ReadInt32(); // ???
+                    pfi.createTime = reader.ReadInt64();
+                    pfi.modifyTime = reader.ReadInt64();
+                    pfi.dummy2 = reader.ReadInt64(); // ???
                 }
-                ms.Position = 0x108;
-                pfi.offset = reader.ReadInt64();
-                pfi.size = reader.ReadInt64();
-                pfi.sizeDuplicate = reader.ReadInt64();
-                pfi.paddingSize = reader.ReadInt32();
-                pfi.md5 = reader.ReadBytes(16);
-                pfi.dummy1 = reader.ReadInt32(); // ???
-                pfi.createTime = reader.ReadInt64();
-                pfi.modifyTime = reader.ReadInt64();
-                pfi.dummy2 = reader.ReadInt64(); // ???
+                else
+                if (_owner.PakType == PakFileType.PakTypeB)
+                {
+                    ms.Position = 0x00;
+                    pfi.paddingSize = reader.ReadInt32();
+                    ms.Position = 0x04;
+                    pfi.md5 = reader.ReadBytes(16);
+
+                    ms.Position = 0x14;
+                    pfi.dummy1 = reader.ReadInt32(); // ???
+
+                    ms.Position = 0x18;
+                    pfi.size = reader.ReadInt64();
+
+                    ms.Position = 0x20;
+                    pfi.name = "";
+                    for (int c = 0; c < 0x108; c++)
+                    {
+                        byte ch = reader.ReadByte();
+                        if (ch != 0)
+                            pfi.name += (char)ch;
+                        else
+                            break;
+                    }
+                    ms.Position = 0x128;
+                    pfi.sizeDuplicate = reader.ReadInt64();
+
+                    pfi.offset = reader.ReadInt64();
+                    pfi.modifyTime = reader.ReadInt64();
+                    pfi.createTime = reader.ReadInt64();
+
+                    pfi.dummy2 = reader.ReadInt64(); // ???
+                }
 
                 _owner.files.Add(pfi);
+
+                if (pfi.name == "bin32/archeage.exe")
+                {
+                    //ByteArrayToHexFile(rawFileData, "fileraw-"+i.ToString()+".hex");
+                    ByteArrayToHexFile(decryptedFileData, "file-"+ i.ToString() + ".hex");
+                    File.WriteAllBytes("file-" + i.ToString() + ".bin",decryptedFileData);
+                }
+
 
                 if ((pfi.offset + pfi.size + pfi.paddingSize) > AddFileOffset)
                 {
@@ -482,19 +554,99 @@ namespace AAPakEditor
             _owner._gpFileStream.Position = FirstFileInfoOffset;
         }
 
+        private void ByteArrayToHexFile(byte[] bytes,string fileName)
+        {
+            string s = "";
+            for(int i = 0; i < bytes.Length;i++)
+            {
+                s += bytes[i].ToString("X2") + " ";
+                if ((i % 16) == 15)
+                    s += "\r\n";
+                else
+                {
+                    if ((i % 4) == 3)
+                        s += " ";
+                    if ((i % 8) == 7)
+                        s += " ";
+                }
+            }
+            File.WriteAllText(fileName, s);
+        }
 
         /// <summary>
         /// Decrypt the current header data
         /// </summary>
         public void DecryptHeaderData()
         {
-            //data = EncryptAES(rawData, key, false);
-            byte[] TestKey1 = new byte[] { 0x6F, 0xF6, 0x6A, 0xB5, 0x11, 0xC0, 0x42, 0x69, 0xEA, 0x96, 0x97, 0x9D, 0x51, 0x82, 0x98, 0x14 };
-            byte[] TestKey2 = new byte[] { 0x32, 0x1F, 0x2A, 0xEE, 0xAA, 0x58, 0x4A, 0xB4, 0x9A, 0x6C, 0x9E, 0x09, 0xD5, 0x9E, 0x9C, 0x6F };
+            data = EncryptAES(rawData, key, false);
+            /*
+            File.WriteAllBytes("nstep0", rawData);
+            ByteArrayToHexFile(rawData, "nstep0.hex");
+            File.WriteAllBytes("nstep1", data);
+            ByteArrayToHexFile(data, "nstep1.hex");
+            ByteArrayToHexFile(key, "nkey.hex");
+            */
+
+            //byte[] TestKey1 = new byte[] { 0x6F, 0xF6, 0x6A, 0xB5, 0x11, 0xC0, 0x42, 0x69, 0xEA, 0x96, 0x97, 0x9D, 0x51, 0x82, 0x98, 0x14 };
+            //data = EncryptAES(rawData, TestKey1, false);
+            /*
+            byte[] XORKey = new byte[] { 0x6F, 0xF6, 0x6A, 0xB5, 0x11, 0xC0, 0x42, 0x69, 0xEA, 0x96, 0x97, 0x9D, 0x51, 0x82, 0x98, 0x14 };
+
+            byte[] dataXOR = new byte[rawData.Length];
+            for (int i = 0; i < rawData.Length; i++)
+            {
+                dataXOR[i] = (byte)(rawData[i] ^ XORKey[i % 16]);
+            }
+            data = EncryptAESUsingIV(rawData, Test, TestKey1, false);
+            */
+
+            /*
+            //var data2 = EncryptAES(rawData, TestKey1, false);
+            data = EncryptAES(rawData, TestKey3, false);
+            byte[] XORKey = new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+            for (int i = 0; i < TestKey1.Length; i++)
+            {
+                data[i] = (byte)(data[i] ^ TestKey2[i % 16]);
+            }
+            */
+            /*
             var data2 = EncryptAES(rawData, TestKey1, false);
             data = EncryptAES(data2, TestKey2, false);
-            fileCount = BitConverter.ToUInt32(data, 8);
-            extraFileCount = BitConverter.ToUInt32(data, 12);
+            File.WriteAllBytes("step0", rawData);
+            ByteArrayToHexFile(rawData, "step0.hex");
+            File.WriteAllBytes("step1", data2);
+            ByteArrayToHexFile(data2, "step1.hex");
+            File.WriteAllBytes("step2", data);
+            ByteArrayToHexFile(data, "step2.hex");
+            ByteArrayToHexFile(TestKey1, "key1.hex");
+            ByteArrayToHexFile(TestKey2, "key2.hex");
+            */
+
+            // A valid header/footer starts with "WIBO" after decryption
+            if ((data[0] == 'W') && (data[1] == 'I') && (data[2] == 'B') && (data[3] == 'O'))
+            {
+                // "WIBO" = 0x57 0x49 0x42 0x4F
+                _owner.PakType = PakFileType.PakTypeA;
+                isValid = true;
+                fileCount = BitConverter.ToUInt32(data, 8);
+                extraFileCount = BitConverter.ToUInt32(data, 12);
+            }
+            else
+            if ((data[8] == 'I') && (data[9] == 'D') && (data[10] == 'E') && (data[11] == 'J'))
+            {
+                // "IDEJ" = 0x49 0x44 0x45 0x4A
+                _owner.PakType = PakFileType.PakTypeB;
+                isValid = true;
+                fileCount = BitConverter.ToUInt32(data, 12);
+                extraFileCount = BitConverter.ToUInt32(data, 0);
+            }
+            else
+            {
+                fileCount = 0;
+                extraFileCount = 0;
+                isValid = false;
+            }
+
         }
 
         /// <summary>
@@ -525,11 +677,15 @@ namespace AAPakEditor
 
     }
 
+    public enum PakFileType { PakTypeA, PakTypeB };
+
     /// <summary>
     /// AAPak Class used to handle game_pak from ArcheAge
     /// </summary>
     public class AAPak
     {
+        
+
         /// <summary>
         /// Virtual data to return as a null value for file details
         /// </summary>
@@ -547,6 +703,7 @@ namespace AAPakEditor
         /// If set to true, adds the freed space from a delete to the previous file's padding. If false (default), it "moves" the file to extrefiles for freeing up space, allowing it to be reused.
         /// </summary>
         public bool paddingDeleteMode = false;
+        public PakFileType PakType = PakFileType.PakTypeA ;
 
         /// <summary>
         /// Creates and/or opens a game_pak file
@@ -693,19 +850,19 @@ namespace AAPakEditor
 
             // Read the last 512 bytes as raw header data
             _gpFileStream.Seek(-_header.Size, SeekOrigin.End);
-            
+
             // Mark correct location as header offset location
-            _gpFileStream.Read(_header.rawData, 0, 0x20); // We don't need to read the entire thing, just the first 32 bytes contain data
+            _gpFileStream.Read(_header.rawData, 0, _header.Size); // We don't need to read the entire thing, just the first 32 bytes contain data
             // _gpFileStream.Read(_header.rawData, 0, _header.Size);
 
             _header.DecryptHeaderData();
 
-            // A valid header/footer starts with "WIBO" after decryption
-            _header.isValid = (_header.data[0] == 'W') && (_header.data[1] == 'I') && (_header.data[2] == 'B') && (_header.data[3] == 'O');
-            //_header.isValid = true;
             if (_header.isValid)
             {
-                _header.LoadFAT();
+                // Only allow editing for TypeA
+                if (PakType != PakFileType.PakTypeA)
+                    readOnly = true;
+                _header.LoadRawFAT();
                 _header.ReadFileTable();
             }
             else
@@ -726,11 +883,20 @@ namespace AAPakEditor
             if (!isOpen || !_header.isValid) return;
             foreach(AAPakFileInfo pfi in files)
             {
-                // Horror function, I know :p
-                string n = Path.GetDirectoryName(pfi.name.ToLower().Replace('/', Path.DirectorySeparatorChar)).Replace(Path.DirectorySeparatorChar, '/');
-                var pos = folders.IndexOf(n);
-                if (pos >= 0) continue;
-                folders.Add(n);
+                if (pfi.name == string.Empty)
+                    continue;
+                try
+                {
+                    // Horror function, I know :p
+                    string n = Path.GetDirectoryName(pfi.name.ToLower().Replace('/', Path.DirectorySeparatorChar)).Replace(Path.DirectorySeparatorChar, '/');
+                    var pos = folders.IndexOf(n);
+                    if (pos >= 0)
+                        continue;
+                    folders.Add(n);
+                }
+                catch
+                {
+                }
             }
             folders.Sort();
         }

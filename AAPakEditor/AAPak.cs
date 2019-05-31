@@ -184,6 +184,10 @@ namespace AAPakEditor
             return true;
         }
 
+        /// <summary>
+        /// Writes current files info back into FAT (encrypted)
+        /// </summary>
+        /// <returns></returns>
         public bool WriteToFAT()
         {
             _owner.PakType = PakFileType.PakTypeB;
@@ -337,7 +341,7 @@ namespace AAPakEditor
 
 
         /// <summary>
-        /// Read and decrypt the File Details Table
+        /// Read and decrypt the File Details Table that was loaded into FAT
         /// </summary>
         public void ReadFileTable()
         {
@@ -481,6 +485,11 @@ namespace AAPakEditor
         }
 
 
+        /// <summary>
+        /// Helper function for debugging, write byte array as a hex text file
+        /// </summary>
+        /// <param name="bytes"></param>
+        /// <param name="fileName"></param>
         private void ByteArrayToHexFile(byte[] bytes,string fileName)
         {
             string s = "";

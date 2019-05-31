@@ -29,6 +29,7 @@ namespace AAPakEditor
         private int updateCounter = 0;
         private int errorCount = 0;
         private long totalSecondsUsed = 0;
+        private bool AutoRun = false;
 
         public ImportFolderDlg()
         {
@@ -201,6 +202,12 @@ namespace AAPakEditor
 
         private void bgwImport_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
+            if (AutoRun)
+            {
+                DialogResult = DialogResult.OK;
+                return;
+            }
+
             if (errorCount > 0)
             {
                 MessageBox.Show(errorCount.ToString() + " file(s) failed to import !", "Import errors", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -296,6 +303,25 @@ namespace AAPakEditor
             btnCancel.Enabled = true;
 
             bgwImport.RunWorkerAsync();
+        }
+
+        private void ImportFolderDlg_Shown(object sender, EventArgs e)
+        {
+            // do auto-run stuff when needed
+            if (AutoRun)
+                btnStart_Click(btnStart, null);
+        }
+
+        /// <summary>
+        /// Call this function before ShowDialog() to make this dialog automated
+        /// </summary>
+        /// <param name="sourceFolder">Source Directory</param>
+        /// <param name="targetFolder">Directory Name to use in the pakfile</param>
+        public void InitAutoRun(string sourceFolder, string targetFolder)
+        {
+            eDiskFolder.Text = sourceFolder;
+            ePakFolder.Text = targetFolder;
+            AutoRun = true;
         }
     }
 }

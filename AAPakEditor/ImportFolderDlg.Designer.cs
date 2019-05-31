@@ -160,6 +160,7 @@
             this.Text = "Import from folder";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.ImportFolderDlg_FormClosing);
             this.Load += new System.EventHandler(this.ImportFolderDlg_Load);
+            this.Shown += new System.EventHandler(this.ImportFolderDlg_Shown);
             this.ResumeLayout(false);
             this.PerformLayout();
 

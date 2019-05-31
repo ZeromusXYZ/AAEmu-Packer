@@ -71,6 +71,29 @@ namespace AAPakEditor.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Command-Line options
+        ///---------------------
+        ///&lt;pakfile&gt;
+        ///Opens pakfile in read-only mode (mainly for use of  &quot;Open With ...&quot; in explorer)
+        ///
+        ///-o &lt;pakfile&gt;
+        ///Opens pakfile in read/write mode
+        ///
+        ///+c &lt;pakfile&gt;
+        ///Creates/Overwrites a pakfile and opens it in read/write mode
+        ///
+        ///+sfx &lt;modtext|filename&gt;
+        ///Adds the mod installer into the pakfile, this must be the first thing added on a new pakfile to work 
+        ///You can either add a description file in plaintext, or just text itself (inside &quot;double quotes&quot;)
+        ///No custom icon is  [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string cmdhelp {
+            get {
+                return ResourceManager.GetString("cmdhelp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap mod_example_icon {

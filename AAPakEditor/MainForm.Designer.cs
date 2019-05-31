@@ -55,7 +55,6 @@
             this.MMExtra = new System.Windows.Forms.ToolStripMenuItem();
             this.MMExtraMD5 = new System.Windows.Forms.ToolStripMenuItem();
             this.MMExtraExportData = new System.Windows.Forms.ToolStripMenuItem();
-            this.mmExtraShowDeleted = new System.Windows.Forms.ToolStripMenuItem();
             this.MMExtraDebugTest = new System.Windows.Forms.ToolStripMenuItem();
             this.MMExtraMakeMod = new System.Windows.Forms.ToolStripMenuItem();
             this.MMVersion = new System.Windows.Forms.ToolStripMenuItem();
@@ -284,7 +283,6 @@
             this.MMExtra.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.MMExtraMD5,
             this.MMExtraExportData,
-            this.mmExtraShowDeleted,
             this.MMExtraDebugTest,
             this.MMExtraMakeMod});
             this.MMExtra.Name = "MMExtra";
@@ -304,13 +302,6 @@
             this.MMExtraExportData.Size = new System.Drawing.Size(206, 22);
             this.MMExtraExportData.Text = "Export File Data as CSV ...";
             this.MMExtraExportData.Click += new System.EventHandler(this.MMExtraExportData_Click);
-            // 
-            // mmExtraShowDeleted
-            // 
-            this.mmExtraShowDeleted.Name = "mmExtraShowDeleted";
-            this.mmExtraShowDeleted.Size = new System.Drawing.Size(206, 22);
-            this.mmExtraShowDeleted.Text = "Show deleted files";
-            this.mmExtraShowDeleted.Click += new System.EventHandler(this.MmExtraShowDeleted_Click);
             // 
             // MMExtraDebugTest
             // 
@@ -339,14 +330,14 @@
             // MMVersionSourceCode
             // 
             this.MMVersionSourceCode.Name = "MMVersionSourceCode";
-            this.MMVersionSourceCode.Size = new System.Drawing.Size(141, 22);
+            this.MMVersionSourceCode.Size = new System.Drawing.Size(180, 22);
             this.MMVersionSourceCode.Text = "Source Code";
             this.MMVersionSourceCode.Click += new System.EventHandler(this.MMVersionSourceCode_Click);
             // 
             // MMVersionDiscord
             // 
             this.MMVersionDiscord.Name = "MMVersionDiscord";
-            this.MMVersionDiscord.Size = new System.Drawing.Size(141, 22);
+            this.MMVersionDiscord.Size = new System.Drawing.Size(180, 22);
             this.MMVersionDiscord.Text = "Visit Discord";
             this.MMVersionDiscord.Click += new System.EventHandler(this.VisitDiscordToolStripMenuItem_Click);
             // 
@@ -563,6 +554,7 @@
             // 
             // lTypePak
             // 
+            this.lTypePak.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.lTypePak.Location = new System.Drawing.Point(472, 454);
             this.lTypePak.Name = "lTypePak";
             this.lTypePak.Size = new System.Drawing.Size(100, 16);
@@ -657,7 +649,6 @@
         private System.Windows.Forms.ToolStripMenuItem MMExportDB;
         private System.Windows.Forms.ToolStripMenuItem MMVersionDiscord;
         private System.Windows.Forms.ToolStripMenuItem MMExtraMakeMod;
-        private System.Windows.Forms.ToolStripMenuItem mmExtraShowDeleted;
         private System.Windows.Forms.TabPage tpExtraFiles;
         private System.Windows.Forms.ListBox lbExtraFiles;
         private System.Windows.Forms.Label lTypePak;

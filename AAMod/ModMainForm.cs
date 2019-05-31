@@ -172,6 +172,7 @@ namespace AAMod
             Refresh();
             lInstallLocation.Text = "Loading, please wait ...";
             lInstallLocation.Refresh();
+            TryLoadCustomKey(gamepak, GamePakFileName);
             if (gamepak.OpenPak(GamePakFileName, false))
             {
                 lInstallLocation.Text = GamePakFileName;
@@ -467,6 +468,27 @@ namespace AAMod
         {
             if ((e.KeyCode == Keys.V) && (e.Control) && (e.Alt))
                 MessageBox.Show("AAMod Installer " + appVerDate);
+        }
+
+        private void TryLoadCustomKey(AAPak aPak,string pakFileName)
+        {
+            byte[] customKey = new byte[16];
+            string fn;
+
+            // PAK-Header Key
+            fn = Path.GetDirectoryName(pakFileName).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar + "game_pak.key";
+            if (File.Exists(fn))
+            {
+                FileStream fs = new FileStream(fn, FileMode.Open, FileAccess.Read);
+                if (fs.Length != 16)
+                {
+                    fs.Dispose();
+                    return;
+                }
+                fs.Read(customKey, 0, 16);
+                fs.Dispose();
+                aPak._header.SetCustomKey(customKey);
+            }
         }
     }
 }

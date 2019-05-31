@@ -16,12 +16,12 @@ namespace AAPakEditor
     {
         public List<string> addFiles = new List<string>();
         public AAPak mainPak;
-        static string ModFileFolderName = "aamod/";
-        static string SFXInfoFileName = ModFileFolderName + "aamod.exe"; // if present, this needs to be the first file in the pak
-        static string ModInfoFileName = ModFileFolderName + "aamod.txt";
-        static string ModPNGImageFileName = ModFileFolderName + "aamod.png";
-        static string ModJPGImageFileName = ModFileFolderName + "aamod.jpg";
-        static string ModNewFilesFileName = ModFileFolderName + "newfiles.txt";
+        public static string ModFileFolderName = "aamod/";
+        public static string SFXInfoFileName = ModFileFolderName + "aamod.exe"; // if present, this needs to be the first file in the pak
+        public static string ModInfoFileName = ModFileFolderName + "aamod.txt";
+        public static string ModPNGImageFileName = ModFileFolderName + "aamod.png";
+        public static string ModJPGImageFileName = ModFileFolderName + "aamod.jpg";
+        public static string ModNewFilesFileName = ModFileFolderName + "newfiles.txt";
         public string NewCustomImage = string.Empty;
         public bool useOldPNGImage = false;
         public bool useOldJPGImage = false;

@@ -187,6 +187,7 @@
   <ItemGroup>
     <Content Include="aapakeditor_icon.ico" />
     <Content Include="charge_package.ico" />
+    <None Include="Resources\cmdhelp.txt" />
     <None Include="Resources\AAMod.exe" />
     <None Include="res\mod_example.png" />
   </ItemGroup>

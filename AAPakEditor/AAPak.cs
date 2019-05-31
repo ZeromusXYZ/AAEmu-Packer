@@ -54,10 +54,10 @@ namespace AAPakEditor
         public Int64 sizeDuplicate; // maybe compressed data size ? if used
         public Int32 paddingSize; // ??
         public byte[] md5;
-        public Int32 dummy1; // looks like padding, always 0 ?
+        public UInt32 dummy1; // looks like padding, always 0 ?
         public Int64 createTime;
         public Int64 modifyTime;
-        public Int64 dummy2; // looks like padding, always 0 ?
+        public UInt64 dummy2; // looks like padding, always 0 ?
     }
 
     /// <summary>
@@ -190,7 +190,6 @@ namespace AAPakEditor
         /// <returns></returns>
         public bool WriteToFAT()
         {
-            _owner.PakType = PakFileType.PakTypeB;
             // Read all File Table Data into Memory
             FAT.SetLength(0);
 
@@ -401,17 +400,17 @@ namespace AAPakEditor
                     pfi.sizeDuplicate = reader.ReadInt64();
                     pfi.paddingSize = reader.ReadInt32();
                     pfi.md5 = reader.ReadBytes(16);
-                    pfi.dummy1 = reader.ReadInt32(); // This seems to be some kind of flag, observed 0x00000000 for TypeA
+                    pfi.dummy1 = reader.ReadUInt32(); // This seems to be some kind of flag, observed 0x00000000 for TypeA
                     pfi.createTime = reader.ReadInt64();
                     pfi.modifyTime = reader.ReadInt64();
-                    pfi.dummy2 = reader.ReadInt64(); // ???
+                    pfi.dummy2 = reader.ReadUInt64(); // ???
                 }
                 else
                 if (_owner.PakType == PakFileType.PakTypeB)
                 {
                     pfi.paddingSize = reader.ReadInt32();
                     pfi.md5 = reader.ReadBytes(16);
-                    pfi.dummy1 = reader.ReadInt32(); // This seems to be some kind of flag, observed 0x80000000 for TypeB
+                    pfi.dummy1 = reader.ReadUInt32(); // This seems to be some kind of flag, observed 0x80000000 for TypeB
                     pfi.size = reader.ReadInt64();
 
                     // Manually read the string for filename
@@ -429,7 +428,7 @@ namespace AAPakEditor
                     pfi.offset = reader.ReadInt64();
                     pfi.modifyTime = reader.ReadInt64();
                     pfi.createTime = reader.ReadInt64();
-                    pfi.dummy2 = reader.ReadInt64(); // ???
+                    pfi.dummy2 = reader.ReadUInt64(); // ???
                 }
 
                 if (_owner.PakType == PakFileType.PakTypeA)
@@ -469,7 +468,6 @@ namespace AAPakEditor
                 /*
                 if (pfi.name == "bin32/archeage.exe")
                 {
-                    //ByteArrayToHexFile(rawFileData, "fileraw-"+i.ToString()+".hex");
                     ByteArrayToHexFile(decryptedFileData, "file-"+ i.ToString() + ".hex");
                     File.WriteAllBytes("file-" + i.ToString() + ".bin",decryptedFileData);
                 }
@@ -957,6 +955,9 @@ namespace AAPakEditor
             // Recalculate the MD5 hash
             UpdateMD5(pfi); // TODO: optimize this to calculate WHILE we are copying the stream
 
+            if (PakType == PakFileType.PakTypeB)
+                pfi.dummy1 = 0x80000000;
+
             // Mark File Table as dirty
             isDirty = true;
 
@@ -979,7 +980,7 @@ namespace AAPakEditor
                 AAPakFileInfo prevPfi = nullAAPakFileInfo;
                 if (FindFileByOffset(pfi.offset - 1, ref prevPfi))
                 {
-                    // If we have a previous file, expand it's padding are with the free space from this file
+                    // If we have a previous file, expand it's padding area with the free space from this file
                     prevPfi.paddingSize += (int)pfi.size + pfi.paddingSize;
                 }
                 files.Remove(pfi);
@@ -994,6 +995,8 @@ namespace AAPakEditor
                 eFile.sizeDuplicate = eFile.size;
                 eFile.paddingSize = 0 ;
                 eFile.md5 = new byte[16];
+                if (PakType == PakFileType.PakTypeB)
+                    eFile.dummy1 = 0x80000000;
 
                 extraFiles.Add(eFile);
 
@@ -1001,6 +1004,23 @@ namespace AAPakEditor
             }
             isDirty = true;
             return true;
+        }
+
+        public bool DeleteFile(string filename)
+        {
+            if (readOnly)
+                return false;
+
+            AAPakFileInfo pfi = nullAAPakFileInfo;
+            if (GetFileByName(filename, ref pfi))
+            {
+                return DeleteFile(pfi);
+            }
+            else
+            {
+                // Return true if the file didn't exist
+                return true;
+            }
         }
 
         public bool AddAsNewFile(string filename, Stream sourceStream, DateTime CreateTime, DateTime ModifyTime, bool autoSpareSpace, out AAPakFileInfo pfi)
@@ -1022,6 +1042,8 @@ namespace AAPakEditor
             newFile.modifyTime = ModifyTime.ToFileTime();
             newFile.paddingSize = 0;
             newFile.md5 = new byte[16];
+            if (PakType == PakFileType.PakTypeB)
+                newFile.dummy1 = 0x80000000;
 
             // check if we have "unused" space in extraFiles that we can use
             for(int i = 0; i < extraFiles.Count;i++)
@@ -1116,6 +1138,18 @@ namespace AAPakEditor
             {
                 return ReplaceFile(ref pfi, sourceStream, ModifyTime);
             }
+        }
+
+        public bool AddFileFromFile(string sourceFileName, string asFileName, bool autoSpareSpace)
+        {
+            if (!File.Exists(sourceFileName))
+                return false;
+            var createTime = File.GetCreationTime(sourceFileName);
+            var modTime = File.GetLastWriteTime(sourceFileName);
+            var fs = File.OpenRead(sourceFileName);
+            var res = AddFileFromStream(asFileName, fs, createTime, modTime, autoSpareSpace, out _);
+            fs.Dispose();
+            return res;
         }
 
         static public string StreamToString(Stream stream)

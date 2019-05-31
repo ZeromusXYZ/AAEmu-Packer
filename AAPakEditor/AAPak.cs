@@ -186,6 +186,7 @@ namespace AAPakEditor
 
         public bool WriteToFAT()
         {
+            _owner.PakType = PakFileType.PakTypeB;
             // Read all File Table Data into Memory
             FAT.SetLength(0);
 
@@ -194,60 +195,116 @@ namespace AAPakEditor
             BinaryWriter writer = new BinaryWriter(ms);
 
             // Normal Files
-            for (int i = 0; i < _owner.files.Count; i++)
+            var totalFileCount = _owner.files.Count + _owner.extraFiles.Count;
+            var filesToGo = _owner.files.Count;
+            var extrasToGo = _owner.extraFiles.Count;
+            int fileIndex = 0;
+            int extrasIndex = 0;
+            for (int i = 0; i < totalFileCount; i++)
             {
                 ms.Position = 0;
-                AAPakFileInfo pfi = _owner.files[i];
 
-                // Manually write the string for filename
-                for (int c = 0; c < 0x108; c++)
+                AAPakFileInfo pfi = null;
+
+                if (_owner.PakType == PakFileType.PakTypeA)
                 {
-                    byte ch = 0;
-                    if (c < pfi.name.Length)
-                        ch = (byte)pfi.name[c];
-                    writer.Write(ch);
+                    // TypeA has files first, extra files after that
+                    if (filesToGo > 0)
+                    {
+                        filesToGo--;
+                        pfi = _owner.files[fileIndex];
+                        fileIndex++;
+                    }
+                    else
+                    if (extrasToGo > 0)
+                    {
+                        extrasToGo--;
+                        pfi = _owner.extraFiles[extrasIndex];
+                        extrasIndex++;
+                    }
+                    else
+                    {
+                        // If we get here, something went wrong
+                        pfi = null;
+                        break;
+                    }
                 }
-                writer.Write(pfi.offset);
-                writer.Write(pfi.size);
-                writer.Write(pfi.sizeDuplicate);
-                writer.Write(pfi.paddingSize);
-                writer.Write(pfi.md5);
-                writer.Write(pfi.dummy1);
-                writer.Write(pfi.createTime);
-                writer.Write(pfi.modifyTime);
-                writer.Write(pfi.dummy2);
-
-                byte[] decryptedFileData = new byte[bufSize];
-                ms.Position = 0;
-                ms.Read(decryptedFileData, 0, bufSize);
-                byte[] rawFileData = EncryptAES(decryptedFileData, key, true); // encrypt header data
-
-                FAT.Write(rawFileData, 0, bufSize);
-            }
-
-            // "Extra" Files
-            for (int i = 0; i < _owner.extraFiles.Count; i++)
-            {
-                ms.Position = 0;
-                AAPakFileInfo pfi = _owner.extraFiles[i];
-
-                // Manually write the string for filename
-                for (int c = 0; c < 0x108; c++)
+                else
+                if (_owner.PakType == PakFileType.PakTypeB)
                 {
-                    byte ch = 0;
-                    if (c < pfi.name.Length)
-                        ch = (byte)pfi.name[c];
-                    writer.Write(ch);
+                    // TypeA has files first, extra files after that
+                    if (extrasToGo > 0)
+                    {
+                        extrasToGo--;
+                        pfi = _owner.extraFiles[extrasIndex];
+                        extrasIndex++;
+                    }
+                    else
+                    if (filesToGo > 0)
+                    {
+                        filesToGo--;
+                        pfi = _owner.files[fileIndex];
+                        fileIndex++;
+                    }
+                    else
+                    {
+                        // If we get here, something went wrong
+                        pfi = null;
+                        break;
+                    }
                 }
-                writer.Write(pfi.offset);
-                writer.Write(pfi.size);
-                writer.Write(pfi.sizeDuplicate);
-                writer.Write(pfi.paddingSize);
-                writer.Write(pfi.md5);
-                writer.Write(pfi.dummy1);
-                writer.Write(pfi.createTime);
-                writer.Write(pfi.modifyTime);
-                writer.Write(pfi.dummy2);
+                else
+                {
+                    // Nope
+                }
+
+
+                if (_owner.PakType == PakFileType.PakTypeA)
+                {
+                    // Manually write the string for filename
+                    for (int c = 0; c < 0x108; c++)
+                    {
+                        byte ch = 0;
+                        if (c < pfi.name.Length)
+                            ch = (byte)pfi.name[c];
+                        writer.Write(ch);
+                    }
+                    writer.Write(pfi.offset);
+                    writer.Write(pfi.size);
+                    writer.Write(pfi.sizeDuplicate);
+                    writer.Write(pfi.paddingSize);
+                    writer.Write(pfi.md5);
+                    writer.Write(pfi.dummy1);
+                    writer.Write(pfi.createTime);
+                    writer.Write(pfi.modifyTime);
+                    writer.Write(pfi.dummy2);
+                }
+                else
+                if (_owner.PakType == PakFileType.PakTypeB)
+                {
+                    writer.Write(pfi.paddingSize);
+                    writer.Write(pfi.md5);
+                    writer.Write(pfi.dummy1);
+                    writer.Write(pfi.size);
+
+                    // Manually write the string for filename
+                    for (int c = 0; c < 0x108; c++)
+                    {
+                        byte ch = 0;
+                        if (c < pfi.name.Length)
+                            ch = (byte)pfi.name[c];
+                        writer.Write(ch);
+                    }
+                    writer.Write(pfi.sizeDuplicate);
+                    writer.Write(pfi.offset);
+                    writer.Write(pfi.modifyTime);
+                    writer.Write(pfi.createTime);
+                    writer.Write(pfi.dummy2);
+                }
+                else
+                {
+                    // Uhm, what now ?
+                }
 
                 byte[] decryptedFileData = new byte[bufSize];
                 ms.Position = 0;
@@ -300,19 +357,6 @@ namespace AAPakEditor
             next
             print "FileTable offset:   %INFO_OFF|x%"
             */
-            /*
-            long TotalFileInfoSize = (fileCount + extraFileCount) * fileInfoSize;
-            _owner._gpFileStream.Seek(0, SeekOrigin.End);
-            FirstFileInfoOffset = _owner._gpFileStream.Position ;
-
-            // Search for the first file location, it needs to be alligned to a 0x200 size block
-            FirstFileInfoOffset -= headerSize;
-            FirstFileInfoOffset -= TotalFileInfoSize;
-            var dif = FirstFileInfoOffset % 0x200;
-            FirstFileInfoOffset -= dif;
-            */
-
-            //_owner._gpFileStream.Position = FirstFileInfoOffset;
             FAT.Position = 0;
 
             int bufSize = 0x150; // Marshal.SizeOf(typeof(AAPakFileInfo));
@@ -321,7 +365,10 @@ namespace AAPakEditor
             // Main Files
             _owner.files.Clear();
             _owner.extraFiles.Clear();
-            for (uint i = 0; i < fileCount; i++)
+            var totalFileCount = fileCount + extraFileCount;
+            var filesToGo = fileCount;
+            var extraToGo = extraFileCount;
+            for (uint i = 0; i < totalFileCount; i++)
             {
                 byte[] rawFileData = new byte[bufSize]; // decrypted header data
                 FAT.Read(rawFileData, 0, bufSize);
@@ -331,13 +378,10 @@ namespace AAPakEditor
                 ms.SetLength(0);
                 ms.Write(decryptedFileData, 0, bufSize);
                 ms.Position = 0;
-                //BinaryFormatter formatter = new BinaryFormatter);
-                //AAPakFileInfo pfi = (AAPakFileInfo)formatter.Deserialize(_owner._gpFileStream);
                 AAPakFileInfo pfi = new AAPakFileInfo();
-                // Manually read the string for filename
-
                 if (_owner.PakType == PakFileType.PakTypeA)
                 {
+                    // Manually read the string for filename
                     pfi.name = "";
                     for (int c = 0; c < 0x108; c++)
                     {
@@ -353,7 +397,7 @@ namespace AAPakEditor
                     pfi.sizeDuplicate = reader.ReadInt64();
                     pfi.paddingSize = reader.ReadInt32();
                     pfi.md5 = reader.ReadBytes(16);
-                    pfi.dummy1 = reader.ReadInt32(); // ???
+                    pfi.dummy1 = reader.ReadInt32(); // This seems to be some kind of flag, observed 0x00000000 for TypeA
                     pfi.createTime = reader.ReadInt64();
                     pfi.modifyTime = reader.ReadInt64();
                     pfi.dummy2 = reader.ReadInt64(); // ???
@@ -361,18 +405,12 @@ namespace AAPakEditor
                 else
                 if (_owner.PakType == PakFileType.PakTypeB)
                 {
-                    ms.Position = 0x00;
                     pfi.paddingSize = reader.ReadInt32();
-                    ms.Position = 0x04;
                     pfi.md5 = reader.ReadBytes(16);
-
-                    ms.Position = 0x14;
-                    pfi.dummy1 = reader.ReadInt32(); // ???
-
-                    ms.Position = 0x18;
+                    pfi.dummy1 = reader.ReadInt32(); // This seems to be some kind of flag, observed 0x80000000 for TypeB
                     pfi.size = reader.ReadInt64();
 
-                    ms.Position = 0x20;
+                    // Manually read the string for filename
                     pfi.name = "";
                     for (int c = 0; c < 0x108; c++)
                     {
@@ -384,175 +422,64 @@ namespace AAPakEditor
                     }
                     ms.Position = 0x128;
                     pfi.sizeDuplicate = reader.ReadInt64();
-
                     pfi.offset = reader.ReadInt64();
                     pfi.modifyTime = reader.ReadInt64();
                     pfi.createTime = reader.ReadInt64();
-
                     pfi.dummy2 = reader.ReadInt64(); // ???
                 }
 
-                _owner.files.Add(pfi);
+                if (_owner.PakType == PakFileType.PakTypeA)
+                {
+                    // TypeA has files first and extra files last
+                    if (filesToGo > 0)
+                    {
+                        filesToGo--;
+                        _owner.files.Add(pfi);
+                    }
+                    else
+                    if (extraToGo > 0)
+                    {
+                        // "Extra" Files. It looks like these are old deleted files renamed to "__unused__"
+                        // There might be more to these, but can't be sure at this moment, looks like they are 512 byte blocks on my paks
+                        extraToGo--;
+                        _owner.extraFiles.Add(pfi);
+                    }
+                }
+                else
+                if (_owner.PakType == PakFileType.PakTypeB)
+                {
+                    // TypeB has extra files first and normal files last
+                    if (extraToGo > 0)
+                    {
+                        extraToGo--;
+                        _owner.extraFiles.Add(pfi);
+                    }
+                    else
+                    if (filesToGo > 0)
+                    {
+                        filesToGo--;
+                        _owner.files.Add(pfi);
+                    }
+                }
 
+                /*
                 if (pfi.name == "bin32/archeage.exe")
                 {
                     //ByteArrayToHexFile(rawFileData, "fileraw-"+i.ToString()+".hex");
                     ByteArrayToHexFile(decryptedFileData, "file-"+ i.ToString() + ".hex");
                     File.WriteAllBytes("file-" + i.ToString() + ".bin",decryptedFileData);
                 }
-
-
-                if ((pfi.offset + pfi.size + pfi.paddingSize) > AddFileOffset)
-                {
-                    AddFileOffset = pfi.offset + pfi.size + pfi.paddingSize;
-                }
-            }
-
-            // "Extra" Files. It looks like these are old deleted files renamed to "__unused__"
-            // There might be more to these, but can't be sure at this moment, looks like they are 512 byte blocks on my paks
-            for (uint i = 0; i < extraFileCount; i++)
-            {
-                byte[] rawFileData = new byte[bufSize]; // decrypted header data
-                FAT.Read(rawFileData, 0, bufSize);
-                byte[] decryptedFileData = EncryptAES(rawFileData, key, false);
-                ms.SetLength(0);
-                ms.Write(decryptedFileData, 0, bufSize);
-                ms.Position = 0;
-                //BinaryFormatter formatter = new BinaryFormatter);
-                //AAPakFileInfo pfi = (AAPakFileInfo)formatter.Deserialize(_owner._gpFileStream);
-                AAPakFileInfo pfi = new AAPakFileInfo();
-                // Manually read the string for filename
-                pfi.name = "";
-                for (int c = 0; c < 0x108; c++)
-                {
-                    byte ch = reader.ReadByte();
-                    if (ch != 0)
-                        pfi.name += (char)ch;
-                    else
-                        break;
-                }
-                ms.Position = 0x108;
-                pfi.offset = reader.ReadInt64();
-                pfi.size = reader.ReadInt64();
-                pfi.sizeDuplicate = reader.ReadInt64();
-                pfi.paddingSize = reader.ReadInt32();
-                pfi.md5 = reader.ReadBytes(16);
-                pfi.dummy1 = reader.ReadInt32(); // ???
-                pfi.createTime = reader.ReadInt64();
-                pfi.modifyTime = reader.ReadInt64();
-                pfi.dummy2 = reader.ReadInt64(); // ???
-
-                _owner.extraFiles.Add(pfi);
+                */
 
                 if ((pfi.offset + pfi.size + pfi.paddingSize) > AddFileOffset)
                 {
                     AddFileOffset = pfi.offset + pfi.size + pfi.paddingSize;
                 }
             }
+
             ms.Dispose();
         }
 
-        /// <summary>
-        /// Encrypt and Write the File Details Table
-        /// </summary>
-        public void WriteFileTable()
-        {
-            long TotalFileInfoSize = (fileCount + extraFileCount) * fileInfoSize;
-            
-            // Check if we are alligned to a block, this should normally already be done when adding files, but let's make sure we are correct
-            var dif = FirstFileInfoOffset % 0x200;
-            if (dif > 0)
-            {
-                // If not, align to the next block offset
-                FirstFileInfoOffset += (0x200 - dif);
-            }
-
-            /*
-            fatHeaderOffset = FirstFileInfoOffset + TotalFileInfoSize ;
-            dif = (fatHeaderOffset % 0x200);
-            if (dif > 0)
-            {
-                fatHeaderOffset = (0x200 - dif);
-            }
-            */
-
-            _owner._gpFileStream.Position = FirstFileInfoOffset; // Move stream to location
-
-            int bufSize = 0x150; // Marshal.SizeOf(typeof(AAPakFileInfo));
-            MemoryStream ms = new MemoryStream(bufSize); // Could probably do without the intermediate memorystream, but it's easier to process
-            BinaryWriter writer = new BinaryWriter(ms);
-
-            // Normal Files
-            for (int i = 0; i < _owner.files.Count; i++)
-            {
-                ms.Position = 0;
-                AAPakFileInfo pfi = _owner.files[i];
-
-                // Manually write the string for filename
-                for (int c = 0; c < 0x108; c++)
-                {
-                    byte ch = 0;
-                    if (c < pfi.name.Length)
-                        ch = (byte)pfi.name[c];
-                    writer.Write(ch);
-                }
-                writer.Write(pfi.offset);
-                writer.Write(pfi.size);
-                writer.Write(pfi.sizeDuplicate);
-                writer.Write(pfi.paddingSize);
-                writer.Write(pfi.md5);
-                writer.Write(pfi.dummy1);
-                writer.Write(pfi.createTime);
-                writer.Write(pfi.modifyTime);
-                writer.Write(pfi.dummy2);
-
-                byte[] decryptedFileData = new byte[bufSize]; 
-                ms.Position = 0;
-                ms.Read(decryptedFileData, 0, bufSize);
-                byte[] rawFileData = EncryptAES(decryptedFileData, key, true); // encrypt header data
-
-                _owner._gpFileStream.Write(rawFileData, 0, bufSize);
-            }
-
-            // "Extra" Files
-            for (int i = 0; i < _owner.extraFiles.Count; i++)
-            {
-                ms.Position = 0;
-                AAPakFileInfo pfi = _owner.extraFiles[i];
-
-                // Manually write the string for filename
-                for (int c = 0; c < 0x108; c++)
-                {
-                    byte ch = 0;
-                    if (c < pfi.name.Length)
-                        ch = (byte)pfi.name[c];
-                    writer.Write(ch);
-                }
-                writer.Write(pfi.offset);
-                writer.Write(pfi.size);
-                writer.Write(pfi.sizeDuplicate);
-                writer.Write(pfi.paddingSize);
-                writer.Write(pfi.md5);
-                writer.Write(pfi.dummy1);
-                writer.Write(pfi.createTime);
-                writer.Write(pfi.modifyTime);
-                writer.Write(pfi.dummy2);
-
-                byte[] decryptedFileData = new byte[bufSize];
-                ms.Position = 0;
-                ms.Read(decryptedFileData, 0, bufSize);
-                byte[] rawFileData = EncryptAES(decryptedFileData, key, true); // encrypt header data
-
-                _owner._gpFileStream.Write(rawFileData, 0, bufSize);
-            }
-
-            ms.Dispose();
-
-            fileCount = (uint)_owner.files.Count;
-            extraFileCount = (uint)_owner.extraFiles.Count;
-
-            _owner._gpFileStream.Position = FirstFileInfoOffset;
-        }
 
         private void ByteArrayToHexFile(byte[] bytes,string fileName)
         {
@@ -579,48 +506,6 @@ namespace AAPakEditor
         public void DecryptHeaderData()
         {
             data = EncryptAES(rawData, key, false);
-            /*
-            File.WriteAllBytes("nstep0", rawData);
-            ByteArrayToHexFile(rawData, "nstep0.hex");
-            File.WriteAllBytes("nstep1", data);
-            ByteArrayToHexFile(data, "nstep1.hex");
-            ByteArrayToHexFile(key, "nkey.hex");
-            */
-
-            //byte[] TestKey1 = new byte[] { 0x6F, 0xF6, 0x6A, 0xB5, 0x11, 0xC0, 0x42, 0x69, 0xEA, 0x96, 0x97, 0x9D, 0x51, 0x82, 0x98, 0x14 };
-            //data = EncryptAES(rawData, TestKey1, false);
-            /*
-            byte[] XORKey = new byte[] { 0x6F, 0xF6, 0x6A, 0xB5, 0x11, 0xC0, 0x42, 0x69, 0xEA, 0x96, 0x97, 0x9D, 0x51, 0x82, 0x98, 0x14 };
-
-            byte[] dataXOR = new byte[rawData.Length];
-            for (int i = 0; i < rawData.Length; i++)
-            {
-                dataXOR[i] = (byte)(rawData[i] ^ XORKey[i % 16]);
-            }
-            data = EncryptAESUsingIV(rawData, Test, TestKey1, false);
-            */
-
-            /*
-            //var data2 = EncryptAES(rawData, TestKey1, false);
-            data = EncryptAES(rawData, TestKey3, false);
-            byte[] XORKey = new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-            for (int i = 0; i < TestKey1.Length; i++)
-            {
-                data[i] = (byte)(data[i] ^ TestKey2[i % 16]);
-            }
-            */
-            /*
-            var data2 = EncryptAES(rawData, TestKey1, false);
-            data = EncryptAES(data2, TestKey2, false);
-            File.WriteAllBytes("step0", rawData);
-            ByteArrayToHexFile(rawData, "step0.hex");
-            File.WriteAllBytes("step1", data2);
-            ByteArrayToHexFile(data2, "step1.hex");
-            File.WriteAllBytes("step2", data);
-            ByteArrayToHexFile(data, "step2.hex");
-            ByteArrayToHexFile(TestKey1, "key1.hex");
-            ByteArrayToHexFile(TestKey2, "key2.hex");
-            */
 
             // A valid header/footer starts with "WIBO" after decryption
             if ((data[0] == 'W') && (data[1] == 'I') && (data[2] == 'B') && (data[3] == 'O'))
@@ -658,14 +543,30 @@ namespace AAPakEditor
             ms.Write(data, 0, headerSize);
             ms.Position = 0;
             BinaryWriter writer = new BinaryWriter(ms);
-            writer.Write((byte)'W');
-            writer.Write((byte)'I');
-            writer.Write((byte)'B');
-            writer.Write((byte)'O');
-            writer.Seek(8, SeekOrigin.Begin);
-            writer.Write(fileCount);
-            writer.Seek(12, SeekOrigin.Begin);
-            writer.Write(extraFileCount);
+
+            if (_owner.PakType == PakFileType.PakTypeA)
+            {
+                writer.Write((byte)'W');
+                writer.Write((byte)'I');
+                writer.Write((byte)'B');
+                writer.Write((byte)'O');
+                writer.Seek(8, SeekOrigin.Begin);
+                writer.Write(fileCount);
+                writer.Seek(12, SeekOrigin.Begin);
+                writer.Write(extraFileCount);
+            }
+            else
+            if (_owner.PakType == PakFileType.PakTypeB)
+            {
+                writer.Write(extraFileCount);
+                writer.Seek(8, SeekOrigin.Begin);
+                writer.Write((byte)'I');
+                writer.Write((byte)'D');
+                writer.Write((byte)'E');
+                writer.Write((byte)'J');
+                writer.Seek(12, SeekOrigin.Begin);
+                writer.Write(fileCount);
+            }
 
             ms.Position = 0;
             ms.Read(data, 0, headerSize);
@@ -860,8 +761,7 @@ namespace AAPakEditor
             if (_header.isValid)
             {
                 // Only allow editing for TypeA
-                if (PakType != PakFileType.PakTypeA)
-                    readOnly = true;
+                // if (PakType != PakFileType.PakTypeA) readOnly = true;
                 _header.LoadRawFAT();
                 _header.ReadFileTable();
             }

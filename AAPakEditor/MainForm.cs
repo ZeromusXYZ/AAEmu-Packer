@@ -132,6 +132,7 @@ namespace AAPakEditor
             lbFolders.Items.Clear();
             lbFiles.Items.Clear();
             tvFolders.Nodes.Clear();
+            lbExtraFiles.Items.Clear();
             TreeNode rootNode = tvFolders.Nodes.Add("", "root");
             TreeNode foundNode = null;
             var c = 0;
@@ -186,6 +187,10 @@ namespace AAPakEditor
             }
             rootNode.Expand();
             lFileCount.Text = pak.files.Count.ToString() + " files in " + pak.folders.Count.ToString() + " folders";
+            foreach(var pfi in pak.extraFiles)
+            {
+                lbExtraFiles.Items.Add(pfi.name);
+            }
             UpdateMM();
         }
 
@@ -229,6 +234,7 @@ namespace AAPakEditor
 
         private void LoadPakFile(string filename, bool openAsReadOnly)
         {
+            lTypePak.Text = string.Empty;
             if (pak == null)
             {
                 pak = new AAPak("",true);
@@ -285,6 +291,7 @@ namespace AAPakEditor
                         "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }
+            lTypePak.Text = pak.PakType.ToString();
 
         }
 
@@ -297,6 +304,51 @@ namespace AAPakEditor
             var d = (sender as ListBox).SelectedItem.ToString();
             PopulateFilesList(d);
             UpdateMM();
+        }
+
+        private void ShowFileInfo(AAPakFileInfo pfi,int index)
+        {
+            if (pfi != null)
+            {
+                if (index >= 0)
+                {
+                    lfiName.Text = pfi.name + " @index: " + index.ToString();
+                }
+                else
+                {
+                    lfiName.Text = pfi.name;
+                }
+                lfiSize.Text = "Size: " + pfi.size.ToString() + " byte(s)";
+                if (pfi.paddingSize > 0)
+                    lfiSize.Text += "  + " + pfi.paddingSize + " padding";
+
+                if (pfi.sizeDuplicate != pfi.size)
+                    lfiSize.Text += "  size mismatch " + pfi.sizeDuplicate + " byte(s)";
+
+                var h = BitConverter.ToString(pfi.md5).ToUpper().Replace("-", "");
+                if (h == pak._header.nullHashString)
+                {
+                    lfiHash.Text = "MD5: Invalid or not calculated !";
+                }
+                else
+                {
+                    lfiHash.Text = "MD5: " + BitConverter.ToString(pfi.md5).ToUpper().Replace("-", "");
+                }
+                lfiCreateTime.Text = "Created: " + DateTime.FromFileTime(pfi.createTime).ToString();
+                lfiModifyTime.Text = "Modified: " + DateTime.FromFileTime(pfi.modifyTime).ToString();
+                lfiStartOffset.Text = "Start Offset: 0x" + pfi.offset.ToString("X16");
+                lfiExtras.Text = "D1 0x" + pfi.dummy1.ToString("X") + "  D2 0x" + pfi.dummy2.ToString("X");
+            }
+            else
+            {
+                lfiName.Text = "<no file selected>";
+                lfiSize.Text = "";
+                lfiHash.Text = "";
+                lfiCreateTime.Text = "";
+                lfiModifyTime.Text = "";
+                lfiStartOffset.Text = "";
+                lfiExtras.Text = "";
+            }
         }
 
         private void lbFiles_SelectedIndexChanged(object sender, EventArgs e)
@@ -318,24 +370,7 @@ namespace AAPakEditor
             //if (pfi.name != "")
             if (pak.GetFileByName(d, ref pfi))
             {
-                lfiName.Text = pfi.name;
-                lfiSize.Text = "Size: " + pfi.size.ToString() + " byte(s)";
-                if (pfi.paddingSize > 0)
-                    lfiSize.Text += "  + " + pfi.paddingSize + " padding";
-
-                var h = BitConverter.ToString(pfi.md5).ToUpper().Replace("-", "");
-                if (h == pak._header.nullHashString)
-                {
-                    lfiHash.Text = "MD5: Invalid or not calculated !";
-                }
-                else
-                {
-                    lfiHash.Text = "MD5: " + BitConverter.ToString(pfi.md5).ToUpper().Replace("-", "");
-                }
-                lfiCreateTime.Text = "Created: " + DateTime.FromFileTime(pfi.createTime).ToString();
-                lfiModifyTime.Text = "Modified: " + DateTime.FromFileTime(pfi.modifyTime).ToString();
-                lfiStartOffset.Text = "Start Offset: 0x" + pfi.offset.ToString("X16");
-                lfiExtras.Text = "D1 0x" + pfi.dummy1.ToString("X") + "  D2 0x" + pfi.dummy2.ToString("X");
+                ShowFileInfo(pfi,-1);
             }
 
             UpdateMM();
@@ -963,6 +998,37 @@ namespace AAPakEditor
                     LoadPakFile(arg, true);
                 }
             }
+        }
+
+        private void MmExtraShowDeleted_Click(object sender, EventArgs e)
+        {
+            if ((pak == null) || (!pak.isOpen))
+                return;
+
+            UpdateMM();
+
+            lbFiles.Items.Clear();
+            foreach (var pfi in pak.extraFiles)
+            {
+                lbFiles.Items.Add(pfi.name);
+            }
+            lFiles.Text = pak.extraFiles.Count.ToString() + " extra files";
+        }
+
+        private void LbExtraFiles_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if ((pak == null) || (!pak.isOpen))
+                return;
+
+            lbFiles.Items.Clear();
+            lFiles.Text = "";
+            var d = (sender as ListBox).SelectedIndex;
+            if ((d >= 0) && (d < pak.extraFiles.Count))
+            {
+                ShowFileInfo(pak.extraFiles[d],d);
+                
+            }
+            UpdateMM();
         }
     }
 }

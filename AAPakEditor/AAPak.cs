@@ -100,6 +100,14 @@ namespace AAPakEditor
         }
 
         /// <summary>
+        /// Reverts back to the original encryption key, this function is also automatically called when closing a file
+        /// </summary>
+        public void SetDefaultKey()
+        {
+            XLGamesKey.CopyTo(key, 0);
+        }
+
+        /// <summary>
         /// Encrypts or Decrypts a byte array using AES128 CBC - 
         /// SourceCode: https://stackoverflow.com/questions/44782910/aes128-decryption-in-c-sharp
         /// </summary>
@@ -119,7 +127,7 @@ namespace AAPakEditor
 
                 ICryptoTransform cipher;
 
-                if (doEncryption == true)
+                if (doEncryption)
                     cipher = aes.CreateEncryptor();
                 else
                     cipher = aes.CreateDecryptor();
@@ -129,6 +137,36 @@ namespace AAPakEditor
             catch (Exception)
             {
                 return null;
+            }
+        }
+
+        public static bool EncryptStreamAES(Stream source, Stream target, byte[] key, bool doEncryption)
+        {
+            try
+            {
+                Aes aes = new AesManaged();
+                aes.Key = key;
+                aes.IV = new byte[16];
+                aes.Mode = CipherMode.CBC;
+                aes.Padding = PaddingMode.None;
+
+                ICryptoTransform cipher;
+
+                if (doEncryption)
+                    cipher = aes.CreateEncryptor();
+                else
+                    cipher = aes.CreateDecryptor();
+
+                // Create the streams used for encryption.
+                using (CryptoStream csEncrypt = new CryptoStream(target, cipher, CryptoStreamMode.Write))
+                {
+                    source.CopyTo(csEncrypt);
+                }
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
             }
         }
 
@@ -218,7 +256,7 @@ namespace AAPakEditor
 
                 AAPakFileInfo pfi = null;
 
-                if (_owner.PakType == PakFileType.PakTypeA)
+                if (_owner.PakType == PakFileType.TypeA)
                 {
                     // TypeA has files first, extra files after that
                     if (filesToGo > 0)
@@ -242,7 +280,7 @@ namespace AAPakEditor
                     }
                 }
                 else
-                if (_owner.PakType == PakFileType.PakTypeB)
+                if (_owner.PakType == PakFileType.TypeB)
                 {
                     // TypeA has files first, extra files after that
                     if (extrasToGo > 0)
@@ -270,7 +308,7 @@ namespace AAPakEditor
                     // Unsupported Type somehow
                 }
 
-                if (_owner.PakType == PakFileType.PakTypeA)
+                if (_owner.PakType == PakFileType.TypeA)
                 {
                     // Manually write the string for filename
                     for (int c = 0; c < 0x108; c++)
@@ -291,7 +329,7 @@ namespace AAPakEditor
                     writer.Write(pfi.dummy2);
                 }
                 else
-                if (_owner.PakType == PakFileType.PakTypeB)
+                if (_owner.PakType == PakFileType.TypeB)
                 {
                     writer.Write(pfi.paddingSize);
                     writer.Write(pfi.md5);
@@ -377,7 +415,7 @@ namespace AAPakEditor
                 ms.Write(decryptedFileData, 0, bufSize);
                 ms.Position = 0;
                 AAPakFileInfo pfi = new AAPakFileInfo();
-                if (_owner.PakType == PakFileType.PakTypeA)
+                if (_owner.PakType == PakFileType.TypeA)
                 {
                     // Manually read the string for filename
                     pfi.name = "";
@@ -401,7 +439,7 @@ namespace AAPakEditor
                     pfi.dummy2 = reader.ReadUInt64(); // unused ?
                 }
                 else
-                if (_owner.PakType == PakFileType.PakTypeB)
+                if (_owner.PakType == PakFileType.TypeB)
                 {
                     pfi.paddingSize = reader.ReadInt32();
                     pfi.md5 = reader.ReadBytes(16);
@@ -425,7 +463,7 @@ namespace AAPakEditor
                     pfi.dummy2 = reader.ReadUInt64(); // unused ?
                 }
 
-                if (_owner.PakType == PakFileType.PakTypeA)
+                if (_owner.PakType == PakFileType.TypeA)
                 {
                     // TypeA has files first and extra files last
                     if (filesToGo > 0)
@@ -443,7 +481,7 @@ namespace AAPakEditor
                     }
                 }
                 else
-                if (_owner.PakType == PakFileType.PakTypeB)
+                if (_owner.PakType == PakFileType.TypeB)
                 {
                     // TypeB has extra files first and normal files last
                     if (extraToGo > 0)
@@ -518,7 +556,7 @@ namespace AAPakEditor
             if ((data[0] == 'W') && (data[1] == 'I') && (data[2] == 'B') && (data[3] == 'O'))
             {
                 // W I B O = 0x57 0x49 0x42 0x4F
-                _owner.PakType = PakFileType.PakTypeA;
+                _owner.PakType = PakFileType.TypeA;
                 fileCount = BitConverter.ToUInt32(data, 8);
                 extraFileCount = BitConverter.ToUInt32(data, 12);
                 isValid = true;
@@ -527,7 +565,7 @@ namespace AAPakEditor
             if ((data[8] == 'I') && (data[9] == 'D') && (data[10] == 'E') && (data[11] == 'J'))
             {
                 // I D E J = 0x49 0x44 0x45 0x4A
-                _owner.PakType = PakFileType.PakTypeB;
+                _owner.PakType = PakFileType.TypeB;
                 fileCount = BitConverter.ToUInt32(data, 12);
                 extraFileCount = BitConverter.ToUInt32(data, 0);
                 isValid = true;
@@ -552,7 +590,7 @@ namespace AAPakEditor
             ms.Position = 0;
             BinaryWriter writer = new BinaryWriter(ms);
 
-            if (_owner.PakType == PakFileType.PakTypeA)
+            if (_owner.PakType == PakFileType.TypeA)
             {
                 writer.Write((byte)'W');
                 writer.Write((byte)'I');
@@ -564,7 +602,7 @@ namespace AAPakEditor
                 writer.Write(extraFileCount);
             }
             else
-            if (_owner.PakType == PakFileType.PakTypeB)
+            if (_owner.PakType == PakFileType.TypeB)
             {
                 writer.Write(extraFileCount);
                 writer.Seek(8, SeekOrigin.Begin);
@@ -589,7 +627,7 @@ namespace AAPakEditor
 
     }
 
-    public enum PakFileType { PakTypeA, PakTypeB };
+    public enum PakFileType { TypeA, TypeB };
 
     /// <summary>
     /// AAPak Class used to handle game_pak from ArcheAge
@@ -636,7 +674,7 @@ namespace AAPakEditor
         /// Should only need to be changed if you are writing your own specialized patcher, and only in special cases
         /// </summary>
         public bool paddingDeleteMode = false;
-        public PakFileType PakType = PakFileType.PakTypeA ;
+        public PakFileType PakType = PakFileType.TypeA ;
 
         /// <summary>
         /// Creates and/or opens a game_pak file
@@ -767,6 +805,7 @@ namespace AAPakEditor
             _gpFileStream = null;
             _gpFilePath = null;
             isOpen = false;
+            _header.SetDefaultKey();
         }
 
         /// <summary>
@@ -1016,7 +1055,7 @@ namespace AAPakEditor
             UpdateMD5(pfi); // TODO: optimize this to calculate WHILE we are copying the stream
             pfi.modifyTime = modifyTime.ToFileTime();
 
-            if (PakType == PakFileType.PakTypeB)
+            if (PakType == PakFileType.TypeB)
                 pfi.dummy1 = 0x80000000;
 
             // Mark File Table as dirty
@@ -1056,7 +1095,7 @@ namespace AAPakEditor
                 eFile.sizeDuplicate = eFile.size;
                 eFile.paddingSize = 0 ;
                 eFile.md5 = new byte[16];
-                if (PakType == PakFileType.PakTypeB)
+                if (PakType == PakFileType.TypeB)
                     eFile.dummy1 = 0x80000000;
 
                 extraFiles.Add(eFile);
@@ -1118,7 +1157,7 @@ namespace AAPakEditor
             newFile.modifyTime = ModifyTime.ToFileTime();
             newFile.paddingSize = 0;
             newFile.md5 = new byte[16];
-            if (PakType == PakFileType.PakTypeB)
+            if (PakType == PakFileType.TypeB)
                 newFile.dummy1 = 0x80000000;
 
             // check if we have "unused" space in extraFiles that we can use

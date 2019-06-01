@@ -45,7 +45,7 @@ namespace AAPakEditor
             MMExportSelectedFile.Enabled = (pak != null) && (pak.isOpen) && (lbFiles.SelectedIndex >= 0);
             MMExportSelectedFolder.Enabled = (pak != null) && (pak.isOpen) && (currentFileViewFolder != "");
             MMExportAll.Enabled = (pak != null) && (pak.isOpen);
-            MMExportDB.Enabled = (pak != null) && (pak.isOpen) && (lbFiles.SelectedIndex >= 0) && (useDBKey) && (Path.GetExtension(lbFiles.SelectedItem.ToString()) == ".sqlite3");
+            MMExportDB.Enabled = (pak != null) && (pak.isOpen) && (lbFiles.SelectedIndex >= 0) && (useDBKey) && (Path.GetExtension(lbFiles.SelectedItem.ToString()).StartsWith(".sql"));
             MMExportDB.Visible = (pak != null) && (pak.isOpen) && (useDBKey);
             MMExportS2.Visible = MMExportDB.Visible;
             MMExport.Visible = (pak != null) && (pak.isOpen);
@@ -106,7 +106,7 @@ namespace AAPakEditor
                 v += "." + AppVer.MinorRevision.ToString();
             MMVersion.Text = v ;
             UpdateMM();
-            // LoadPakFile("C:\\ArcheAge\\Working\\game_pak");
+            ShowFileInfo(null, 0);
         }
 
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
@@ -232,7 +232,7 @@ namespace AAPakEditor
             }
         }
 
-        private void LoadPakFile(string filename, bool openAsReadOnly, bool showWriteWarning = true)
+        private void LoadPakFile(string filename, bool openAsReadOnly, bool showWriteWarning = true, bool quickLoad = false)
         {
             lTypePak.Text = string.Empty;
             if (pak == null)
@@ -273,7 +273,8 @@ namespace AAPakEditor
             {
                 Text = baseTitle + " - " + pak._gpFilePath;
 
-                GenerateFolderViews();
+                if (!quickLoad)
+                    GenerateFolderViews();
 
                 // Only show this waring if this is not a new pak file
                 if ((openAsReadOnly == false) && (pak.files.Count > 0) && (showWriteWarning))
@@ -284,14 +285,25 @@ namespace AAPakEditor
                         "This program comes with absolutly NO warranty.\r\n" +
                         "It is possible that this program will inreversably damage your game files while editing.\r\n" +
                         "Please be sure that you have a backup available of the pak file you are editing.\r\n" +
-                        "That being said, I did my best as to avoid possible damage (other than oderered by the user) caused by malfunctions.\r\n" +
+                        "That being said, I did my best as to avoid possible damage (other than odered by the user) caused by malfunctions.\r\n" +
+                        "\r\n" +
+                        "Also, I am in no way responsible for possible damage to the game or the account you will be playing as.\r\n" +
+                        "There are systems in place on the live servers to check the validity of the game files. \r\n" +
+                        "Please consider that chaning files as you can potentially get your account banned !\r\n" +
                         "\r\n" +
                         "Enjoy, and edit responsibly.\r\n" +
                         "~ ZeromusXYZ",
                         "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }
-            lTypePak.Text = pak.PakType.ToString();
+            if (pak.PakType != PakFileType.TypeA)
+            {
+                lTypePak.Text = pak.PakType.ToString();
+            }
+            else
+            {
+                lTypePak.Text = string.Empty ;
+            }
 
         }
 
@@ -325,10 +337,11 @@ namespace AAPakEditor
                 if (pfi.sizeDuplicate != pfi.size)
                     lfiSize.Text += "  size mismatch " + pfi.sizeDuplicate + " byte(s)";
 
-                var h = BitConverter.ToString(pfi.md5).ToUpper().Replace("-", "");
-                if (h == pak._header.nullHashString)
+                //var h = BitConverter.ToString(pfi.md5).ToUpper().Replace("-", "");
+                //if (h == pak._header.nullHashString)
+                if (Array.Equals(pfi.md5, AAPakFileHeader.nullHash))
                 {
-                    lfiHash.Text = "MD5: Invalid or not calculated !";
+                        lfiHash.Text = "MD5: Invalid or not calculated !";
                 }
                 else
                 {
@@ -830,6 +843,7 @@ namespace AAPakEditor
             Cursor.Current = Cursors.Default;
             Application.UseWaitCursor = false;
             UpdateMM();
+            ShowFileInfo(null, 0);
         }
 
         private void MMFileNew_Click(object sender, EventArgs e)
@@ -945,31 +959,25 @@ namespace AAPakEditor
                 return;
 
             var pf = pak.ExportFileAsStream(d);
-            MemoryStream ms = new MemoryStream();
-            pf.CopyTo(ms);
-            pf.Dispose();
-
-            ms.Position = 0;
-            
 
             FileStream fs = new FileStream(exportFileDialog.FileName, FileMode.Create);
-            while (ms.Position < ms.Length)
+            try
             {
-                var rest = (int)(ms.Length - ms.Position);
-                // reading blocks doesn't end to well, comment for now :p
-                /*
-                if (rest > 4096)
-                    rest = 4096;
-                */
-                byte[] buf = new byte[rest];
-                byte[] decBuf = new byte[rest];
-                ms.Read(buf, 0, rest);
-                decBuf = AAPakFileHeader.EncryptAES(buf, dbKey, false);
-                fs.Write(decBuf, 0, decBuf.Length);
+                if (AAPakFileHeader.EncryptStreamAES(pf,fs,dbKey,false))
+                {
+                    MessageBox.Show("ExportDB: Done");
+                }
+                else
+                {
+                    MessageBox.Show("Decryption failed");
+                }
+            }
+            catch (Exception x)
+            {
+                MessageBox.Show("Exception: " + x.Message);
             }
             fs.Dispose();
-            ms.Dispose();
-            MessageBox.Show("Debug: Done");
+            // ms.Dispose();
             UpdateMM();
         }
 
@@ -1037,12 +1045,12 @@ namespace AAPakEditor
                 if (i + 2 < args.Length)
                     arg2 = args[i + 2];
 
-                if (arg == "-o")
+                if ((arg == "-o") || (arg == "+o"))
                 {
                     i++; // take one arg
                     if (pak != null)
                         pak.ClosePak();
-                    LoadPakFile(arg1, false, false);
+                    LoadPakFile(arg1, false, false,true);
                     if ((pak == null) || (!pak.isOpen))
                     {
                         cmdErrors += "Failed to open for r/w: " + arg1 + "\r\n";
@@ -1065,7 +1073,7 @@ namespace AAPakEditor
                     }
                     pak.ClosePak();
                     // Re-open it in read/write mode
-                    LoadPakFile(arg1, false);
+                    LoadPakFile(arg1, false, false, true);
 
                     if ((pak == null) || (!pak.isOpen))
                     {
@@ -1151,7 +1159,7 @@ namespace AAPakEditor
                 }
                 else
 
-                if (arg == "-s")
+                if ((arg == "-s") || (arg == "+s"))
                 {
                     if ((pak == null) || (!pak.isOpen) || (pak.readOnly))
                     {
@@ -1209,7 +1217,7 @@ namespace AAPakEditor
                 }
                 else
 
-                if (arg == "-m")
+                if ((arg == "-m") || (arg == "+m"))
                 {
                     i++;
                     MessageBox.Show(arg1, "Command-Line Message", MessageBoxButtons.OK, MessageBoxIcon.Stop);
@@ -1242,7 +1250,7 @@ namespace AAPakEditor
                     // Open file in read-only mode if nothing is specified and it's a valid filename
                     if (pak != null)
                         pak.ClosePak();
-                    LoadPakFile(arg, true);
+                    LoadPakFile(arg, true, true, true);
                     if ((pak == null) || (!pak.isOpen))
                     {
                         cmdErrors += "Failed to open: " + arg + "\r\n";

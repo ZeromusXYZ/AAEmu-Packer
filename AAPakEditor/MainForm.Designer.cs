@@ -241,7 +241,7 @@
             // 
             this.MMExportSelectedFile.Name = "MMExportSelectedFile";
             this.MMExportSelectedFile.ShortcutKeys = System.Windows.Forms.Keys.F5;
-            this.MMExportSelectedFile.Size = new System.Drawing.Size(160, 22);
+            this.MMExportSelectedFile.Size = new System.Drawing.Size(180, 22);
             this.MMExportSelectedFile.Text = "Selected &File";
             this.MMExportSelectedFile.Click += new System.EventHandler(this.MMExportSelectedFile_Click);
             // 
@@ -249,32 +249,32 @@
             // 
             this.MMExportSelectedFolder.Enabled = false;
             this.MMExportSelectedFolder.Name = "MMExportSelectedFolder";
-            this.MMExportSelectedFolder.Size = new System.Drawing.Size(160, 22);
+            this.MMExportSelectedFolder.Size = new System.Drawing.Size(180, 22);
             this.MMExportSelectedFolder.Text = "Selected F&older";
             this.MMExportSelectedFolder.Click += new System.EventHandler(this.MMExportSelectedFolder_Click);
             // 
             // MMExportS1
             // 
             this.MMExportS1.Name = "MMExportS1";
-            this.MMExportS1.Size = new System.Drawing.Size(157, 6);
+            this.MMExportS1.Size = new System.Drawing.Size(177, 6);
             // 
             // MMExportAll
             // 
             this.MMExportAll.Name = "MMExportAll";
             this.MMExportAll.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F5)));
-            this.MMExportAll.Size = new System.Drawing.Size(160, 22);
+            this.MMExportAll.Size = new System.Drawing.Size(180, 22);
             this.MMExportAll.Text = "&All Files";
             this.MMExportAll.Click += new System.EventHandler(this.MMExportAll_Click);
             // 
             // MMExportS2
             // 
             this.MMExportS2.Name = "MMExportS2";
-            this.MMExportS2.Size = new System.Drawing.Size(157, 6);
+            this.MMExportS2.Size = new System.Drawing.Size(177, 6);
             // 
             // MMExportDB
             // 
             this.MMExportDB.Name = "MMExportDB";
-            this.MMExportDB.Size = new System.Drawing.Size(160, 22);
+            this.MMExportDB.Size = new System.Drawing.Size(180, 22);
             this.MMExportDB.Text = "Export DB";
             this.MMExportDB.Click += new System.EventHandler(this.MMExportDB_Click);
             // 
@@ -283,8 +283,8 @@
             this.MMExtra.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.MMExtraMD5,
             this.MMExtraExportData,
-            this.MMExtraDebugTest,
-            this.MMExtraMakeMod});
+            this.MMExtraMakeMod,
+            this.MMExtraDebugTest});
             this.MMExtra.Name = "MMExtra";
             this.MMExtra.Size = new System.Drawing.Size(45, 20);
             this.MMExtra.Text = "E&xtra";
@@ -308,7 +308,6 @@
             this.MMExtraDebugTest.Name = "MMExtraDebugTest";
             this.MMExtraDebugTest.Size = new System.Drawing.Size(206, 22);
             this.MMExtraDebugTest.Text = "DebugTest";
-            this.MMExtraDebugTest.Visible = false;
             this.MMExtraDebugTest.Click += new System.EventHandler(this.MMExtraDebugTest_Click);
             // 
             // MMExtraMakeMod
@@ -330,14 +329,14 @@
             // MMVersionSourceCode
             // 
             this.MMVersionSourceCode.Name = "MMVersionSourceCode";
-            this.MMVersionSourceCode.Size = new System.Drawing.Size(180, 22);
+            this.MMVersionSourceCode.Size = new System.Drawing.Size(141, 22);
             this.MMVersionSourceCode.Text = "Source Code";
             this.MMVersionSourceCode.Click += new System.EventHandler(this.MMVersionSourceCode_Click);
             // 
             // MMVersionDiscord
             // 
             this.MMVersionDiscord.Name = "MMVersionDiscord";
-            this.MMVersionDiscord.Size = new System.Drawing.Size(180, 22);
+            this.MMVersionDiscord.Size = new System.Drawing.Size(141, 22);
             this.MMVersionDiscord.Text = "Visit Discord";
             this.MMVersionDiscord.Click += new System.EventHandler(this.VisitDiscordToolStripMenuItem_Click);
             // 

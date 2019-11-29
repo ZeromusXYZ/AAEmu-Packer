@@ -1,16 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Diagnostics;
-using System.Windows.Forms;
 using System.IO;
-using System.Threading;
-using SubStreamHelper;
+using System.Text;
+using System.Windows.Forms;
 
 namespace AAPakEditor
 {
@@ -405,7 +398,14 @@ namespace AAPakEditor
             var d = currentFileViewFolder ;
             if (d != "") d += "/";
             d += lbFiles.SelectedItem.ToString();
-            exportFileDialog.FileName = Path.GetFileName(d.Replace('/', Path.DirectorySeparatorChar));
+            try
+            {
+                exportFileDialog.FileName = Path.GetFileName(d.Replace('/', Path.DirectorySeparatorChar));
+            }
+            catch
+            {
+                exportFileDialog.FileName = "__invalid_name__";
+            }
 
             if (exportFileDialog.ShowDialog() == DialogResult.OK)
             {
@@ -658,7 +658,15 @@ namespace AAPakEditor
             List<string> sl = new List<string>();
             foreach (AAPakFileInfo pfi in list)
             {
-                var f = Path.GetFileName(pfi.name);
+                string f = string.Empty;
+                try
+                {
+                    f = Path.GetFileName(pfi.name);
+                }
+                catch
+                {
+                    f = pfi.name;
+                }
                 // lbFiles.Items.Add(f);
                 sl.Add(f);
             }
@@ -687,6 +695,49 @@ namespace AAPakEditor
         {
             if ((pak == null) || (!pak.isOpen))
                 return;
+
+
+            var d = currentFileViewFolder;
+            if (d != "") d += "/";
+            d += lbFiles.SelectedItem.ToString();
+            exportFileDialog.FileName = Path.GetFileName(d.Replace('/', Path.DirectorySeparatorChar));
+
+            if (exportFileDialog.ShowDialog() != DialogResult.OK)
+                return;
+
+            var pfraw = pak.ExportFileAsStream(d);
+
+            FileStream fs = new FileStream(exportFileDialog.FileName, FileMode.Create);
+
+            MemoryStream pf = new MemoryStream();
+            pfraw.CopyTo(pf);
+
+            // Padding
+            while ((pf.Length % 16) != 0)
+                pf.WriteByte(0);
+
+            pf.Position = 0;
+
+            MemoryStream fsraw = new MemoryStream();
+            try
+            {
+                if (AAPakFileHeader.EncryptStreamAES(pf, fsraw, dbKey, false,true))
+                {
+                    fsraw.Position = 16;
+                    fsraw.CopyTo(fs);
+                    MessageBox.Show("ExportDB: Done","Export DB");
+                }
+                else
+                {
+                    MessageBox.Show("Decryption failed:\r\n"+AAPakFileHeader.LastAESError,"Error");
+                }
+            }
+            catch (Exception x)
+            {
+                MessageBox.Show("Exception: " + x.Message);
+            }
+            fs.Dispose();
+            // ms.Dispose();
 
             UpdateMM();
         }
@@ -963,13 +1014,14 @@ namespace AAPakEditor
             FileStream fs = new FileStream(exportFileDialog.FileName, FileMode.Create);
             try
             {
+                AAPakFileHeader.LastAESError = string.Empty;
                 if (AAPakFileHeader.EncryptStreamAES(pf,fs,dbKey,false))
                 {
                     MessageBox.Show("ExportDB: Done");
                 }
                 else
                 {
-                    MessageBox.Show("Decryption failed");
+                    MessageBox.Show("Decryption failed:\r\n" + AAPakFileHeader.LastAESError, "Error");
                 }
             }
             catch (Exception x)

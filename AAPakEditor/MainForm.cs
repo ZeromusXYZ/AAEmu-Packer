@@ -19,6 +19,22 @@ namespace AAPakEditor
         private byte[] dbKey = new byte[16] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
         private byte[] customKey = new byte[16] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
+        public class fileListEntry : Object 
+        {
+            public string DisplayName;
+            public AAPakFileInfo pfi;
+            public bool isDeletedFile;
+            public override string ToString()
+            {
+                if (DisplayName != string.Empty)
+                    return DisplayName;
+                if (pfi != null)
+                    return pfi.name;
+                return "<noname>";
+            }
+        }
+        private List<fileListEntry> fileListEntries = new List<fileListEntry>();
+
         public MainForm()
         {
             InitializeComponent();
@@ -99,7 +115,7 @@ namespace AAPakEditor
                 v += "." + AppVer.MinorRevision.ToString();
             MMVersion.Text = v ;
             UpdateMM();
-            ShowFileInfo(null, 0);
+            ShowFileInfo(null);
         }
 
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
@@ -126,9 +142,10 @@ namespace AAPakEditor
             lbFiles.Items.Clear();
             tvFolders.Nodes.Clear();
             lbExtraFiles.Items.Clear();
-            TreeNode rootNode = tvFolders.Nodes.Add("", "root");
+            TreeNode rootNode = tvFolders.Nodes.Add("", "<root>");
             TreeNode foundNode = null;
             var c = 0;
+            lbFolders.Items.Add("<root>");
             foreach (string s in pak.folders)
             {
                 lbFolders.Items.Add(s);
@@ -307,22 +324,17 @@ namespace AAPakEditor
                 return;
 
             var d = (sender as ListBox).SelectedItem.ToString();
+            if (d == "<root>")
+                d = string.Empty;
             PopulateFilesList(d);
             UpdateMM();
         }
 
-        private void ShowFileInfo(AAPakFileInfo pfi,int index)
+        private void ShowFileInfo(AAPakFileInfo pfi)
         {
             if (pfi != null)
             {
-                if (index >= 0)
-                {
-                    lfiName.Text = pfi.name + " @index: " + index.ToString();
-                }
-                else
-                {
-                    lfiName.Text = pfi.name;
-                }
+                lfiName.Text = pfi.name;
                 lfiSize.Text = "Size: " + pfi.size.ToString() + " byte(s)";
                 if (pfi.paddingSize > 0)
                     lfiSize.Text += "  + " + pfi.paddingSize + " padding";
@@ -334,7 +346,7 @@ namespace AAPakEditor
                 //if (h == pak._header.nullHashString)
                 if (Array.Equals(pfi.md5, AAPakFileHeader.nullHash))
                 {
-                        lfiHash.Text = "MD5: Invalid or not calculated !";
+                    lfiHash.Text = "MD5: Invalid or not calculated !";
                 }
                 else
                 {
@@ -344,6 +356,14 @@ namespace AAPakEditor
                 lfiModifyTime.Text = "Modified: " + DateTime.FromFileTime(pfi.modifyTime).ToString();
                 lfiStartOffset.Text = "Start Offset: 0x" + pfi.offset.ToString("X16");
                 lfiExtras.Text = "D1 0x" + pfi.dummy1.ToString("X") + "  D2 0x" + pfi.dummy2.ToString("X");
+                if (pfi.entryIndexNumber >= 0)
+                {
+                    lfiIndex.Text = "index: " + pfi.entryIndexNumber.ToString();
+                }
+                else if (pfi.deletedIndexNumber >= 0)
+                {
+                    lfiIndex.Text = "extra-index: " + pfi.deletedIndexNumber.ToString();
+                }
             }
             else
             {
@@ -354,6 +374,7 @@ namespace AAPakEditor
                 lfiModifyTime.Text = "";
                 lfiStartOffset.Text = "";
                 lfiExtras.Text = "";
+                lfiIndex.Text = "";
             }
         }
 
@@ -373,10 +394,17 @@ namespace AAPakEditor
             d += lbFiles.SelectedItem.ToString();
             ref AAPakFileInfo pfi = ref pak.nullAAPakFileInfo;
 
-            //if (pfi.name != "")
-            if (pak.GetFileByName(d, ref pfi))
+            try
             {
-                ShowFileInfo(pfi,-1);
+                fileListEntry fle = (lbFiles.SelectedItem as fileListEntry);
+                ShowFileInfo(fle.pfi);
+            }
+            catch
+            { 
+                if (pak.GetFileByName(d, ref pfi))
+                {
+                    ShowFileInfo(pfi);
+                }
             }
 
             UpdateMM();
@@ -397,7 +425,23 @@ namespace AAPakEditor
             }
             var d = currentFileViewFolder ;
             if (d != "") d += "/";
-            d += lbFiles.SelectedItem.ToString();
+            fileListEntry fle = null;
+            try
+            {
+                fle = (lbFiles.SelectedItem as fileListEntry);
+                d += fle.DisplayName;
+            }
+            catch
+            {
+                fle = null;
+                d += lbFiles.SelectedItem.ToString();
+            }
+            if (fle == null)
+            {
+                MessageBox.Show("Error selecting file, please contact report this error.");
+                return;
+            }
+
             try
             {
                 exportFileDialog.FileName = Path.GetFileName(d.Replace('/', Path.DirectorySeparatorChar));
@@ -409,9 +453,10 @@ namespace AAPakEditor
 
             if (exportFileDialog.ShowDialog() == DialogResult.OK)
             {
-                if (!ExportFile(d, exportFileDialog.FileName))
+                if (!ExportFile(fle.pfi, exportFileDialog.FileName))
+                //  if (!ExportFile(d, exportFileDialog.FileName))
                 {
-                    MessageBox.Show("Failed to export " + d);
+                        MessageBox.Show("Failed to export " + d);
                 }
             }
 
@@ -601,12 +646,23 @@ namespace AAPakEditor
             if (filename != "") filename += "/";
             filename += lbFiles.SelectedItem.ToString();
 
+            fileListEntry fle = null;
+            try
+            {
+                fle = (lbFiles.SelectedItem as fileListEntry);
+            }
+            catch
+            {
+                MessageBox.Show("It looks like there was no file selected to replace !");
+                return;
+            }
+
+            AAPakFileInfo pfi = fle.pfi;
+
+            /*
             ref AAPakFileInfo pfi = ref pak.nullAAPakFileInfo;
 
             if (!pak.GetFileByName(filename, ref pfi))
-                return;
-            /*
-            if (pfi.Equals(pak.nullAAPakFileInfo))
                 return;
             */
 
@@ -630,7 +686,7 @@ namespace AAPakEditor
                 fs.Position = 0;
                 if (pak.ReplaceFile(ref pfi, fs, modifyTime) == false)
                 {
-                    MessageBox.Show(string.Format("Failed to replace file !\r\n{0}\r\nPak or File might damaged !!", filename));
+                    MessageBox.Show(string.Format("Failed to replace file !\r\n{0}\r\nPak or File might be damaged !!", filename));
                 }
                 fs.Dispose();
             }
@@ -642,11 +698,34 @@ namespace AAPakEditor
 
         }
 
+        private void PrepareFileListView()
+        {
+            fileListEntries.Clear();
+            lbFiles.Items.Clear();
+        }
+
+        private void AddFileListEntry(AAPakFileInfo pfi, string displayName, bool isDeletedList)
+        {
+            fileListEntry fle = new fileListEntry();
+            fle.DisplayName = displayName;
+            fle.pfi = pfi;
+            fle.isDeletedFile = isDeletedList;
+            fileListEntries.Add(fle);
+        }
+
+        private void FinalizeFileListView()
+        {
+            lbFiles.Items.Clear();
+            foreach (fileListEntry fle in fileListEntries)
+                lbFiles.Items.Add(fle);
+        }
+
         private void PopulateFilesList(string withdir)
         {
             currentFileViewFolder = withdir;
 
-            lbFiles.Items.Clear();
+            PrepareFileListView();
+            //lbFiles.Items.Clear();
             Application.UseWaitCursor = true;
             Cursor.Current = Cursors.WaitCursor;
 
@@ -655,7 +734,7 @@ namespace AAPakEditor
                 lFiles.Text = list.Count.ToString() + " files in <root>";
             else
                 lFiles.Text = list.Count.ToString() + " files in \"" + currentFileViewFolder + "\"";
-            List<string> sl = new List<string>();
+            //List<string> sl = new List<string>();
             foreach (AAPakFileInfo pfi in list)
             {
                 string f = string.Empty;
@@ -665,13 +744,17 @@ namespace AAPakEditor
                 }
                 catch
                 {
-                    f = pfi.name;
+                    f = "__invalid_name_" + pfi.entryIndexNumber.ToString() + "__";
                 }
+                AddFileListEntry(pfi, f, false);
+
                 // lbFiles.Items.Add(f);
-                sl.Add(f);
+                //sl.Add(f);
             }
-            sl.Sort();
-            lbFiles.Items.AddRange(sl.ToArray());
+
+            FinalizeFileListView();
+            //sl.Sort();
+            //lbFiles.Items.AddRange(sl.ToArray());
             Cursor.Current = Cursors.Default;
             Application.UseWaitCursor = false;
             UpdateMM();
@@ -753,19 +836,28 @@ namespace AAPakEditor
                 return;
             }
 
+            if (lbFiles.SelectedIndex < 0)
+            {
+                MessageBox.Show("Nothing selected to delete.");
+                return;
+            }
+
             var filename = currentFileViewFolder;
             if (filename != "") filename += "/";
             filename += lbFiles.SelectedItem.ToString();
 
-            ref AAPakFileInfo pfi = ref pak.nullAAPakFileInfo;
+            fileListEntry fle = (lbFiles.SelectedItem as fileListEntry);
 
+            /*
+            ref AAPakFileInfo pfi = ref pak.nullAAPakFileInfo;
             if (!pak.GetFileByName(filename, ref pfi))
                 return;
+            */
 
             if (MessageBox.Show("Are you sure you want to delete this file ?\r\n" + filename, "Delete", MessageBoxButtons.YesNo) != DialogResult.Yes)
                 return;
 
-            if (pak.DeleteFile(pfi))
+            if (pak.DeleteFile(fle.pfi))
             {
                 MessageBox.Show("Reference to " + filename + " has been removed from the pak.");
             }
@@ -794,7 +886,15 @@ namespace AAPakEditor
                 addDlg.Dispose();
 
                 // virual directory to the new file
-                var newpakfilepath = Path.GetDirectoryName(pakfn.Replace("/","\\")).Replace("\\","/");
+                var newpakfilepath = string.Empty;
+                try
+                {
+                    newpakfilepath = Path.GetDirectoryName(pakfn.Replace("/", "\\")).Replace("\\", "/");
+                }
+                catch
+                {
+                    newpakfilepath = string.Empty;
+                }
 
                 if (File.Exists(diskfn))
                 {
@@ -894,7 +994,7 @@ namespace AAPakEditor
             Cursor.Current = Cursors.Default;
             Application.UseWaitCursor = false;
             UpdateMM();
-            ShowFileInfo(null, 0);
+            ShowFileInfo(null);
         }
 
         private void MMFileNew_Click(object sender, EventArgs e)
@@ -1073,7 +1173,7 @@ namespace AAPakEditor
             var d = (sender as ListBox).SelectedIndex;
             if ((d >= 0) && (d < pak.extraFiles.Count))
             {
-                ShowFileInfo(pak.extraFiles[d],d);
+                ShowFileInfo(pak.extraFiles[d]);
                 
             }
             UpdateMM();
@@ -1327,6 +1427,12 @@ namespace AAPakEditor
             Application.UseWaitCursor = false;
             Cursor.Current = Cursors.Default;
             return closeWhenDone;
+        }
+
+        private void lfiName_Click(object sender, EventArgs e)
+        {
+            // copy to clipboard
+            Clipboard.SetText((sender as Label).Text);
         }
     }
 }

@@ -99,7 +99,17 @@ namespace AAPakEditor
                 destName += exportedFileName.Replace('/', Path.DirectorySeparatorChar);
 
                 // Check if target directory exists
-                var destFolder = Path.GetDirectoryName(destName);
+                var destFolder = string.Empty;
+                try
+                {
+                    destFolder = Path.GetDirectoryName(destName);
+                }
+                catch
+                {
+                    // Fallback for stuff with invalid chars
+                    destFolder = TargetDir + Path.DirectorySeparatorChar;
+                }
+
                 if (!Directory.Exists(destFolder))
                     Directory.CreateDirectory(destFolder);
 

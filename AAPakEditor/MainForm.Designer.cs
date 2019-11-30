@@ -55,8 +55,8 @@
             this.MMExtra = new System.Windows.Forms.ToolStripMenuItem();
             this.MMExtraMD5 = new System.Windows.Forms.ToolStripMenuItem();
             this.MMExtraExportData = new System.Windows.Forms.ToolStripMenuItem();
-            this.MMExtraDebugTest = new System.Windows.Forms.ToolStripMenuItem();
             this.MMExtraMakeMod = new System.Windows.Forms.ToolStripMenuItem();
+            this.MMExtraDebugTest = new System.Windows.Forms.ToolStripMenuItem();
             this.MMVersion = new System.Windows.Forms.ToolStripMenuItem();
             this.MMVersionSourceCode = new System.Windows.Forms.ToolStripMenuItem();
             this.MMVersionDiscord = new System.Windows.Forms.ToolStripMenuItem();
@@ -83,6 +83,7 @@
             this.tpExtraFiles = new System.Windows.Forms.TabPage();
             this.lbExtraFiles = new System.Windows.Forms.ListBox();
             this.lTypePak = new System.Windows.Forms.Label();
+            this.lfiIndex = new System.Windows.Forms.Label();
             this.MM.SuspendLayout();
             this.pFileInfo.SuspendLayout();
             this.tcDirectoryViews.SuspendLayout();
@@ -303,19 +304,20 @@
             this.MMExtraExportData.Text = "Export File Data as CSV ...";
             this.MMExtraExportData.Click += new System.EventHandler(this.MMExtraExportData_Click);
             // 
-            // MMExtraDebugTest
-            // 
-            this.MMExtraDebugTest.Name = "MMExtraDebugTest";
-            this.MMExtraDebugTest.Size = new System.Drawing.Size(206, 22);
-            this.MMExtraDebugTest.Text = "DebugTest";
-            this.MMExtraDebugTest.Click += new System.EventHandler(this.MMExtraDebugTest_Click);
-            // 
             // MMExtraMakeMod
             // 
             this.MMExtraMakeMod.Name = "MMExtraMakeMod";
             this.MMExtraMakeMod.Size = new System.Drawing.Size(206, 22);
             this.MMExtraMakeMod.Text = "Export pak as mod";
             this.MMExtraMakeMod.Click += new System.EventHandler(this.MMExtraMakeMod_Click);
+            // 
+            // MMExtraDebugTest
+            // 
+            this.MMExtraDebugTest.Name = "MMExtraDebugTest";
+            this.MMExtraDebugTest.Size = new System.Drawing.Size(206, 22);
+            this.MMExtraDebugTest.Text = "DebugTest";
+            this.MMExtraDebugTest.Visible = false;
+            this.MMExtraDebugTest.Click += new System.EventHandler(this.MMExtraDebugTest_Click);
             // 
             // MMVersion
             // 
@@ -395,6 +397,7 @@
             // 
             this.pFileInfo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.pFileInfo.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.pFileInfo.Controls.Add(this.lfiIndex);
             this.pFileInfo.Controls.Add(this.lfiExtras);
             this.pFileInfo.Controls.Add(this.lfiModifyTime);
             this.pFileInfo.Controls.Add(this.lfiStartOffset);
@@ -410,7 +413,7 @@
             // lfiExtras
             // 
             this.lfiExtras.AutoSize = true;
-            this.lfiExtras.Location = new System.Drawing.Point(3, 117);
+            this.lfiExtras.Location = new System.Drawing.Point(3, 115);
             this.lfiExtras.Name = "lfiExtras";
             this.lfiExtras.Size = new System.Drawing.Size(51, 13);
             this.lfiExtras.TabIndex = 6;
@@ -464,11 +467,13 @@
             // lfiName
             // 
             this.lfiName.AutoSize = true;
+            this.lfiName.Cursor = System.Windows.Forms.Cursors.Hand;
             this.lfiName.Location = new System.Drawing.Point(3, 0);
             this.lfiName.Name = "lfiName";
             this.lfiName.Size = new System.Drawing.Size(33, 13);
             this.lfiName.TabIndex = 0;
             this.lfiName.Text = "name";
+            this.lfiName.Click += new System.EventHandler(this.lfiName_Click);
             // 
             // exportFolderDialog
             // 
@@ -561,6 +566,15 @@
             this.lTypePak.Text = "...";
             this.lTypePak.TextAlign = System.Drawing.ContentAlignment.TopRight;
             // 
+            // lfiIndex
+            // 
+            this.lfiIndex.AutoSize = true;
+            this.lfiIndex.Location = new System.Drawing.Point(3, 130);
+            this.lfiIndex.Name = "lfiIndex";
+            this.lfiIndex.Size = new System.Drawing.Size(32, 13);
+            this.lfiIndex.TabIndex = 7;
+            this.lfiIndex.Text = "index";
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -651,6 +665,7 @@
         private System.Windows.Forms.TabPage tpExtraFiles;
         private System.Windows.Forms.ListBox lbExtraFiles;
         private System.Windows.Forms.Label lTypePak;
+        private System.Windows.Forms.Label lfiIndex;
     }
 }
 

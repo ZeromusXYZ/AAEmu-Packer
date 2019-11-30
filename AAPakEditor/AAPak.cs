@@ -27,6 +27,9 @@ namespace AAPakEditor
         public Int64 createTime;
         public Int64 modifyTime;
         public UInt64 dummy2; // looks like padding to fill out the block, observed 0
+        // The following are not part of the structure but used by the program
+        public int entryIndexNumber = -1;
+        public int deletedIndexNumber = -1;
     }
 
     /// <summary>
@@ -36,6 +39,7 @@ namespace AAPakEditor
     {
         /// <summary>
         /// Default AES128 key used by XLGames for ArcheAge as encryption key for header and fileinfo data
+        /// 32 1F 2A EE AA 58 4A B4 9A 6C 9E 09 D5 9E 9C 6F
         /// </summary>
         private readonly byte[] XLGamesKey = new byte[] { 0x32, 0x1F, 0x2A, 0xEE, 0xAA, 0x58, 0x4A, 0xB4, 0x9A, 0x6C, 0x9E, 0x09, 0xD5, 0x9E, 0x9C, 0x6F };
         /// <summary>
@@ -73,6 +77,7 @@ namespace AAPakEditor
         /// Empty MD5 Hash as a hex string to compare against
         /// </summary>
         public static string nullHashString = "".PadRight(32, '0');
+        public static string LastAESError = string.Empty;
 
         /// <summary>
         /// Creates a new Header Block for a Pak file
@@ -134,13 +139,14 @@ namespace AAPakEditor
 
                 return cipher.TransformFinalBlock(message, 0, message.Length);
             }
-            catch (Exception)
+            catch (Exception x)
             {
+                LastAESError = x.Message;
                 return null;
             }
         }
 
-        public static bool EncryptStreamAES(Stream source, Stream target, byte[] key, bool doEncryption)
+        public static bool EncryptStreamAES(Stream source, Stream target, byte[] key, bool doEncryption, bool leaveOpen = false)
         {
             try
             {
@@ -158,14 +164,54 @@ namespace AAPakEditor
                     cipher = aes.CreateDecryptor();
 
                 // Create the streams used for encryption.
+
+                CryptoStream csEncrypt = new CryptoStream(target, cipher, CryptoStreamMode.Write);
+                source.CopyTo(csEncrypt);
+                if (!leaveOpen)
+                    csEncrypt.Dispose();
+
+                /*
+                using (CryptoStream csEncrypt = new CryptoStream(target, cipher, CryptoStreamMode.Write))
+                {
+                    source.CopyTo(csEncrypt);
+                }
+                */
+                return true;
+            }
+            catch (Exception x)
+            {
+                LastAESError = x.Message;
+                return false;
+            }
+        }
+
+        public static bool EncryptStreamAESWithIV(Stream source, Stream target, byte[] key, byte[] customIV, bool doEncryption)
+        {
+            try
+            {
+                Aes aes = new AesManaged();
+                aes.Key = key;
+                aes.IV = customIV;
+                aes.Mode = CipherMode.CBC;
+                aes.Padding = PaddingMode.None;
+
+                ICryptoTransform cipher;
+
+                if (doEncryption)
+                    cipher = aes.CreateEncryptor();
+                else
+                    cipher = aes.CreateDecryptor();
+
+                // Create the streams used for encryption.
                 using (CryptoStream csEncrypt = new CryptoStream(target, cipher, CryptoStreamMode.Write))
                 {
                     source.CopyTo(csEncrypt);
                 }
                 return true;
             }
-            catch (Exception)
+            catch (Exception x)
             {
+                LastAESError = x.Message;
                 return false;
             }
         }
@@ -197,8 +243,9 @@ namespace AAPakEditor
 
                 return cipher.TransformFinalBlock(message, 0, message.Length);
             }
-            catch (Exception)
+            catch (Exception x)
             {
+                LastAESError = x.Message;
                 return null;
             }
         }
@@ -282,7 +329,7 @@ namespace AAPakEditor
                 else
                 if (_owner.PakType == PakFileType.TypeB)
                 {
-                    // TypeA has files first, extra files after that
+                    // TypeB has files first, extra files after that
                     if (extrasToGo > 0)
                     {
                         extrasToGo--;
@@ -403,6 +450,8 @@ namespace AAPakEditor
             var totalFileCount = fileCount + extraFileCount;
             var filesToGo = fileCount;
             var extraToGo = extraFileCount;
+            var fileIndexCounter = -1;
+            var deletedIndexCounter = -1;
             for (uint i = 0; i < totalFileCount; i++)
             {
                 // Read and decrypt a fileinfo block
@@ -468,6 +517,9 @@ namespace AAPakEditor
                     // TypeA has files first and extra files last
                     if (filesToGo > 0)
                     {
+                        fileIndexCounter++;
+                        pfi.entryIndexNumber = fileIndexCounter;
+
                         filesToGo--;
                         _owner.files.Add(pfi);
                     }
@@ -476,6 +528,9 @@ namespace AAPakEditor
                     {
                         // "Extra" Files. It looks like these are old deleted files renamed to "__unused__"
                         // There might be more to these, but can't be sure at this moment, looks like they are 512 byte blocks on my paks
+                        deletedIndexCounter++;
+                        pfi.deletedIndexNumber = deletedIndexCounter;
+
                         extraToGo--;
                         _owner.extraFiles.Add(pfi);
                     }
@@ -486,12 +541,18 @@ namespace AAPakEditor
                     // TypeB has extra files first and normal files last
                     if (extraToGo > 0)
                     {
+                        fileIndexCounter++;
+                        pfi.entryIndexNumber = fileIndexCounter;
+
                         extraToGo--;
                         _owner.extraFiles.Add(pfi);
                     }
                     else
                     if (filesToGo > 0)
                     {
+                        deletedIndexCounter++;
+                        pfi.deletedIndexNumber = deletedIndexCounter;
+
                         filesToGo--;
                         _owner.files.Add(pfi);
                     }
@@ -900,7 +961,15 @@ namespace AAPakEditor
             foreach (AAPakFileInfo pfi in files)
             {
                 // extract dir name
-                string n = Path.GetDirectoryName(pfi.name.ToLower().Replace('/', Path.DirectorySeparatorChar)).Replace(Path.DirectorySeparatorChar, '/');
+                string n = string.Empty;
+                try
+                {
+                    n = Path.GetDirectoryName(pfi.name.ToLower().Replace('/', Path.DirectorySeparatorChar)).Replace(Path.DirectorySeparatorChar, '/');
+                }
+                catch
+                {
+                    n = string.Empty;
+                }
                 if (n == dirname)
                     res.Add(pfi);
             }
@@ -918,6 +987,20 @@ namespace AAPakEditor
             foreach (AAPakFileInfo pfi in files)
             {
                 if (pfi.name == filename)
+                {
+                    fileInfo = pfi;
+                    return true;
+                }
+            }
+            fileInfo = nullAAPakFileInfo; // return null file if it fails
+            return false;
+        }
+
+        public bool GetFileByIndex(int fileIndex, ref AAPakFileInfo fileInfo)
+        {
+            foreach (AAPakFileInfo pfi in files)
+            {
+                if (pfi.entryIndexNumber == fileIndex)
                 {
                     fileInfo = pfi;
                     return true;

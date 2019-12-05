@@ -97,7 +97,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AAPak.cs" />
+    <Compile Include="..\Common\AAPak.cs">
+      <Link>AAPak.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\SubStream.cs">
+      <Link>SubStream.cs</Link>
+    </Compile>
     <Compile Include="ImportFolderDlg.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -130,7 +135,6 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SubStream.cs" />
     <EmbeddedResource Include="ImportFolderDlg.resx">
       <DependentUpon>ImportFolderDlg.cs</DependentUpon>
     </EmbeddedResource>

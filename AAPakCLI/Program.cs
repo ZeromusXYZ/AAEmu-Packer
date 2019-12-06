@@ -62,6 +62,33 @@ namespace AAPakCLI
             }
         }
 
+        static private int AddDirectory(string sourceDir, string targetDir)
+        {
+            int filesAdded = 0;
+            // Make sure slashes are correct
+            sourceDir = sourceDir.Replace('/', Path.DirectorySeparatorChar);
+            if (sourceDir.Last() != Path.DirectorySeparatorChar)
+                sourceDir += Path.DirectorySeparatorChar;
+            if (targetDir != string.Empty)
+            {
+                targetDir = targetDir.Replace(Path.DirectorySeparatorChar, '/');
+                if (targetDir.Last() != '/')
+                    targetDir += '/';
+            }
+            var dirs = Directory.GetDirectories(sourceDir);
+            foreach (var dir in dirs)
+                filesAdded += AddDirectory(sourceDir + dir, targetDir + dir);
+
+            var files = Directory.GetFiles(sourceDir);
+            foreach(var file in files)
+            {
+                if (pak.AddFileFromFile(sourceDir + file, targetDir + file, false))
+                    filesAdded++;
+            }
+
+            return filesAdded;
+        }
+
         static private bool HandleCommandLine()
         {
             bool closeWhenDone = false;
@@ -223,26 +250,16 @@ namespace AAPakCLI
                     }
                     else
                     {
-                        Console.WriteLine("[NYI] Adding directory currently disabled !");
-                        /*
-                        using (ImportFolderDlg importFolder = new ImportFolderDlg())
+                        Console.WriteLine("[PAK] Adding directory {0} => {1}",arg1,arg2);
+                        try
                         {
-
-                            importFolder.pak = this.pak;
-                            importFolder.InitAutoRun(arg1, arg2);
-                            try
-                            {
-                                if (importFolder.ShowDialog() != DialogResult.OK)
-                                {
-                                    cmdErrors += "[ERROR] Possible errors while adding directory\r\n" + arg1 + "\r\n=>\r\n" + arg2;
-                                }
-                            }
-                            catch (Exception x)
-                            {
-                                cmdErrors += "[EXCEPTION] " + x.Message + " \r\nPossible file corruption !";
-                            }
+                            var filesAdded = AddDirectory(arg1, arg2);
+                            Console.WriteLine("[PAK] Added {0} file(s)", filesAdded);
                         }
-                        */
+                        catch (Exception x)
+                        {
+                            cmdErrors += "[EXCEPTION] " + x.Message + " \r\nPossible file corruption !";
+                        }
                     }
                 }
                 else

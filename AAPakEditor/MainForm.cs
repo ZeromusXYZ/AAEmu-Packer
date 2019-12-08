@@ -42,6 +42,11 @@ namespace AAPakEditor
                 if (objAsPart == null) return false;
                 else return Equals(objAsPart);
             }
+            
+            public override int GetHashCode()
+            {
+                return base.GetHashCode();
+            }
 
             public int CompareTo(fileListEntry comparePart)
             {

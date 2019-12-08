@@ -27,7 +27,7 @@ Deletes target filename from the pak
 Adds all files in sourcedirectory and all of it's sub-directories to the pakfile inside pakdirectory
 
 -d <directory>
-!!! NOT IMPLEMENTED YET !!! Removes all files in target directory and all off the subfolders of the pakfile
+Removes all files in target directory and all off the subfolders of the pakfile
 
 -s
 Force-Save pakfile

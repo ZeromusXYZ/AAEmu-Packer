@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
@@ -1354,6 +1355,42 @@ namespace AAPakEditor
                 }
                 else
 
+                if (arg == "-d")
+                {
+                    i += 1; // take one arg
+                    if ((pak == null) || (!pak.isOpen) || (pak.readOnly))
+                    {
+                        cmdErrors += "Pak file needs to be opened in read/write mode to be able to delete a file !\r\n";
+                    }
+                    else
+                    {
+                        // Delete the files
+                        try
+                        {
+                            var filesDeleted = 0;
+                            string delDir = arg1.ToLower();
+                            if (delDir.Last() != '/')
+                                delDir += '/';
+                            for (int n = pak.files.Count - 1; n >= 0; n--)
+                            //foreach(AAPakFileInfo pfi in pak.files)
+                            {
+                                AAPakFileInfo pfi = pak.files[n];
+                                if (pfi.name.ToLower().StartsWith(delDir))
+                                {
+                                    if (pak.DeleteFile(pfi))
+                                        filesDeleted++;
+                                }
+                            }
+                        }
+                        catch (Exception x)
+                        {
+                            cmdErrors += "Exception: " + x.Message + " \r\nPossible file corruption !";
+                        }
+
+                    }
+                }
+                else
+
                 if ((arg == "-x") || (arg == "+x"))
                 {
                     if ((pak == null) || (!pak.isOpen))
@@ -1376,7 +1413,7 @@ namespace AAPakEditor
                 }
                 else
 
-                if (arg == "-csv")
+                if ((arg == "-csv") || (arg == "+csv"))
                 {
                     i++; // take one arg
                     if ((pak == null) || (!pak.isOpen))

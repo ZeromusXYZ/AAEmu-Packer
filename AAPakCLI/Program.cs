@@ -77,17 +77,67 @@ namespace AAPakCLI
             }
             var dirs = Directory.GetDirectories(sourceDir);
             foreach (var dir in dirs)
-                filesAdded += AddDirectory(sourceDir + dir, targetDir + dir);
+            {
+                var dn = Path.GetFileName(dir);
+                filesAdded += AddDirectory(sourceDir + dn, targetDir + dn);
+            }
 
             var files = Directory.GetFiles(sourceDir);
             foreach(var file in files)
             {
-                if (pak.AddFileFromFile(sourceDir + file, targetDir + file, false))
+                var fn = Path.GetFileName(file);
+                if (pak.AddFileFromFile(sourceDir + fn, targetDir + fn, false))
                     filesAdded++;
             }
 
             return filesAdded;
         }
+
+        static private void CreateCSVFile(string filename = "")
+        {
+            if (filename == string.Empty)
+            {
+                return;
+            }
+
+            DateTime newest = new DateTime(1600, 1, 1);
+
+            List<string> sl = new List<string>();
+            string s = "";
+            s = "name";
+            s += ";size";
+            s += ";offset";
+            s += ";md5";
+            s += ";createTime";
+            s += ";modifyTime";
+            s += ";sizeDuplicate";
+            s += ";paddingSize";
+            s += ";dummy1";
+            s += ";dummy2";
+            sl.Add(s);
+            foreach (AAPakFileInfo pfi in pak.files)
+            {
+                DateTime modTime = DateTime.FromFileTime(pfi.modifyTime);
+                if (modTime > newest)
+                    newest = modTime;
+
+                s = pfi.name;
+                s += ";" + pfi.size.ToString();
+                s += ";" + pfi.offset.ToString();
+                s += ";" + BitConverter.ToString(pfi.md5).Replace("-", "").ToUpper();
+                s += ";" + DateTime.FromFileTime(pfi.createTime).ToString();
+                s += ";" + modTime.ToString();
+                s += ";" + pfi.sizeDuplicate.ToString();
+                s += ";" + pfi.paddingSize.ToString();
+                s += ";" + pfi.dummy1.ToString();
+                s += ";" + pfi.dummy2.ToString();
+                sl.Add(s);
+
+            }
+
+            File.WriteAllLines(filename, sl);
+        }
+
 
         static private bool HandleCommandLine()
         {
@@ -145,10 +195,14 @@ namespace AAPakCLI
                     {
                         cmdErrors += "[ERROR] Failed to re-open created file: " + arg1 + "\r\n";
                     }
+                    else
+                    {
+                        Console.WriteLine("[PAK] Created pak file {0}", arg1);
+                    }
                 }
                 else
 
-                /* Currently disable SFX support for cdommand-line
+                /* Currently disable SFX support for command-line
                 if (arg == "+sfx")
                 {
                     i++;
@@ -203,7 +257,11 @@ namespace AAPakCLI
                     {
                         if (!pak.AddFileFromFile(arg1, arg2, false))
                         {
-                            cmdErrors += "[ERROR] Failed to add file:\r\n" + arg1 + "\r\n=>" + arg2 + "\r\n";
+                            cmdErrors += "[ERROR] Failed to add file: " + arg1 + " => " + arg2 + "\r\n";
+                        }
+                        else
+                        {
+                            Console.WriteLine("[PAK] Added file {0} => {1}", arg1, arg2);
                         }
                     }
                 }
@@ -222,6 +280,10 @@ namespace AAPakCLI
                         {
                             // Technically, this could never fail as it only can return false if it's in read-only
                             cmdErrors += "[ERROR] Failed to delete file:\r\n" + arg1;
+                        }
+                        else
+                        {
+                            Console.WriteLine("[PAK] Deleted file {0}", arg1);
                         }
                     }
                 }
@@ -264,6 +326,42 @@ namespace AAPakCLI
                 }
                 else
 
+                if (arg == "-d")
+                {
+                    i += 1; // takes one arg
+                    if ((pak == null) || (!pak.isOpen) || (pak.readOnly))
+                    {
+                        cmdErrors += "[ERROR] Pak file needs to be opened in read/write mode to be able to add a file !\r\n";
+                    }
+                    else
+                    {
+                        Console.WriteLine("[PAK] Deleting directory {0}", arg1);
+                        try
+                        {
+                            var filesDeleted = 0;
+                            string delDir = arg1.ToLower();
+                            if (delDir.Last() != '/')
+                                delDir += '/';
+                            for(int n = pak.files.Count - 1;n >= 0;n--)
+                            //foreach(AAPakFileInfo pfi in pak.files)
+                            {
+                                AAPakFileInfo pfi = pak.files[n];
+                                if (pfi.name.ToLower().StartsWith(delDir))
+                                {
+                                    if (pak.DeleteFile(pfi))
+                                        filesDeleted++;
+                                }
+                            }
+                            Console.WriteLine("[PAK] Deleted {0} file(s)", filesDeleted);
+                        }
+                        catch (Exception x)
+                        {
+                            cmdErrors += "[EXCEPTION] " + x.Message + " \r\nPossible file corruption !";
+                        }
+                    }
+                }
+                else
+
                 if ((arg == "-x") || (arg == "+x"))
                 {
                     if ((pak == null) || (!pak.isOpen))
@@ -288,7 +386,7 @@ namespace AAPakCLI
                 }
                 else
 
-                if (arg == "-csv")
+                if ((arg == "-csv") || (arg == "+csv"))
                 {
                     i++; // take one arg
                     if ((pak == null) || (!pak.isOpen))
@@ -297,8 +395,14 @@ namespace AAPakCLI
                     }
                     else
                     {
-                        Console.WriteLine("[NYI] Export CSV currently not implemented");
-                        //CreateCSVFile(arg1);
+                        if (arg1 == string.Empty)
+                        {
+                            Console.WriteLine("[ERROR] you need to provide a filename to export to");
+                        }
+                        else
+                        {
+                            CreateCSVFile(arg1);
+                        }
                     }
                 }
                 else
@@ -339,7 +443,14 @@ namespace AAPakCLI
 
         static void Main(string[] args)
         {
-            HandleCommandLine();
+            try
+            {
+                HandleCommandLine();
+            }
+            catch (Exception x)
+            {
+                Console.WriteLine("[EXCEPTION] {0}\r\n", x.Message);
+            }
             try
             {
                 if ((pak != null) && (pak.isOpen))

@@ -20,11 +20,12 @@ namespace AAPakEditor
         private byte[] dbKey = new byte[16] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
         private byte[] customKey = new byte[16] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
-        public class fileListEntry : Object 
+        public class fileListEntry : Object, IEquatable<fileListEntry>, IComparable<fileListEntry>
         {
             public string DisplayName;
             public AAPakFileInfo pfi;
             public bool isDeletedFile;
+
             public override string ToString()
             {
                 if (DisplayName != string.Empty)
@@ -32,6 +33,30 @@ namespace AAPakEditor
                 if (pfi != null)
                     return pfi.name;
                 return "<noname>";
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (obj == null) return false;
+                fileListEntry objAsPart = obj as fileListEntry;
+                if (objAsPart == null) return false;
+                else return Equals(objAsPart);
+            }
+
+            public int CompareTo(fileListEntry comparePart)
+            {
+                // A null value means that this object is greater.
+                if (comparePart == null)
+                    return 1;
+
+                else
+                    return this.pfi.name.CompareTo(comparePart.pfi.name);
+            }
+
+            public bool Equals(fileListEntry other)
+            {
+                if (other == null) return false;
+                return (this.pfi.name.Equals(other.pfi.name));
             }
         }
         private List<fileListEntry> fileListEntries = new List<fileListEntry>();
@@ -717,6 +742,7 @@ namespace AAPakEditor
         private void FinalizeFileListView()
         {
             lbFiles.Items.Clear();
+            fileListEntries.Sort();
             foreach (fileListEntry fle in fileListEntries)
                 lbFiles.Items.Add(fle);
         }

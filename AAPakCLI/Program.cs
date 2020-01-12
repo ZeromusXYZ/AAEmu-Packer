@@ -12,8 +12,9 @@ namespace AAPakCLI
     {
         static AAPak pak;
         static bool useCustomKey = false;
+        static AAPak oldpak;
 
-        static private void LoadPakFile(string filename, bool openAsReadOnly, bool showWriteWarning = true, bool quickLoad = false)
+        static private void LoadPakFile(ref AAPak pak, string filename, bool openAsReadOnly, bool showWriteWarning = true, bool quickLoad = false)
         {
             if (pak == null)
             {
@@ -62,7 +63,7 @@ namespace AAPakCLI
             }
         }
 
-        static private int AddDirectory(string sourceDir, string targetDir)
+        static private int AddDirectory(ref AAPak pak, string sourceDir, string targetDir)
         {
             int filesAdded = 0;
             // Make sure slashes are correct
@@ -79,7 +80,7 @@ namespace AAPakCLI
             foreach (var dir in dirs)
             {
                 var dn = Path.GetFileName(dir);
-                filesAdded += AddDirectory(sourceDir + dn, targetDir + dn);
+                filesAdded += AddDirectory(ref pak, sourceDir + dn, targetDir + dn);
             }
 
             var files = Directory.GetFiles(sourceDir);
@@ -93,7 +94,7 @@ namespace AAPakCLI
             return filesAdded;
         }
 
-        static private void CreateCSVFile(string filename = "")
+        static private void CreateCSVFile(ref AAPak pak, string filename = "")
         {
             if (filename == string.Empty)
             {
@@ -166,7 +167,7 @@ namespace AAPakCLI
                     i++; // take one arg
                     if (pak != null)
                         pak.ClosePak();
-                    LoadPakFile(arg1, false, false, true);
+                    LoadPakFile(ref pak, arg1, false, false, true);
                     if ((pak == null) || (!pak.isOpen))
                     {
                         cmdErrors += "[ERROR] Failed to open for r/w: " + arg1 + "\r\n";
@@ -189,7 +190,7 @@ namespace AAPakCLI
                     }
                     pak.ClosePak();
                     // Re-open it in read/write mode
-                    LoadPakFile(arg1, false, false, true);
+                    LoadPakFile(ref pak, arg1, false, false, true);
 
                     if ((pak == null) || (!pak.isOpen))
                     {
@@ -315,7 +316,7 @@ namespace AAPakCLI
                         Console.WriteLine("[PAK] Adding directory {0} => {1}",arg1,arg2);
                         try
                         {
-                            var filesAdded = AddDirectory(arg1, arg2);
+                            var filesAdded = AddDirectory(ref pak, arg1, arg2);
                             Console.WriteLine("[PAK] Added {0} file(s)", filesAdded);
                         }
                         catch (Exception x)
@@ -401,7 +402,36 @@ namespace AAPakCLI
                         }
                         else
                         {
-                            CreateCSVFile(arg1);
+                            CreateCSVFile(ref pak, arg1);
+                        }
+                    }
+                }
+                else
+
+                if ((arg == "-patchbycompare") || (arg == "+patchbycompare") || (arg == "-pbc") || (arg == "+pbc"))
+                {
+                    i += 2; // take two args
+                    if ((pak == null) || (!pak.isOpen))
+                    {
+                        cmdErrors += "[ERROR] A Pak file needs to be opened before you can create a patch by compare !\r\n";
+                    }
+                    else
+                    {
+                        if (arg1 == string.Empty)
+                        {
+                            Console.WriteLine("[ERROR] you need to provide a older pak or cvs filename to compare with.");
+                        }
+                        else
+                        if (arg2 == string.Empty)
+                        {
+                            Console.WriteLine("[ERROR] you need to provide a patch filename to write the updated files to.");
+                        }
+                        else
+                        {
+                            Console.WriteLine("Current File: " + pak._gpFilePath);
+                            Console.WriteLine("Compare to old file: " + arg1);
+                            Console.WriteLine("Write changes to: " + arg2);
+                            Console.WriteLine("[NYI] This function is not yet implemented");
                         }
                     }
                 }
@@ -421,7 +451,7 @@ namespace AAPakCLI
                     // Open file in read-only mode if nothing is specified and it's a valid filename
                     if (pak != null)
                         pak.ClosePak();
-                    LoadPakFile(arg, true, true, true);
+                    LoadPakFile(ref pak, arg, true, true, true);
                     if ((pak == null) || (!pak.isOpen))
                     {
                         cmdErrors += "[ERROR] Failed to open: " + arg + "\r\n";

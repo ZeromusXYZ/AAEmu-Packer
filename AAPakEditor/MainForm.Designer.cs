@@ -66,6 +66,7 @@
             this.lbFiles = new System.Windows.Forms.ListBox();
             this.lFiles = new System.Windows.Forms.Label();
             this.pFileInfo = new System.Windows.Forms.Panel();
+            this.lfiIndex = new System.Windows.Forms.Label();
             this.lfiExtras = new System.Windows.Forms.Label();
             this.lfiModifyTime = new System.Windows.Forms.Label();
             this.lfiStartOffset = new System.Windows.Forms.Label();
@@ -83,7 +84,6 @@
             this.tpExtraFiles = new System.Windows.Forms.TabPage();
             this.lbExtraFiles = new System.Windows.Forms.ListBox();
             this.lTypePak = new System.Windows.Forms.Label();
-            this.lfiIndex = new System.Windows.Forms.Label();
             this.MM.SuspendLayout();
             this.pFileInfo.SuspendLayout();
             this.tcDirectoryViews.SuspendLayout();
@@ -124,7 +124,7 @@
             // 
             this.MMFileOpen.Name = "MMFileOpen";
             this.MMFileOpen.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-            this.MMFileOpen.Size = new System.Drawing.Size(164, 22);
+            this.MMFileOpen.Size = new System.Drawing.Size(180, 22);
             this.MMFileOpen.Text = "&Open ...";
             this.MMFileOpen.Click += new System.EventHandler(this.MMFileOpen_Click);
             // 
@@ -132,20 +132,20 @@
             // 
             this.MMFileSave.Name = "MMFileSave";
             this.MMFileSave.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-            this.MMFileSave.Size = new System.Drawing.Size(164, 22);
+            this.MMFileSave.Size = new System.Drawing.Size(180, 22);
             this.MMFileSave.Text = "&Save now";
             this.MMFileSave.Click += new System.EventHandler(this.MMFileSave_Click);
             // 
             // MMFileS1
             // 
             this.MMFileS1.Name = "MMFileS1";
-            this.MMFileS1.Size = new System.Drawing.Size(161, 6);
+            this.MMFileS1.Size = new System.Drawing.Size(177, 6);
             // 
             // MMFileNew
             // 
             this.MMFileNew.Name = "MMFileNew";
             this.MMFileNew.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.N)));
-            this.MMFileNew.Size = new System.Drawing.Size(164, 22);
+            this.MMFileNew.Size = new System.Drawing.Size(180, 22);
             this.MMFileNew.Text = "New ...";
             this.MMFileNew.Click += new System.EventHandler(this.MMFileNew_Click);
             // 
@@ -153,20 +153,20 @@
             // 
             this.MMFileClose.Name = "MMFileClose";
             this.MMFileClose.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.W)));
-            this.MMFileClose.Size = new System.Drawing.Size(164, 22);
+            this.MMFileClose.Size = new System.Drawing.Size(180, 22);
             this.MMFileClose.Text = "&Close";
             this.MMFileClose.Click += new System.EventHandler(this.MMFileClose_Click);
             // 
             // MMFileS2
             // 
             this.MMFileS2.Name = "MMFileS2";
-            this.MMFileS2.Size = new System.Drawing.Size(161, 6);
+            this.MMFileS2.Size = new System.Drawing.Size(177, 6);
             // 
             // MMFileExit
             // 
             this.MMFileExit.Name = "MMFileExit";
             this.MMFileExit.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.X)));
-            this.MMFileExit.Size = new System.Drawing.Size(164, 22);
+            this.MMFileExit.Size = new System.Drawing.Size(180, 22);
             this.MMFileExit.Text = "E&xit";
             this.MMFileExit.Click += new System.EventHandler(this.MMFileExit_Click);
             // 
@@ -331,14 +331,14 @@
             // MMVersionSourceCode
             // 
             this.MMVersionSourceCode.Name = "MMVersionSourceCode";
-            this.MMVersionSourceCode.Size = new System.Drawing.Size(141, 22);
+            this.MMVersionSourceCode.Size = new System.Drawing.Size(180, 22);
             this.MMVersionSourceCode.Text = "Source Code";
             this.MMVersionSourceCode.Click += new System.EventHandler(this.MMVersionSourceCode_Click);
             // 
             // MMVersionDiscord
             // 
             this.MMVersionDiscord.Name = "MMVersionDiscord";
-            this.MMVersionDiscord.Size = new System.Drawing.Size(141, 22);
+            this.MMVersionDiscord.Size = new System.Drawing.Size(180, 22);
             this.MMVersionDiscord.Text = "Visit Discord";
             this.MMVersionDiscord.Click += new System.EventHandler(this.VisitDiscordToolStripMenuItem_Click);
             // 
@@ -409,6 +409,15 @@
             this.pFileInfo.Name = "pFileInfo";
             this.pFileInfo.Size = new System.Drawing.Size(295, 150);
             this.pFileInfo.TabIndex = 6;
+            // 
+            // lfiIndex
+            // 
+            this.lfiIndex.AutoSize = true;
+            this.lfiIndex.Location = new System.Drawing.Point(3, 130);
+            this.lfiIndex.Name = "lfiIndex";
+            this.lfiIndex.Size = new System.Drawing.Size(32, 13);
+            this.lfiIndex.TabIndex = 7;
+            this.lfiIndex.Text = "index";
             // 
             // lfiExtras
             // 
@@ -565,15 +574,6 @@
             this.lTypePak.TabIndex = 9;
             this.lTypePak.Text = "...";
             this.lTypePak.TextAlign = System.Drawing.ContentAlignment.TopRight;
-            // 
-            // lfiIndex
-            // 
-            this.lfiIndex.AutoSize = true;
-            this.lfiIndex.Location = new System.Drawing.Point(3, 130);
-            this.lfiIndex.Name = "lfiIndex";
-            this.lfiIndex.Size = new System.Drawing.Size(32, 13);
-            this.lfiIndex.TabIndex = 7;
-            this.lfiIndex.Text = "index";
             // 
             // MainForm
             // 

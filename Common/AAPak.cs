@@ -714,6 +714,10 @@ namespace AAPakEditor
         /// </summary>
         public bool isDirty = false;
         /// <summary>
+        /// Set to true if this is not a pak file, but rather information loaded from somewhere else
+        /// </summary>
+        public bool isVirtual = false;
+        /// <summary>
         /// List of all used files
         /// </summary>
         public List<AAPakFileInfo> files = new List<AAPakFileInfo>();
@@ -749,6 +753,19 @@ namespace AAPakEditor
             if (filePath != "")
             {
                 bool isLoaded = false;
+
+                var ext = Path.GetExtension(filePath).ToLower();
+                if (ext == "csv") 
+                {
+                    if ((openAsReadOnly == true) && (createAsNewPak == false))
+                    {
+                        // Open file as CVS data
+                        isLoaded = OpenVirtualCSVPak(filePath);
+                        return;
+                    }
+                    // We will only allow opening as a CVS file when it's set to readonly (and not a new file)
+                }
+
                 if (createAsNewPak)
                 {
                     isLoaded = NewPak(filePath);
@@ -796,6 +813,8 @@ namespace AAPakEditor
                 return false;
             }
 
+            isVirtual = false;
+
             try
             {
                 // Open stream
@@ -832,7 +851,7 @@ namespace AAPakEditor
             // Fail if already open
             if (isOpen)
                 return false;
-
+            isVirtual = false;
             try
             {
                 // Create new file stream
@@ -847,6 +866,37 @@ namespace AAPakEditor
             catch
             {
                 _gpFilePath = null;
+                isOpen = false;
+                readOnly = true;
+                return false;
+            }
+        }
+
+
+        public bool OpenVirtualCSVPak(string csvfilePath)
+        {            
+            // Fail if already open
+            if (isOpen)
+                return false;
+
+            // Check if it exists
+            if (!File.Exists(csvfilePath))
+            {
+                return false;
+            }
+            isVirtual = true;
+            _gpFileStream = null; // Not used on virtual paks
+            try
+            {
+                // Open stream
+                _gpFilePath = csvfilePath;
+                isDirty = false;
+                isOpen = true;
+                readOnly = true;                 
+                return ReadCSVData();
+            }
+            catch
+            {
                 isOpen = false;
                 readOnly = true;
                 return false;
@@ -918,6 +968,60 @@ namespace AAPakEditor
 
             return _header.isValid ;
         }
+
+        protected bool ReadCSVData()
+        {
+            files.Clear();
+            extraFiles.Clear();
+            folders.Clear();
+
+            var lines = File.ReadAllLines(_gpFilePath);
+
+            if (lines.Length >= 1)
+            {
+                string csvHead = "";
+                csvHead = "name";
+                csvHead += ";size";
+                csvHead += ";offset";
+                csvHead += ";md5";
+                csvHead += ";createTime";
+                csvHead += ";modifyTime";
+                csvHead += ";sizeDuplicate";
+                csvHead += ";paddingSize";
+                csvHead += ";dummy1";
+                csvHead += ";dummy2";
+
+                if (lines[0].ToLower() != csvHead)
+                {
+                    _header.isValid = true;
+                }
+                else
+                {
+                    _header.isValid = false;
+                }
+            }
+            else
+            {
+                _header.isValid = false;
+            }
+
+            if (_header.isValid)
+            {
+                for (var i = 1; i < lines.Length;i++)
+                {
+                    var line = lines[i];
+                    var fields = line.Split(';');
+                    if (fields.Length == 10)
+                    {
+                        // Looks like it's valid, read it
+                        Work in progress here
+                    }
+                }
+            }
+
+            return _header.isValid;
+        }
+
 
         /// <summary>
         /// Populate the folders string list with virual folder names derived from the files found inside the pak

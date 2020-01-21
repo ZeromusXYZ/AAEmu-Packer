@@ -80,18 +80,19 @@ namespace AAPakEditor
             MMEditImportFiles.Enabled = ((pak != null) && (pak.isOpen) && (pak.readOnly == false));
             MMEditDeleteSelected.Enabled = ((pak != null) && (pak.isOpen) && (pak.readOnly == false) && (lbFiles.SelectedIndex >= 0));
             MMEditReplace.Enabled = ((pak != null) && (pak.isOpen) && (pak.readOnly == false) && (lbFiles.SelectedIndex >= 0));
-            MMEdit.Visible = (pak != null) && (pak.isOpen) && (!pak.readOnly);
+            MMEdit.Visible = (pak != null) && (pak.isOpen) && (pak.readOnly == false);
 
-            MMExportSelectedFile.Enabled = (pak != null) && (pak.isOpen) && (lbFiles.SelectedIndex >= 0);
-            MMExportSelectedFolder.Enabled = (pak != null) && (pak.isOpen) && (currentFileViewFolder != "");
-            MMExportAll.Enabled = (pak != null) && (pak.isOpen);
-            MMExportDB.Enabled = (pak != null) && (pak.isOpen) && (lbFiles.SelectedIndex >= 0) && (useDBKey) && (Path.GetExtension(lbFiles.SelectedItem.ToString()).StartsWith(".sql"));
-            MMExportDB.Visible = (pak != null) && (pak.isOpen) && (useDBKey);
+            MMExportSelectedFile.Enabled = (pak != null) && (pak.isOpen) && (pak.PakType != PakFileType.CSV) && (lbFiles.SelectedIndex >= 0);
+            MMExportSelectedFolder.Enabled = (pak != null) && (pak.isOpen) && (pak.PakType != PakFileType.CSV) && (currentFileViewFolder != "");
+            MMExportAll.Enabled = (pak != null) && (pak.isOpen) && (pak.PakType != PakFileType.CSV);
+            MMExportDB.Enabled = (pak != null) && (pak.isOpen) && (pak.PakType != PakFileType.CSV) && (lbFiles.SelectedIndex >= 0) && (useDBKey) && (Path.GetExtension(lbFiles.SelectedItem.ToString()).StartsWith(".sql"));
+            MMExportDB.Visible = (pak != null) && (pak.isOpen) && (pak.PakType != PakFileType.CSV) && (useDBKey);
             MMExportS2.Visible = MMExportDB.Visible;
-            MMExport.Visible = (pak != null) && (pak.isOpen);
+            MMExport.Visible = (pak != null) && (pak.isOpen) && (pak.PakType != PakFileType.CSV);
 
-            MMExtraMD5.Enabled = (pak != null) && (pak.isOpen) && (pak.readOnly == false) && (lbFiles.SelectedIndex >= 0);
-            MMExtraExportData.Enabled = (pak != null) && (pak.isOpen);
+            MMExtraMD5.Enabled = (pak != null) && (pak.isOpen) && (pak.PakType != PakFileType.CSV) && (pak.readOnly == false) && (lbFiles.SelectedIndex >= 0);
+            MMExtraExportData.Enabled = (pak != null) && (pak.isOpen) && (pak.PakType != PakFileType.CSV);
+            MMExtraMakeMod.Enabled = (pak != null) && (pak.isOpen) && (pak.PakType != PakFileType.CSV);
             MMExtra.Visible = (pak != null) && (pak.isOpen);
 
             if ((pak != null) && (pak.isOpen))
@@ -641,8 +642,8 @@ namespace AAPakEditor
                 s += ";" + pfi.size.ToString();
                 s += ";" + pfi.offset.ToString();
                 s += ";" + BitConverter.ToString(pfi.md5).Replace("-","").ToUpper();
-                s += ";" + DateTime.FromFileTime(pfi.createTime).ToString();
-                s += ";" + modTime.ToString();
+                s += ";" + DateTime.FromFileTime(pfi.createTime).ToString("yyyy-MM-dd HH:mm:ss");
+                s += ";" + modTime.ToString("yyyy-MM-dd HH:mm:ss");
                 s += ";" + pfi.sizeDuplicate.ToString();
                 s += ";" + pfi.paddingSize.ToString();
                 s += ";" + pfi.dummy1.ToString();

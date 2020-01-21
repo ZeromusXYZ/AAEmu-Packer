@@ -124,7 +124,7 @@
             // 
             this.MMFileOpen.Name = "MMFileOpen";
             this.MMFileOpen.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-            this.MMFileOpen.Size = new System.Drawing.Size(180, 22);
+            this.MMFileOpen.Size = new System.Drawing.Size(164, 22);
             this.MMFileOpen.Text = "&Open ...";
             this.MMFileOpen.Click += new System.EventHandler(this.MMFileOpen_Click);
             // 
@@ -132,20 +132,20 @@
             // 
             this.MMFileSave.Name = "MMFileSave";
             this.MMFileSave.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-            this.MMFileSave.Size = new System.Drawing.Size(180, 22);
+            this.MMFileSave.Size = new System.Drawing.Size(164, 22);
             this.MMFileSave.Text = "&Save now";
             this.MMFileSave.Click += new System.EventHandler(this.MMFileSave_Click);
             // 
             // MMFileS1
             // 
             this.MMFileS1.Name = "MMFileS1";
-            this.MMFileS1.Size = new System.Drawing.Size(177, 6);
+            this.MMFileS1.Size = new System.Drawing.Size(161, 6);
             // 
             // MMFileNew
             // 
             this.MMFileNew.Name = "MMFileNew";
             this.MMFileNew.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.N)));
-            this.MMFileNew.Size = new System.Drawing.Size(180, 22);
+            this.MMFileNew.Size = new System.Drawing.Size(164, 22);
             this.MMFileNew.Text = "New ...";
             this.MMFileNew.Click += new System.EventHandler(this.MMFileNew_Click);
             // 
@@ -153,20 +153,20 @@
             // 
             this.MMFileClose.Name = "MMFileClose";
             this.MMFileClose.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.W)));
-            this.MMFileClose.Size = new System.Drawing.Size(180, 22);
+            this.MMFileClose.Size = new System.Drawing.Size(164, 22);
             this.MMFileClose.Text = "&Close";
             this.MMFileClose.Click += new System.EventHandler(this.MMFileClose_Click);
             // 
             // MMFileS2
             // 
             this.MMFileS2.Name = "MMFileS2";
-            this.MMFileS2.Size = new System.Drawing.Size(177, 6);
+            this.MMFileS2.Size = new System.Drawing.Size(161, 6);
             // 
             // MMFileExit
             // 
             this.MMFileExit.Name = "MMFileExit";
             this.MMFileExit.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.X)));
-            this.MMFileExit.Size = new System.Drawing.Size(180, 22);
+            this.MMFileExit.Size = new System.Drawing.Size(164, 22);
             this.MMFileExit.Text = "E&xit";
             this.MMFileExit.Click += new System.EventHandler(this.MMFileExit_Click);
             // 
@@ -242,7 +242,7 @@
             // 
             this.MMExportSelectedFile.Name = "MMExportSelectedFile";
             this.MMExportSelectedFile.ShortcutKeys = System.Windows.Forms.Keys.F5;
-            this.MMExportSelectedFile.Size = new System.Drawing.Size(180, 22);
+            this.MMExportSelectedFile.Size = new System.Drawing.Size(160, 22);
             this.MMExportSelectedFile.Text = "Selected &File";
             this.MMExportSelectedFile.Click += new System.EventHandler(this.MMExportSelectedFile_Click);
             // 
@@ -250,32 +250,32 @@
             // 
             this.MMExportSelectedFolder.Enabled = false;
             this.MMExportSelectedFolder.Name = "MMExportSelectedFolder";
-            this.MMExportSelectedFolder.Size = new System.Drawing.Size(180, 22);
+            this.MMExportSelectedFolder.Size = new System.Drawing.Size(160, 22);
             this.MMExportSelectedFolder.Text = "Selected F&older";
             this.MMExportSelectedFolder.Click += new System.EventHandler(this.MMExportSelectedFolder_Click);
             // 
             // MMExportS1
             // 
             this.MMExportS1.Name = "MMExportS1";
-            this.MMExportS1.Size = new System.Drawing.Size(177, 6);
+            this.MMExportS1.Size = new System.Drawing.Size(157, 6);
             // 
             // MMExportAll
             // 
             this.MMExportAll.Name = "MMExportAll";
             this.MMExportAll.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F5)));
-            this.MMExportAll.Size = new System.Drawing.Size(180, 22);
+            this.MMExportAll.Size = new System.Drawing.Size(160, 22);
             this.MMExportAll.Text = "&All Files";
             this.MMExportAll.Click += new System.EventHandler(this.MMExportAll_Click);
             // 
             // MMExportS2
             // 
             this.MMExportS2.Name = "MMExportS2";
-            this.MMExportS2.Size = new System.Drawing.Size(177, 6);
+            this.MMExportS2.Size = new System.Drawing.Size(157, 6);
             // 
             // MMExportDB
             // 
             this.MMExportDB.Name = "MMExportDB";
-            this.MMExportDB.Size = new System.Drawing.Size(180, 22);
+            this.MMExportDB.Size = new System.Drawing.Size(160, 22);
             this.MMExportDB.Text = "Export DB";
             this.MMExportDB.Click += new System.EventHandler(this.MMExportDB_Click);
             // 
@@ -331,21 +331,21 @@
             // MMVersionSourceCode
             // 
             this.MMVersionSourceCode.Name = "MMVersionSourceCode";
-            this.MMVersionSourceCode.Size = new System.Drawing.Size(180, 22);
+            this.MMVersionSourceCode.Size = new System.Drawing.Size(141, 22);
             this.MMVersionSourceCode.Text = "Source Code";
             this.MMVersionSourceCode.Click += new System.EventHandler(this.MMVersionSourceCode_Click);
             // 
             // MMVersionDiscord
             // 
             this.MMVersionDiscord.Name = "MMVersionDiscord";
-            this.MMVersionDiscord.Size = new System.Drawing.Size(180, 22);
+            this.MMVersionDiscord.Size = new System.Drawing.Size(141, 22);
             this.MMVersionDiscord.Text = "Visit Discord";
             this.MMVersionDiscord.Click += new System.EventHandler(this.VisitDiscordToolStripMenuItem_Click);
             // 
             // openGamePakDialog
             // 
-            this.openGamePakDialog.Filter = "Known pak file types|*_pak;*_pak.*;*.aamod|ArcheAge Game Pak|*_pak;*_pak.*|All Fi" +
-    "les|*.*";
+            this.openGamePakDialog.Filter = "Known pak file types|*_pak;*_pak.*;*.aamod;*.csv|ArcheAge Game Pak|*_pak;*_pak.*|" +
+    "CSV Files|*.csv|All Files|*.*";
             this.openGamePakDialog.ReadOnlyChecked = true;
             this.openGamePakDialog.RestoreDirectory = true;
             this.openGamePakDialog.ShowReadOnly = true;

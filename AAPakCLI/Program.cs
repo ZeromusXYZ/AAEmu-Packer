@@ -126,8 +126,8 @@ namespace AAPakCLI
                 s += ";" + pfi.size.ToString();
                 s += ";" + pfi.offset.ToString();
                 s += ";" + BitConverter.ToString(pfi.md5).Replace("-", "").ToUpper();
-                s += ";" + DateTime.FromFileTime(pfi.createTime).ToString("yyyy-MM-dd HH:mm:ss");
-                s += ";" + modTime.ToString("yyyy-MM-dd HH:mm:ss");
+                s += ";" + AAPak.DateTimeToDateTimeStr(DateTime.FromFileTime(pfi.createTime));// DateTimeToDateTimeStr DateTime.FromFileTime(pfi.createTime).ToString("yyyy-MM-dd HH:mm:ss");
+                s += ";" + AAPak.DateTimeToDateTimeStr(modTime); // .ToString("yyyy-MM-dd HH:mm:ss");
                 s += ";" + pfi.sizeDuplicate.ToString();
                 s += ";" + pfi.paddingSize.ToString();
                 s += ";" + pfi.dummy1.ToString();
@@ -419,7 +419,7 @@ namespace AAPakCLI
                     {
                         if (arg1 == string.Empty)
                         {
-                            Console.WriteLine("[ERROR] you need to provide a older pak or cvs filename to compare with.");
+                            Console.WriteLine("[ERROR] you need to provide a older pak or csv filename to compare with.");
                         }
                         else
                         if (arg2 == string.Empty)

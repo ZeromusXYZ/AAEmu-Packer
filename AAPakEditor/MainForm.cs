@@ -1503,5 +1503,40 @@ namespace AAPakEditor
             // copy to clipboard
             Clipboard.SetText((sender as Label).Text);
         }
+
+        private void manualEditFileMD5ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if ((pak == null) || (!pak.isOpen))
+                return;
+
+            if (lbFiles.SelectedIndex < 0)
+            {
+                MessageBox.Show("No file selected");
+                return;
+            }
+            var d = currentFileViewFolder;
+            if (d != "") d += "/";
+            d += lbFiles.SelectedItem.ToString();
+
+            ref AAPakFileInfo pfi = ref pak.nullAAPakFileInfo;
+            if (pak.GetFileByName(d, ref pfi))
+            {
+                using (var fp = new FilePropForm())
+                {
+                    fp.pfi = pfi;
+                    fp.ResetFileInfo();
+                    if (fp.ShowDialog() == DialogResult.OK)
+                    {
+                        MessageBox.Show("Updating data not yet implemented");
+                    }
+                }
+            }
+            else
+            {
+                MessageBox.Show("ERROR: No file");
+            }
+            UpdateMM();
+
+        }
     }
 }

@@ -1270,6 +1270,22 @@ namespace AAPakEditor
         }
 
         /// <summary>
+        /// Manually set a new MD5 value for a file
+        /// </summary>
+        /// <param name="file"></param>
+        /// <param name="newHash"></param>
+        /// <returns>Returns true if a new value was set</returns>
+        public bool SetMD5(AAPakFileInfo file, byte[] newHash)
+        {
+            if ((file == null) || (newHash == null) || (newHash.Length != 16))
+                return false;
+            newHash.CopyTo(file.md5, 0);
+            isDirty = true;
+            return true;
+        }
+
+
+        /// <summary>
         /// Try to find a file inside the pakfile base on a offset position inside the pakfile.
         /// Note: this only checks inside the used files and does not account for "deleted" files
         /// </summary>

@@ -103,6 +103,12 @@
     <Compile Include="..\Common\SubStream.cs">
       <Link>SubStream.cs</Link>
     </Compile>
+    <Compile Include="FilePropForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FilePropForm.Designer.cs">
+      <DependentUpon>FilePropForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="ImportFolderDlg.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -135,6 +141,9 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="FilePropForm.resx">
+      <DependentUpon>FilePropForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="ImportFolderDlg.resx">
       <DependentUpon>ImportFolderDlg.cs</DependentUpon>
     </EmbeddedResource>

@@ -15,7 +15,7 @@ namespace AAPakEditor
     public partial class FilePropForm : Form
     {
         public AAPakFileInfo pfi;
-        private AAPakFileInfo newInfo = new AAPakFileInfo();
+        public AAPakFileInfo newInfo = new AAPakFileInfo();
         private string defaultWarning = "Please edit with care.\r\nChanging values to unintended values might completely break the pak-file !";
 
         public FilePropForm()

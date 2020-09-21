@@ -91,6 +91,7 @@ namespace AAPakEditor
             MMExport.Visible = (pak != null) && (pak.isOpen) && (pak.PakType != PakFileType.CSV);
 
             MMExtraMD5.Enabled = (pak != null) && (pak.isOpen) && (pak.PakType != PakFileType.CSV) && (pak.readOnly == false) && (lbFiles.SelectedIndex >= 0);
+            MMExtraEditFileProp.Enabled = (pak != null) && (pak.isOpen) && (pak.PakType != PakFileType.CSV) && (pak.readOnly == false) && (lbFiles.SelectedIndex >= 0);
             MMExtraExportData.Enabled = (pak != null) && (pak.isOpen) && (pak.PakType != PakFileType.CSV);
             MMExtraMakeMod.Enabled = (pak != null) && (pak.isOpen) && (pak.PakType != PakFileType.CSV);
             MMExtra.Visible = (pak != null) && (pak.isOpen);
@@ -1509,6 +1510,9 @@ namespace AAPakEditor
             if ((pak == null) || (!pak.isOpen))
                 return;
 
+            if (pak.readOnly)
+                return;
+
             if (lbFiles.SelectedIndex < 0)
             {
                 MessageBox.Show("No file selected");
@@ -1527,7 +1531,18 @@ namespace AAPakEditor
                     fp.ResetFileInfo();
                     if (fp.ShowDialog() == DialogResult.OK)
                     {
-                        MessageBox.Show("Updating data not yet implemented");
+                        pfi.name = fp.newInfo.name;
+                        pfi.size = fp.newInfo.size;
+                        pfi.sizeDuplicate = fp.newInfo.sizeDuplicate;
+                        pfi.paddingSize = fp.newInfo.paddingSize;
+                        fp.newInfo.md5.CopyTo(pfi.md5, 0);
+                        pfi.createTime = fp.newInfo.createTime;
+                        pfi.modifyTime = fp.newInfo.modifyTime;
+                        pfi.offset = fp.newInfo.offset;
+                        pfi.dummy1 = fp.newInfo.dummy1;
+                        pfi.dummy2 = fp.newInfo.dummy2;
+                        pak.isDirty = true;
+                        ShowFileInfo(pfi);
                     }
                 }
             }

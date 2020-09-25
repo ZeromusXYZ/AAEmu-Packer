@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
@@ -19,11 +20,12 @@ namespace AAPakEditor
         private byte[] dbKey = new byte[16] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
         private byte[] customKey = new byte[16] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
-        public class fileListEntry : Object 
+        public class fileListEntry : Object, IEquatable<fileListEntry>, IComparable<fileListEntry>
         {
             public string DisplayName;
             public AAPakFileInfo pfi;
             public bool isDeletedFile;
+
             public override string ToString()
             {
                 if (DisplayName != string.Empty)
@@ -31,6 +33,35 @@ namespace AAPakEditor
                 if (pfi != null)
                     return pfi.name;
                 return "<noname>";
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (obj == null) return false;
+                fileListEntry objAsPart = obj as fileListEntry;
+                if (objAsPart == null) return false;
+                else return Equals(objAsPart);
+            }
+            
+            public override int GetHashCode()
+            {
+                return base.GetHashCode();
+            }
+
+            public int CompareTo(fileListEntry comparePart)
+            {
+                // A null value means that this object is greater.
+                if (comparePart == null)
+                    return 1;
+
+                else
+                    return this.pfi.name.CompareTo(comparePart.pfi.name);
+            }
+
+            public bool Equals(fileListEntry other)
+            {
+                if (other == null) return false;
+                return (this.pfi.name.Equals(other.pfi.name));
             }
         }
         private List<fileListEntry> fileListEntries = new List<fileListEntry>();
@@ -45,22 +76,24 @@ namespace AAPakEditor
             MMFileSave.Enabled = (pak != null) && (pak.isOpen) && (!pak.readOnly) && (pak.isDirty);
             MMFileClose.Enabled = (pak != null) && (pak.isOpen);
 
-            MMEditAddFile.Enabled = ((pak != null) && (pak.isOpen) && (pak.readOnly == false));
-            MMEditImportFiles.Enabled = ((pak != null) && (pak.isOpen) && (pak.readOnly == false));
-            MMEditDeleteSelected.Enabled = ((pak != null) && (pak.isOpen) && (pak.readOnly == false) && (lbFiles.SelectedIndex >= 0));
-            MMEditReplace.Enabled = ((pak != null) && (pak.isOpen) && (pak.readOnly == false) && (lbFiles.SelectedIndex >= 0));
-            MMEdit.Visible = (pak != null) && (pak.isOpen) && (!pak.readOnly);
+            MMEditAddFile.Enabled = ((pak != null) && (pak.isOpen) && (pak.readOnly == false) && (pak.PakType != PakFileType.CSV));
+            MMEditImportFiles.Enabled = ((pak != null) && (pak.isOpen) && (pak.readOnly == false) && (pak.PakType != PakFileType.CSV));
+            MMEditDeleteSelected.Enabled = ((pak != null) && (pak.isOpen) && (pak.readOnly == false) && (lbFiles.SelectedIndex >= 0) && (pak.PakType != PakFileType.CSV));
+            MMEditReplace.Enabled = ((pak != null) && (pak.isOpen) && (pak.PakType != PakFileType.CSV) && (pak.readOnly == false) && (lbFiles.SelectedIndex >= 0));
+            MMEditFileProp.Enabled = (pak != null) && (pak.isOpen) && (pak.PakType != PakFileType.CSV) && (pak.readOnly == false) && (lbFiles.SelectedIndex >= 0);
+            MMEdit.Visible = (pak != null) && (pak.isOpen) && (pak.PakType != PakFileType.CSV) && (pak.readOnly == false);
 
-            MMExportSelectedFile.Enabled = (pak != null) && (pak.isOpen) && (lbFiles.SelectedIndex >= 0);
-            MMExportSelectedFolder.Enabled = (pak != null) && (pak.isOpen) && (currentFileViewFolder != "");
-            MMExportAll.Enabled = (pak != null) && (pak.isOpen);
-            MMExportDB.Enabled = (pak != null) && (pak.isOpen) && (lbFiles.SelectedIndex >= 0) && (useDBKey) && (Path.GetExtension(lbFiles.SelectedItem.ToString()).StartsWith(".sql"));
-            MMExportDB.Visible = (pak != null) && (pak.isOpen) && (useDBKey);
+            MMExportSelectedFile.Enabled = (pak != null) && (pak.isOpen) && (pak.PakType != PakFileType.CSV) && (lbFiles.SelectedIndex >= 0);
+            MMExportSelectedFolder.Enabled = (pak != null) && (pak.isOpen) && (pak.PakType != PakFileType.CSV) && (currentFileViewFolder != "");
+            MMExportAll.Enabled = (pak != null) && (pak.isOpen) && (pak.PakType != PakFileType.CSV);
+            MMExportDB.Enabled = (pak != null) && (pak.isOpen) && (pak.PakType != PakFileType.CSV) && (lbFiles.SelectedIndex >= 0) && (useDBKey) && (Path.GetExtension(lbFiles.SelectedItem.ToString()).StartsWith(".sql"));
+            MMExportDB.Visible = (pak != null) && (pak.isOpen) && (pak.PakType != PakFileType.CSV) && (useDBKey);
             MMExportS2.Visible = MMExportDB.Visible;
-            MMExport.Visible = (pak != null) && (pak.isOpen);
+            MMExport.Visible = (pak != null) && (pak.isOpen) && (pak.PakType != PakFileType.CSV);
 
-            MMExtraMD5.Enabled = (pak != null) && (pak.isOpen) && (pak.readOnly == false) && (lbFiles.SelectedIndex >= 0);
-            MMExtraExportData.Enabled = (pak != null) && (pak.isOpen);
+            MMExtraMD5.Enabled = (pak != null) && (pak.isOpen) && (pak.PakType != PakFileType.CSV) && (pak.readOnly == false) && (lbFiles.SelectedIndex >= 0);
+            MMExtraExportData.Enabled = (pak != null) && (pak.isOpen) && (pak.PakType != PakFileType.CSV);
+            MMExtraMakeMod.Enabled = (pak != null) && (pak.isOpen) && (pak.PakType != PakFileType.CSV);
             MMExtra.Visible = (pak != null) && (pak.isOpen);
 
             if ((pak != null) && (pak.isOpen))
@@ -610,8 +643,8 @@ namespace AAPakEditor
                 s += ";" + pfi.size.ToString();
                 s += ";" + pfi.offset.ToString();
                 s += ";" + BitConverter.ToString(pfi.md5).Replace("-","").ToUpper();
-                s += ";" + DateTime.FromFileTime(pfi.createTime).ToString();
-                s += ";" + modTime.ToString();
+                s += ";" + AAPak.DateTimeToDateTimeStr(DateTime.FromFileTime(pfi.createTime)); // .ToString("yyyy-MM-dd HH:mm:ss");
+                s += ";" + AAPak.DateTimeToDateTimeStr(modTime); // .ToString("yyyy-MM-dd HH:mm:ss");
                 s += ";" + pfi.sizeDuplicate.ToString();
                 s += ";" + pfi.paddingSize.ToString();
                 s += ";" + pfi.dummy1.ToString();
@@ -716,6 +749,7 @@ namespace AAPakEditor
         private void FinalizeFileListView()
         {
             lbFiles.Items.Clear();
+            fileListEntries.Sort();
             foreach (fileListEntry fle in fileListEntries)
                 lbFiles.Items.Add(fle);
         }
@@ -1354,6 +1388,42 @@ namespace AAPakEditor
                 }
                 else
 
+                if (arg == "-d")
+                {
+                    i += 1; // take one arg
+                    if ((pak == null) || (!pak.isOpen) || (pak.readOnly))
+                    {
+                        cmdErrors += "Pak file needs to be opened in read/write mode to be able to delete a file !\r\n";
+                    }
+                    else
+                    {
+                        // Delete the files
+                        try
+                        {
+                            var filesDeleted = 0;
+                            string delDir = arg1.ToLower();
+                            if (delDir.Last() != '/')
+                                delDir += '/';
+                            for (int n = pak.files.Count - 1; n >= 0; n--)
+                            //foreach(AAPakFileInfo pfi in pak.files)
+                            {
+                                AAPakFileInfo pfi = pak.files[n];
+                                if (pfi.name.ToLower().StartsWith(delDir))
+                                {
+                                    if (pak.DeleteFile(pfi))
+                                        filesDeleted++;
+                                }
+                            }
+                        }
+                        catch (Exception x)
+                        {
+                            cmdErrors += "Exception: " + x.Message + " \r\nPossible file corruption !";
+                        }
+
+                    }
+                }
+                else
+
                 if ((arg == "-x") || (arg == "+x"))
                 {
                     if ((pak == null) || (!pak.isOpen))
@@ -1376,7 +1446,7 @@ namespace AAPakEditor
                 }
                 else
 
-                if (arg == "-csv")
+                if ((arg == "-csv") || (arg == "+csv"))
                 {
                     i++; // take one arg
                     if ((pak == null) || (!pak.isOpen))
@@ -1433,6 +1503,55 @@ namespace AAPakEditor
         {
             // copy to clipboard
             Clipboard.SetText((sender as Label).Text);
+        }
+
+        private void manualEditFileMD5ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if ((pak == null) || (!pak.isOpen))
+                return;
+
+            if (pak.readOnly)
+                return;
+
+            if (lbFiles.SelectedIndex < 0)
+            {
+                MessageBox.Show("No file selected");
+                return;
+            }
+            var d = currentFileViewFolder;
+            if (d != "") d += "/";
+            d += lbFiles.SelectedItem.ToString();
+
+            ref AAPakFileInfo pfi = ref pak.nullAAPakFileInfo;
+            if (pak.GetFileByName(d, ref pfi))
+            {
+                using (var fp = new FilePropForm())
+                {
+                    fp.pfi = pfi;
+                    fp.ResetFileInfo();
+                    if (fp.ShowDialog() == DialogResult.OK)
+                    {
+                        pfi.name = fp.newInfo.name;
+                        pfi.size = fp.newInfo.size;
+                        pfi.sizeDuplicate = fp.newInfo.sizeDuplicate;
+                        pfi.paddingSize = fp.newInfo.paddingSize;
+                        fp.newInfo.md5.CopyTo(pfi.md5, 0);
+                        pfi.createTime = fp.newInfo.createTime;
+                        pfi.modifyTime = fp.newInfo.modifyTime;
+                        pfi.offset = fp.newInfo.offset;
+                        pfi.dummy1 = fp.newInfo.dummy1;
+                        pfi.dummy2 = fp.newInfo.dummy2;
+                        pak.isDirty = true;
+                        ShowFileInfo(pfi);
+                    }
+                }
+            }
+            else
+            {
+                MessageBox.Show("ERROR: No file");
+            }
+            UpdateMM();
+
         }
     }
 }

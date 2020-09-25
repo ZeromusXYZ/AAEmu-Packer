@@ -66,6 +66,7 @@
             this.lbFiles = new System.Windows.Forms.ListBox();
             this.lFiles = new System.Windows.Forms.Label();
             this.pFileInfo = new System.Windows.Forms.Panel();
+            this.lfiIndex = new System.Windows.Forms.Label();
             this.lfiExtras = new System.Windows.Forms.Label();
             this.lfiModifyTime = new System.Windows.Forms.Label();
             this.lfiStartOffset = new System.Windows.Forms.Label();
@@ -83,7 +84,7 @@
             this.tpExtraFiles = new System.Windows.Forms.TabPage();
             this.lbExtraFiles = new System.Windows.Forms.ListBox();
             this.lTypePak = new System.Windows.Forms.Label();
-            this.lfiIndex = new System.Windows.Forms.Label();
+            this.MMEditFileProp = new System.Windows.Forms.ToolStripMenuItem();
             this.MM.SuspendLayout();
             this.pFileInfo.SuspendLayout();
             this.tcDirectoryViews.SuspendLayout();
@@ -175,6 +176,7 @@
             this.MMEdit.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.MMEditAddFile,
             this.MMEditReplace,
+            this.MMEditFileProp,
             this.MMEditS2,
             this.MMEditDeleteSelected,
             this.MMEditS1,
@@ -243,7 +245,7 @@
             this.MMExportSelectedFile.Name = "MMExportSelectedFile";
             this.MMExportSelectedFile.ShortcutKeys = System.Windows.Forms.Keys.F5;
             this.MMExportSelectedFile.Size = new System.Drawing.Size(180, 22);
-            this.MMExportSelectedFile.Text = "Selected &File";
+            this.MMExportSelectedFile.Text = "Selected &File ...";
             this.MMExportSelectedFile.Click += new System.EventHandler(this.MMExportSelectedFile_Click);
             // 
             // MMExportSelectedFolder
@@ -251,7 +253,7 @@
             this.MMExportSelectedFolder.Enabled = false;
             this.MMExportSelectedFolder.Name = "MMExportSelectedFolder";
             this.MMExportSelectedFolder.Size = new System.Drawing.Size(180, 22);
-            this.MMExportSelectedFolder.Text = "Selected F&older";
+            this.MMExportSelectedFolder.Text = "Selected F&older ...";
             this.MMExportSelectedFolder.Click += new System.EventHandler(this.MMExportSelectedFolder_Click);
             // 
             // MMExportS1
@@ -264,7 +266,7 @@
             this.MMExportAll.Name = "MMExportAll";
             this.MMExportAll.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F5)));
             this.MMExportAll.Size = new System.Drawing.Size(180, 22);
-            this.MMExportAll.Text = "&All Files";
+            this.MMExportAll.Text = "&All Files ...";
             this.MMExportAll.Click += new System.EventHandler(this.MMExportAll_Click);
             // 
             // MMExportS2
@@ -276,7 +278,7 @@
             // 
             this.MMExportDB.Name = "MMExportDB";
             this.MMExportDB.Size = new System.Drawing.Size(180, 22);
-            this.MMExportDB.Text = "Export DB";
+            this.MMExportDB.Text = "Export DB ...";
             this.MMExportDB.Click += new System.EventHandler(this.MMExportDB_Click);
             // 
             // MMExtra
@@ -308,7 +310,7 @@
             // 
             this.MMExtraMakeMod.Name = "MMExtraMakeMod";
             this.MMExtraMakeMod.Size = new System.Drawing.Size(206, 22);
-            this.MMExtraMakeMod.Text = "Export pak as mod";
+            this.MMExtraMakeMod.Text = "Export pak as mod ...";
             this.MMExtraMakeMod.Click += new System.EventHandler(this.MMExtraMakeMod_Click);
             // 
             // MMExtraDebugTest
@@ -344,8 +346,8 @@
             // 
             // openGamePakDialog
             // 
-            this.openGamePakDialog.Filter = "Known pak file types|*_pak;*_pak.*;*.aamod|ArcheAge Game Pak|*_pak;*_pak.*|All Fi" +
-    "les|*.*";
+            this.openGamePakDialog.Filter = "Known pak file types|*_pak;*_pak.*;*.aamod;*.csv|ArcheAge Game Pak|*_pak;*_pak.*|" +
+    "CSV Files|*.csv|All Files|*.*";
             this.openGamePakDialog.ReadOnlyChecked = true;
             this.openGamePakDialog.RestoreDirectory = true;
             this.openGamePakDialog.ShowReadOnly = true;
@@ -409,6 +411,15 @@
             this.pFileInfo.Name = "pFileInfo";
             this.pFileInfo.Size = new System.Drawing.Size(295, 150);
             this.pFileInfo.TabIndex = 6;
+            // 
+            // lfiIndex
+            // 
+            this.lfiIndex.AutoSize = true;
+            this.lfiIndex.Location = new System.Drawing.Point(3, 130);
+            this.lfiIndex.Name = "lfiIndex";
+            this.lfiIndex.Size = new System.Drawing.Size(32, 13);
+            this.lfiIndex.TabIndex = 7;
+            this.lfiIndex.Text = "index";
             // 
             // lfiExtras
             // 
@@ -566,14 +577,11 @@
             this.lTypePak.Text = "...";
             this.lTypePak.TextAlign = System.Drawing.ContentAlignment.TopRight;
             // 
-            // lfiIndex
+            // MMExtraEditFileProp
             // 
-            this.lfiIndex.AutoSize = true;
-            this.lfiIndex.Location = new System.Drawing.Point(3, 130);
-            this.lfiIndex.Name = "lfiIndex";
-            this.lfiIndex.Size = new System.Drawing.Size(32, 13);
-            this.lfiIndex.TabIndex = 7;
-            this.lfiIndex.Text = "index";
+            this.MMEditFileProp.Name = "MMExtraEditFileProp";
+            this.MMEditFileProp.Size = new System.Drawing.Size(222, 22);
+            this.MMEditFileProp.Text = "Edit File Properties ...";
             // 
             // MainForm
             // 
@@ -666,6 +674,7 @@
         private System.Windows.Forms.ListBox lbExtraFiles;
         private System.Windows.Forms.Label lTypePak;
         private System.Windows.Forms.Label lfiIndex;
+        private System.Windows.Forms.ToolStripMenuItem MMEditFileProp;
     }
 }
 

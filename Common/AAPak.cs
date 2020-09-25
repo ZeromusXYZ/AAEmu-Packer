@@ -284,6 +284,9 @@ namespace AAPakEditor
         /// <returns>Returns true on success</returns>
         public bool WriteToFAT()
         {
+            if (_owner.PakType == PakFileType.CSV)
+                return false;
+
             // Read all File Table Data into Memory
             FAT.SetLength(0);
 
@@ -688,7 +691,7 @@ namespace AAPakEditor
 
     }
 
-    public enum PakFileType { TypeA, TypeB };
+    public enum PakFileType { TypeA, TypeB, CSV };
 
     /// <summary>
     /// AAPak Class used to handle game_pak from ArcheAge
@@ -713,6 +716,10 @@ namespace AAPakEditor
         /// Set to true if there have been changes made that require a rewrite of the FAT and/or header
         /// </summary>
         public bool isDirty = false;
+        /// <summary>
+        /// Set to true if this is not a pak file, but rather information loaded from somewhere else
+        /// </summary>
+        public bool isVirtual = false;
         /// <summary>
         /// List of all used files
         /// </summary>
@@ -749,6 +756,21 @@ namespace AAPakEditor
             if (filePath != "")
             {
                 bool isLoaded = false;
+
+                /*
+                var ext = Path.GetExtension(filePath).ToLower();
+                if (ext == "csv") 
+                {
+                    if ((openAsReadOnly == true) && (createAsNewPak == false))
+                    {
+                        // Open file as CVS data
+                        isLoaded = OpenVirtualCSVPak(filePath);
+                        return;
+                    }
+                    // We will only allow opening as a CVS file when it's set to readonly (and not a new file)
+                }
+                */
+
                 if (createAsNewPak)
                 {
                     isLoaded = NewPak(filePath);
@@ -796,6 +818,17 @@ namespace AAPakEditor
                 return false;
             }
 
+            isVirtual = false;
+
+            var ext = Path.GetExtension(filePath).ToLower();
+            if (ext == ".csv")
+            {
+                openAsReadOnly = true;
+                readOnly = true;
+                // Open file as CVS data
+                return OpenVirtualCSVPak(filePath);
+            }
+
             try
             {
                 // Open stream
@@ -832,7 +865,7 @@ namespace AAPakEditor
             // Fail if already open
             if (isOpen)
                 return false;
-
+            isVirtual = false;
             try
             {
                 // Create new file stream
@@ -853,6 +886,38 @@ namespace AAPakEditor
             }
         }
 
+
+        public bool OpenVirtualCSVPak(string csvfilePath)
+        {            
+            // Fail if already open
+            if (isOpen)
+                return false;
+
+            // Check if it exists
+            if (!File.Exists(csvfilePath))
+            {
+                return false;
+            }
+            isVirtual = true;
+            _gpFileStream = null; // Not used on virtual paks
+            try
+            {
+                // Open stream
+                _gpFilePath = csvfilePath;
+                isDirty = false;
+                isOpen = true;
+                readOnly = true;
+                PakType = PakFileType.CSV;
+                return ReadCSVData();
+            }
+            catch
+            {
+                isOpen = false;
+                readOnly = true;
+                return false;
+            }
+        }
+
         /// <summary>
         /// Closes the currently opened pakfile (if open)
         /// </summary>
@@ -862,7 +927,8 @@ namespace AAPakEditor
                 return;
             if ((isDirty) && (readOnly == false))
                 SaveHeader();
-            _gpFileStream.Close();
+            if (_gpFileStream != null)
+                _gpFileStream.Close();
             _gpFileStream = null;
             _gpFilePath = null;
             isOpen = false;
@@ -918,6 +984,134 @@ namespace AAPakEditor
 
             return _header.isValid ;
         }
+
+        public static byte[] StringToByteArray(string hex)
+        {
+            int NumberChars = hex.Length;
+            byte[] bytes = new byte[NumberChars / 2];
+            for (int i = 0; i < NumberChars; i += 2)
+                bytes[i / 2] = Convert.ToByte(hex.Substring(i, 2), 16);
+            return bytes;
+        }
+
+        public static string DateTimeToDateTimeStr(DateTime aTime)
+        {
+            string res = "";
+            try
+            {
+                res = aTime.ToString("yyyyMMdd-HHmmss");
+            }
+            catch
+            {
+                res = "00000000-000000";
+            }
+            return res;
+        }
+
+        public static long DateTimeStrToFILETIME(string encodedString)
+        {
+            long res = 0;
+
+            int yyyy = 0;
+            int mm = 0;
+            int dd = 0;
+            int hh = 0;
+            int nn = 0;
+            int ss = 0;
+
+            try
+            {
+                if (!int.TryParse(encodedString.Substring(0, 4), out yyyy)) yyyy = 0;
+                if (!int.TryParse(encodedString.Substring(5, 2), out mm)) mm = 0;
+                if (!int.TryParse(encodedString.Substring(8, 2), out dd)) dd = 0;
+                if (!int.TryParse(encodedString.Substring(11, 2), out hh)) hh = 0;
+                if (!int.TryParse(encodedString.Substring(14, 2), out nn)) nn = 0;
+                if (!int.TryParse(encodedString.Substring(17, 2), out ss)) ss = 0;
+
+                res = (new DateTime(yyyy, mm, dd, hh, nn, ss)).ToFileTime();
+            }
+            catch
+            {
+                res = 0;
+            }
+            return res;
+        }
+
+        protected bool ReadCSVData()
+        {
+            files.Clear();
+            extraFiles.Clear();
+            folders.Clear();
+
+            var lines = File.ReadAllLines(_gpFilePath);
+
+            if (lines.Length >= 1)
+            {
+                string csvHead = "";
+                csvHead = "name";
+                csvHead += ";size";
+                csvHead += ";offset";
+                csvHead += ";md5";
+                csvHead += ";createTime";
+                csvHead += ";modifyTime";
+                csvHead += ";sizeDuplicate";
+                csvHead += ";paddingSize";
+                csvHead += ";dummy1";
+                csvHead += ";dummy2";
+
+                if (lines[0].ToLower() != csvHead)
+                {
+                    _header.isValid = true;
+                }
+                else
+                {
+                    _header.isValid = false;
+                }
+            }
+            else
+            {
+                _header.isValid = false;
+            }
+
+            if (_header.isValid)
+            {
+                for (var i = 1; i < lines.Length;i++)
+                {
+                    var line = lines[i];
+                    var fields = line.Split(';');
+                    if (fields.Length == 10)
+                    {
+                        try
+                        {
+                            var fni = new AAPakFileInfo();
+
+                            // Looks like it's valid, read it
+                            fni.name = fields[0];
+                            fni.size = long.Parse(fields[1]);
+                            fni.offset = long.Parse(fields[2]);
+                            fni.md5 = StringToByteArray(fields[3]);
+                            fni.createTime = DateTimeStrToFILETIME(fields[4]);
+                            fni.modifyTime = DateTimeStrToFILETIME(fields[5]);
+                            fni.sizeDuplicate = long.Parse(fields[6]);
+                            fni.paddingSize = int.Parse(fields[7]);
+                            fni.dummy1 = uint.Parse(fields[8]);
+                            fni.dummy2 = uint.Parse(fields[9]);
+
+                            // TODO: check if this reads correctly
+                            files.Add(fni);
+                        }
+                        catch
+                        {
+                            _header.isValid = false;
+                            return false;
+                        }
+                    }
+                }
+            }
+
+            return _header.isValid;
+        }
+
 
         /// <summary>
         /// Populate the folders string list with virual folder names derived from the files found inside the pak
@@ -1074,6 +1268,22 @@ namespace AAPakEditor
             }
             return BitConverter.ToString(file.md5).Replace("-", ""); // Return the (updated) md5 as a string
         }
+
+        /// <summary>
+        /// Manually set a new MD5 value for a file
+        /// </summary>
+        /// <param name="file"></param>
+        /// <param name="newHash"></param>
+        /// <returns>Returns true if a new value was set</returns>
+        public bool SetMD5(AAPakFileInfo file, byte[] newHash)
+        {
+            if ((file == null) || (newHash == null) || (newHash.Length != 16))
+                return false;
+            newHash.CopyTo(file.md5, 0);
+            isDirty = true;
+            return true;
+        }
+
 
         /// <summary>
         /// Try to find a file inside the pakfile base on a offset position inside the pakfile.

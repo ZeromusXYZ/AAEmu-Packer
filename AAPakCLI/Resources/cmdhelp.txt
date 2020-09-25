@@ -1,0 +1,45 @@
+	Command-Line options
+----------------------------
+	The Command-Line arguments are treated as a macro, and are executed in order
+
+	<pakfile>
+		Opens pakfile in read-only mode (mainly used for exporting)
+
+	-o <pakfile>
+		Opens pakfile in read/write mode
+
+	+c <pakfile>
+		Creates/Overwrites a pakfile and opens it in read/write mode
+
+	+f <sourcefilename> <filename>
+		Adds a single file as target filename
+
+	-f <filename>
+		Deletes target filename from the pak
+
+	+d <sourcedirecotry> <directory>
+		Adds all files in sourcedirectory and all of it's sub-directories 
+		to the pakfile inside pakdirectory (don't add trailing slashes)
+
+	-d <directory>
+		Removes all files in target directory and all of the 
+		subfolders of the pakfile
+
+	-s
+		Force-Save pakfile
+
+	-x
+		Close (and save) pakfile
+
+	+x
+		same as -x but also closes the program after all arguments have been processed
+
+	-m <dialogboxtext>
+		Pause to show a MessageBox with a given message
+
+	-csv <filename>
+		Creates a CSV file from the current open pakfile, providing a blank will 
+		prompt a save dialog as normal
+
+	-h
+		This command-line help

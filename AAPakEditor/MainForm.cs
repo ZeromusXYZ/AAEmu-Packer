@@ -76,11 +76,12 @@ namespace AAPakEditor
             MMFileSave.Enabled = (pak != null) && (pak.isOpen) && (!pak.readOnly) && (pak.isDirty);
             MMFileClose.Enabled = (pak != null) && (pak.isOpen);
 
-            MMEditAddFile.Enabled = ((pak != null) && (pak.isOpen) && (pak.readOnly == false));
-            MMEditImportFiles.Enabled = ((pak != null) && (pak.isOpen) && (pak.readOnly == false));
-            MMEditDeleteSelected.Enabled = ((pak != null) && (pak.isOpen) && (pak.readOnly == false) && (lbFiles.SelectedIndex >= 0));
-            MMEditReplace.Enabled = ((pak != null) && (pak.isOpen) && (pak.readOnly == false) && (lbFiles.SelectedIndex >= 0));
-            MMEdit.Visible = (pak != null) && (pak.isOpen) && (pak.readOnly == false);
+            MMEditAddFile.Enabled = ((pak != null) && (pak.isOpen) && (pak.readOnly == false) && (pak.PakType != PakFileType.CSV));
+            MMEditImportFiles.Enabled = ((pak != null) && (pak.isOpen) && (pak.readOnly == false) && (pak.PakType != PakFileType.CSV));
+            MMEditDeleteSelected.Enabled = ((pak != null) && (pak.isOpen) && (pak.readOnly == false) && (lbFiles.SelectedIndex >= 0) && (pak.PakType != PakFileType.CSV));
+            MMEditReplace.Enabled = ((pak != null) && (pak.isOpen) && (pak.PakType != PakFileType.CSV) && (pak.readOnly == false) && (lbFiles.SelectedIndex >= 0));
+            MMEditFileProp.Enabled = (pak != null) && (pak.isOpen) && (pak.PakType != PakFileType.CSV) && (pak.readOnly == false) && (lbFiles.SelectedIndex >= 0);
+            MMEdit.Visible = (pak != null) && (pak.isOpen) && (pak.PakType != PakFileType.CSV) && (pak.readOnly == false);
 
             MMExportSelectedFile.Enabled = (pak != null) && (pak.isOpen) && (pak.PakType != PakFileType.CSV) && (lbFiles.SelectedIndex >= 0);
             MMExportSelectedFolder.Enabled = (pak != null) && (pak.isOpen) && (pak.PakType != PakFileType.CSV) && (currentFileViewFolder != "");
@@ -91,7 +92,6 @@ namespace AAPakEditor
             MMExport.Visible = (pak != null) && (pak.isOpen) && (pak.PakType != PakFileType.CSV);
 
             MMExtraMD5.Enabled = (pak != null) && (pak.isOpen) && (pak.PakType != PakFileType.CSV) && (pak.readOnly == false) && (lbFiles.SelectedIndex >= 0);
-            MMExtraEditFileProp.Enabled = (pak != null) && (pak.isOpen) && (pak.PakType != PakFileType.CSV) && (pak.readOnly == false) && (lbFiles.SelectedIndex >= 0);
             MMExtraExportData.Enabled = (pak != null) && (pak.isOpen) && (pak.PakType != PakFileType.CSV);
             MMExtraMakeMod.Enabled = (pak != null) && (pak.isOpen) && (pak.PakType != PakFileType.CSV);
             MMExtra.Visible = (pak != null) && (pak.isOpen);

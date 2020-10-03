@@ -41,6 +41,7 @@
             this.MMEdit = new System.Windows.Forms.ToolStripMenuItem();
             this.MMEditAddFile = new System.Windows.Forms.ToolStripMenuItem();
             this.MMEditReplace = new System.Windows.Forms.ToolStripMenuItem();
+            this.MMEditFileProp = new System.Windows.Forms.ToolStripMenuItem();
             this.MMEditS2 = new System.Windows.Forms.ToolStripSeparator();
             this.MMEditDeleteSelected = new System.Windows.Forms.ToolStripMenuItem();
             this.MMEditS1 = new System.Windows.Forms.ToolStripSeparator();
@@ -84,7 +85,6 @@
             this.tpExtraFiles = new System.Windows.Forms.TabPage();
             this.lbExtraFiles = new System.Windows.Forms.ListBox();
             this.lTypePak = new System.Windows.Forms.Label();
-            this.MMEditFileProp = new System.Windows.Forms.ToolStripMenuItem();
             this.MM.SuspendLayout();
             this.pFileInfo.SuspendLayout();
             this.tcDirectoryViews.SuspendLayout();
@@ -200,6 +200,13 @@
             this.MMEditReplace.Text = "Replace selected file ...";
             this.MMEditReplace.Click += new System.EventHandler(this.MMEditReplace_Click);
             // 
+            // MMEditFileProp
+            // 
+            this.MMEditFileProp.Name = "MMEditFileProp";
+            this.MMEditFileProp.Size = new System.Drawing.Size(222, 22);
+            this.MMEditFileProp.Text = "Edit File Properties ...";
+            this.MMEditFileProp.Click += new System.EventHandler(this.manualEditFileMD5ToolStripMenuItem_Click);
+            // 
             // MMEditS2
             // 
             this.MMEditS2.Name = "MMEditS2";
@@ -244,7 +251,7 @@
             // 
             this.MMExportSelectedFile.Name = "MMExportSelectedFile";
             this.MMExportSelectedFile.ShortcutKeys = System.Windows.Forms.Keys.F5;
-            this.MMExportSelectedFile.Size = new System.Drawing.Size(180, 22);
+            this.MMExportSelectedFile.Size = new System.Drawing.Size(172, 22);
             this.MMExportSelectedFile.Text = "Selected &File ...";
             this.MMExportSelectedFile.Click += new System.EventHandler(this.MMExportSelectedFile_Click);
             // 
@@ -252,32 +259,32 @@
             // 
             this.MMExportSelectedFolder.Enabled = false;
             this.MMExportSelectedFolder.Name = "MMExportSelectedFolder";
-            this.MMExportSelectedFolder.Size = new System.Drawing.Size(180, 22);
+            this.MMExportSelectedFolder.Size = new System.Drawing.Size(172, 22);
             this.MMExportSelectedFolder.Text = "Selected F&older ...";
             this.MMExportSelectedFolder.Click += new System.EventHandler(this.MMExportSelectedFolder_Click);
             // 
             // MMExportS1
             // 
             this.MMExportS1.Name = "MMExportS1";
-            this.MMExportS1.Size = new System.Drawing.Size(177, 6);
+            this.MMExportS1.Size = new System.Drawing.Size(169, 6);
             // 
             // MMExportAll
             // 
             this.MMExportAll.Name = "MMExportAll";
             this.MMExportAll.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F5)));
-            this.MMExportAll.Size = new System.Drawing.Size(180, 22);
+            this.MMExportAll.Size = new System.Drawing.Size(172, 22);
             this.MMExportAll.Text = "&All Files ...";
             this.MMExportAll.Click += new System.EventHandler(this.MMExportAll_Click);
             // 
             // MMExportS2
             // 
             this.MMExportS2.Name = "MMExportS2";
-            this.MMExportS2.Size = new System.Drawing.Size(177, 6);
+            this.MMExportS2.Size = new System.Drawing.Size(169, 6);
             // 
             // MMExportDB
             // 
             this.MMExportDB.Name = "MMExportDB";
-            this.MMExportDB.Size = new System.Drawing.Size(180, 22);
+            this.MMExportDB.Size = new System.Drawing.Size(172, 22);
             this.MMExportDB.Text = "Export DB ...";
             this.MMExportDB.Click += new System.EventHandler(this.MMExportDB_Click);
             // 
@@ -576,12 +583,6 @@
             this.lTypePak.TabIndex = 9;
             this.lTypePak.Text = "...";
             this.lTypePak.TextAlign = System.Drawing.ContentAlignment.TopRight;
-            // 
-            // MMExtraEditFileProp
-            // 
-            this.MMEditFileProp.Name = "MMExtraEditFileProp";
-            this.MMEditFileProp.Size = new System.Drawing.Size(222, 22);
-            this.MMEditFileProp.Text = "Edit File Properties ...";
             // 
             // MainForm
             // 

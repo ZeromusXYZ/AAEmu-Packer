@@ -162,6 +162,7 @@ namespace AAPakEditor
                 return;
             try
             {
+                File.Delete(saveFileDlg.FileName);
                 AAPak modpak = new AAPak(saveFileDlg.FileName, false, true);
                 Bitmap customIconImage = null;
 
@@ -183,7 +184,7 @@ namespace AAPakEditor
                 else
                 if (NewCustomImage != string.Empty)
                 {
-                    FileStream iconStream = File.Open(NewCustomImage, FileMode.Open, FileAccess.Read);
+                    FileStream iconStream = File.Open(NewCustomImage, FileMode.Open, FileAccess.Read,FileShare.Read);
                     /*
                     if ( (Path.GetExtension(NewCustomImage).ToLower() == ".png") && (!modpak.AddFileFromStream(ModPNGImageFileName, iconStream, DateTime.Now, DateTime.Now, false, out _)) )
                     {
@@ -289,7 +290,6 @@ namespace AAPakEditor
                             }
                         }
 
-
                         // Add to IconDirectory
                         IconDirectoryResource iconDirectoryResource = new IconDirectoryResource(icf);
                         IconResource icr = new IconResource();
@@ -392,7 +392,10 @@ namespace AAPakEditor
             if (openImageDlg.ShowDialog() == DialogResult.OK)
             {
                 NewCustomImage = openImageDlg.FileName;
-                modIcon.Load(NewCustomImage);
+                var newImg = Image.FromFile(NewCustomImage);
+                var thumb = newImg.GetThumbnailImage(128, 128, null, new IntPtr());
+                modIcon.Image = thumb; // .Load(NewCustomImage);
+                newImg.Dispose();
                 useOldPNGImage = false;
                 useOldJPGImage = false;
                 useDefaultImage = false;

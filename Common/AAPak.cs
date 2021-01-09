@@ -286,6 +286,8 @@ namespace AAPakEditor
         {
             if (_owner.PakType == PakFileType.CSV)
                 return false;
+            if (_owner.PakType == PakFileType.TypeF)
+                return false;
 
             // Read all File Table Data into Memory
             FAT.SetLength(0);

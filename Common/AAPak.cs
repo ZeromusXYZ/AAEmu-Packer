@@ -514,8 +514,41 @@ namespace AAPakEditor
                     pfi.createTime = reader.ReadInt64();
                     pfi.dummy2 = reader.ReadUInt64(); // unused ?
                 }
+                else
+                if (_owner.PakType == PakFileType.TypeF)
+                {
+                    /*
+                    using (var hf = File.OpenWrite("fileheader.bin"))
+                    {
+                        ms.CopyTo(hf);
+                    }
+                    ms.Position = 0;
+                    */
 
-                if (_owner.PakType == PakFileType.TypeA)
+                    pfi.dummy2 = reader.ReadUInt64(); // unused ?
+                    // Manually read the string for filename
+                    pfi.name = "";
+                    for (int c = 0; c < 0x108; c++)
+                    {
+                        byte ch = reader.ReadByte();
+                        if (ch != 0)
+                            pfi.name += (char)ch;
+                        else
+                            break;
+                    }
+                    ms.Position = 0x110;
+
+                    pfi.offset = reader.ReadInt64();
+                    pfi.size = reader.ReadInt64();
+                    pfi.sizeDuplicate = reader.ReadInt64();
+                    pfi.paddingSize = reader.ReadInt32();
+                    pfi.md5 = reader.ReadBytes(16);
+                    pfi.dummy1 = reader.ReadUInt32(); // observed 0x00000000
+                    pfi.createTime = reader.ReadInt64();
+                    pfi.modifyTime = reader.ReadInt64();
+                }
+
+                if ((_owner.PakType == PakFileType.TypeA) || (_owner.PakType == PakFileType.TypeF))
                 {
                     // TypeA has files first and extra files last
                     if (filesToGo > 0)
@@ -610,6 +643,31 @@ namespace AAPakEditor
         }
 
         /// <summary>
+        /// Helper function for debugging, write byte array as a hex text file
+        /// </summary>
+        /// <param name="bytes"></param>
+        public static string ByteArrayToHexString(byte[] bytes, string spacingText = " ", string lineFeed = "\r\n")
+        {
+            string s = "";
+            for(int i = 0; i < bytes.Length;i++)
+            {
+                s += bytes[i].ToString("X2") + spacingText;
+                if ((i % 16) == 15)
+                    s += lineFeed;
+                else
+                {
+                    if ((i % 4) == 3)
+                        s += spacingText;
+                    if ((i % 8) == 7)
+                        s += spacingText;
+                }
+            }
+
+            return s;
+        }
+
+
+        /// <summary>
         /// Decrypt the current header data to get the file counts
         /// </summary>
         public void DecryptHeaderData()
@@ -634,12 +692,26 @@ namespace AAPakEditor
                 extraFileCount = BitConverter.ToUInt32(data, 0);
                 isValid = true;
             }
+            if ((data[0] == 'Z') && (data[1] == 'E') && (data[2] == 'R') && (data[3] == 'O'))
+            {
+                // Z E R O = 0x5A 0x45 0x52 0x4F
+                _owner.PakType = PakFileType.TypeF;
+                fileCount = BitConverter.ToUInt32(data, 8);
+                extraFileCount = BitConverter.ToUInt32(data, 12);
+                isValid = true;
+            }
             else
             {
                 // Doesn't look like this is a pak file, the file is corrupted, or is in a unknown layout/format
                 fileCount = 0;
                 extraFileCount = 0;
                 isValid = false;
+
+                if (_owner.DebugMode)
+                {
+                    var hex = ByteArrayToHexString(key, "", "");
+                    File.WriteAllBytes("game_pak_failed_header_" + hex + ".key", data);
+                }
             }
 
         }
@@ -691,7 +763,7 @@ namespace AAPakEditor
 
     }
 
-    public enum PakFileType { TypeA, TypeB, CSV };
+    public enum PakFileType { TypeA, TypeB, CSV, TypeF };
 
     /// <summary>
     /// AAPak Class used to handle game_pak from ArcheAge
@@ -743,6 +815,7 @@ namespace AAPakEditor
         /// </summary>
         public bool paddingDeleteMode = false;
         public PakFileType PakType = PakFileType.TypeA ;
+        public bool DebugMode = false;
 
         /// <summary>
         /// Creates and/or opens a game_pak file

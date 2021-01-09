@@ -385,8 +385,25 @@ namespace AAPakEditor
                 {
                     lfiHash.Text = "MD5: " + BitConverter.ToString(pfi.md5).ToUpper().Replace("-", "");
                 }
-                lfiCreateTime.Text = "Created: " + DateTime.FromFileTime(pfi.createTime).ToString();
-                lfiModifyTime.Text = "Modified: " + DateTime.FromFileTime(pfi.modifyTime).ToString();
+                try
+                {
+                    lfiCreateTime.Text = "Created: " + DateTime.FromFileTime(pfi.createTime).ToString();
+                }
+                catch
+                {
+                    lfiCreateTime.Text = "Invalid creation time";
+                }
+                try
+                {
+                    if (pfi.modifyTime != 0)
+                        lfiModifyTime.Text = "Modified: " + DateTime.FromFileTime(pfi.modifyTime).ToString();
+                    else
+                        lfiModifyTime.Text = "<Modified time not used>";
+                }
+                catch
+                {
+                    lfiModifyTime.Text = "Invalid modified time";
+                }
                 lfiStartOffset.Text = "Start Offset: 0x" + pfi.offset.ToString("X16");
                 lfiExtras.Text = "D1 0x" + pfi.dummy1.ToString("X") + "  D2 0x" + pfi.dummy2.ToString("X");
                 if (pfi.entryIndexNumber >= 0)
@@ -1552,6 +1569,45 @@ namespace AAPakEditor
             }
             UpdateMM();
 
+        }
+
+        private void MMExtraTryOpenUsingKeyList_Click(object sender, EventArgs e)
+        {
+            if (openKeyListDialog.ShowDialog() != DialogResult.OK)
+                return;
+            if (openGamePakDialog.ShowDialog() != DialogResult.OK)
+                return;
+            var useDebug = MessageBox.Show("Output debug headers ?", "", MessageBoxButtons.YesNo) == DialogResult.Yes;
+            var keyListText = File.ReadAllLines(openKeyListDialog.FileName).ToList();
+            var keyList = new List<byte[]>();
+            foreach(var s in keyListText)
+            {
+                var key = AAPak.StringToByteArray(s);
+                keyList.Add(key);
+            }
+
+            foreach(var key in keyList)
+            {
+                var pak = new AAPak("");
+                pak.DebugMode = useDebug;
+                pak._header.SetCustomKey(key);
+                if (pak.OpenPak(openGamePakDialog.FileName, true))
+                {
+                    if (MessageBox.Show("Was able to open pak with key \r\n" + AAPakFileHeader.ByteArrayToHexString(key, "", "") + "\r\n\r\nDo you want to save this key at the game_pak location ?", "Valid key found", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                    {
+                        var keyfile = Path.ChangeExtension(pak._gpFilePath, ".key");
+                        File.WriteAllBytes(keyfile, key);
+                        MessageBox.Show("Saved key as " + keyfile);
+                    }
+                    return;
+                }
+            }
+            MessageBox.Show("No match found using "+keyList.Count.ToString()+" keys !");
+        }
+
+        private void MMFileS2_Click(object sender, EventArgs e)
+        {
+            MMFileTryOpenUsingKeyList.Visible = true;
         }
     }
 }

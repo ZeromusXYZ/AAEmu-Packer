@@ -528,7 +528,8 @@ namespace AAPakEditor
 
                 // Update file details
                 File.SetCreationTime(destName, DateTime.FromFileTime(pfi.createTime));
-                File.SetLastWriteTime(destName, DateTime.FromFileTime(pfi.modifyTime));
+                if (pfi.modifyTime != 0)
+                    File.SetLastWriteTime(destName, DateTime.FromFileTime(pfi.modifyTime));
             }
             catch
             {

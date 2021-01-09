@@ -286,8 +286,6 @@ namespace AAPakEditor
         {
             if (_owner.PakType == PakFileType.CSV)
                 return false;
-            if (_owner.PakType == PakFileType.TypeF)
-                return false;
 
             // Read all File Table Data into Memory
             FAT.SetLength(0);
@@ -308,7 +306,7 @@ namespace AAPakEditor
 
                 AAPakFileInfo pfi = null;
 
-                if (_owner.PakType == PakFileType.TypeA)
+                if ((_owner.PakType == PakFileType.TypeA) || (_owner.PakType == PakFileType.TypeF))
                 {
                     // TypeA has files first, extra files after that
                     if (filesToGo > 0)
@@ -358,6 +356,7 @@ namespace AAPakEditor
                 else
                 {
                     // Unsupported Type somehow
+                    throw new Exception("Don't know how to write this FAT: " + _owner.PakType);
                 }
 
                 if (_owner.PakType == PakFileType.TypeA)
@@ -403,8 +402,29 @@ namespace AAPakEditor
                     writer.Write(pfi.dummy2);
                 }
                 else
+                if (_owner.PakType == PakFileType.TypeF)
                 {
-                    // Uhm, what now ?
+                    writer.Write(pfi.dummy2);
+                    // Manually write the string for filename
+                    for (int c = 0; c < 0x108; c++)
+                    {
+                        byte ch = 0;
+                        if (c < pfi.name.Length)
+                            ch = (byte)pfi.name[c];
+                        writer.Write(ch);
+                    }
+                    writer.Write(pfi.offset);
+                    writer.Write(pfi.size);
+                    writer.Write(pfi.sizeDuplicate);
+                    writer.Write(pfi.paddingSize);
+                    writer.Write(pfi.md5);
+                    writer.Write(pfi.dummy1);
+                    writer.Write(pfi.createTime);
+                    writer.Write(pfi.modifyTime); // For TypeF this is typically zero
+                }
+                else
+                {
+                    throw new Exception("I don't know how to write this file format: " + _owner.PakType);
                 }
 
                 // encrypt and write our new file into the FAT memory stream
@@ -519,14 +539,6 @@ namespace AAPakEditor
                 else
                 if (_owner.PakType == PakFileType.TypeF)
                 {
-                    /*
-                    using (var hf = File.OpenWrite("fileheader.bin"))
-                    {
-                        ms.CopyTo(hf);
-                    }
-                    ms.Position = 0;
-                    */
-
                     pfi.dummy2 = reader.ReadUInt64(); // unused ?
                     // Manually read the string for filename
                     pfi.name = "";
@@ -547,7 +559,17 @@ namespace AAPakEditor
                     pfi.md5 = reader.ReadBytes(16);
                     pfi.dummy1 = reader.ReadUInt32(); // observed 0x00000000
                     pfi.createTime = reader.ReadInt64();
-                    pfi.modifyTime = reader.ReadInt64();
+                    pfi.modifyTime = reader.ReadInt64(); // For TypeF this is typically zero
+                }
+                else
+                {
+                    /*
+                    using (var hf = File.OpenWrite("fileheader.bin"))
+                    {
+                        ms.CopyTo(hf);
+                    }
+                    ms.Position = 0;
+                    */
                 }
 
                 if ((_owner.PakType == PakFileType.TypeA) || (_owner.PakType == PakFileType.TypeF))

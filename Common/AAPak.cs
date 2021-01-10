@@ -716,6 +716,7 @@ namespace AAPakEditor
                 extraFileCount = BitConverter.ToUInt32(data, 0);
                 isValid = true;
             }
+            else
             if ((data[0] == 'Z') && (data[1] == 'E') && (data[2] == 'R') && (data[3] == 'O'))
             {
                 // Z E R O = 0x5A 0x45 0x52 0x4F

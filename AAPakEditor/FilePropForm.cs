@@ -251,7 +251,9 @@ namespace AAPakEditor
                 tHash.Text = BitConverter.ToString(pfi.md5).ToUpper().Replace("-", "");
 
                 dtCreate.Value = DateTime.FromFileTime(pfi.createTime);
-                dtModified.Value = DateTime.FromFileTime(pfi.modifyTime);
+                if (pfi.modifyTime != 0)
+                    dtModified.Value = DateTime.FromFileTime(pfi.modifyTime);
+                dtModified.Value = DateTime.UtcNow ;
 
                 tOffset.Text = "0x" + pfi.offset.ToString("X");
 

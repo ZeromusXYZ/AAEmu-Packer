@@ -775,6 +775,18 @@ namespace AAPakEditor
                 writer.Write(fileCount);
             }
             else
+            if (_owner.PakType == PakFileType.TypeF)
+            {
+                writer.Write((byte)'Z');
+                writer.Write((byte)'E');
+                writer.Write((byte)'R');
+                writer.Write((byte)'O');
+                writer.Seek(8, SeekOrigin.Begin);
+                writer.Write(fileCount);
+                writer.Seek(12, SeekOrigin.Begin);
+                writer.Write(extraFileCount);
+            }
+            else
             {
                 // I don't know what to do with something that shouldn't exist
             }

@@ -118,7 +118,7 @@ namespace AAPakCLI
             sl.Add(s);
             foreach (AAPakFileInfo pfi in pak.files)
             {
-                DateTime modTime = DateTime.FromFileTime(pfi.modifyTime);
+                DateTime modTime = DateTime.FromFileTimeUtc(pfi.modifyTime);
                 if (modTime > newest)
                     newest = modTime;
 
@@ -126,7 +126,7 @@ namespace AAPakCLI
                 s += ";" + pfi.size.ToString();
                 s += ";" + pfi.offset.ToString();
                 s += ";" + BitConverter.ToString(pfi.md5).Replace("-", "").ToUpper();
-                s += ";" + AAPak.DateTimeToDateTimeStr(DateTime.FromFileTime(pfi.createTime));// DateTimeToDateTimeStr DateTime.FromFileTime(pfi.createTime).ToString("yyyy-MM-dd HH:mm:ss");
+                s += ";" + AAPak.DateTimeToDateTimeStr(DateTime.FromFileTimeUtc(pfi.createTime));// DateTimeToDateTimeStr DateTime.FromFileTimeUtc(pfi.createTime).ToString("yyyy-MM-dd HH:mm:ss");
                 s += ";" + AAPak.DateTimeToDateTimeStr(modTime); // .ToString("yyyy-MM-dd HH:mm:ss");
                 s += ";" + pfi.sizeDuplicate.ToString();
                 s += ";" + pfi.paddingSize.ToString();

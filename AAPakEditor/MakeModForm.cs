@@ -369,7 +369,7 @@ namespace AAPakEditor
                     if (fi.name.StartsWith(ModFileFolderName))
                         continue;
                     var ms = mainPak.ExportFileAsStream(fi);
-                    if (!modpak.AddFileFromStream(fi.name,ms,DateTime.FromFileTime(fi.createTime),DateTime.FromFileTime(fi.modifyTime),false,out _))
+                    if (!modpak.AddFileFromStream(fi.name,ms,DateTime.FromFileTimeUtc(fi.createTime),DateTime.FromFileTimeUtc(fi.modifyTime),false,out _))
                     {
                         MessageBox.Show("Failed to copy \n"+fi.name+"\nAborting !","Copy Error",MessageBoxButtons.OK,MessageBoxIcon.Error);
                         modpak.ClosePak();

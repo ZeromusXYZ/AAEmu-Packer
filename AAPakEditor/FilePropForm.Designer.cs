@@ -53,6 +53,10 @@
             this.lPadding = new System.Windows.Forms.Label();
             this.lWarning = new System.Windows.Forms.Label();
             this.tWarnings = new System.Windows.Forms.TextBox();
+            this.tCreateAsNumber = new System.Windows.Forms.TextBox();
+            this.tModifyAsNumber = new System.Windows.Forms.TextBox();
+            this.lCTtoR = new System.Windows.Forms.Label();
+            this.lDTToR = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // lfiIndex
@@ -158,7 +162,7 @@
             this.dtCreate.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
             this.dtCreate.Location = new System.Drawing.Point(91, 138);
             this.dtCreate.Name = "dtCreate";
-            this.dtCreate.Size = new System.Drawing.Size(200, 20);
+            this.dtCreate.Size = new System.Drawing.Size(190, 20);
             this.dtCreate.TabIndex = 11;
             this.dtCreate.ValueChanged += new System.EventHandler(this.tFieldsChanged);
             // 
@@ -168,7 +172,7 @@
             this.dtModified.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
             this.dtModified.Location = new System.Drawing.Point(91, 164);
             this.dtModified.Name = "dtModified";
-            this.dtModified.Size = new System.Drawing.Size(200, 20);
+            this.dtModified.Size = new System.Drawing.Size(190, 20);
             this.dtModified.TabIndex = 12;
             this.dtModified.ValueChanged += new System.EventHandler(this.tFieldsChanged);
             // 
@@ -281,11 +285,53 @@
             this.tWarnings.Size = new System.Drawing.Size(433, 57);
             this.tWarnings.TabIndex = 24;
             // 
+            // tCreateAsNumber
+            // 
+            this.tCreateAsNumber.Location = new System.Drawing.Point(322, 138);
+            this.tCreateAsNumber.Name = "tCreateAsNumber";
+            this.tCreateAsNumber.Size = new System.Drawing.Size(126, 20);
+            this.tCreateAsNumber.TabIndex = 25;
+            this.tCreateAsNumber.TextChanged += new System.EventHandler(this.tFieldsChanged);
+            // 
+            // tModifyAsNumber
+            // 
+            this.tModifyAsNumber.Location = new System.Drawing.Point(322, 164);
+            this.tModifyAsNumber.Name = "tModifyAsNumber";
+            this.tModifyAsNumber.Size = new System.Drawing.Size(126, 20);
+            this.tModifyAsNumber.TabIndex = 26;
+            this.tModifyAsNumber.TextChanged += new System.EventHandler(this.tFieldsChanged);
+            // 
+            // lCTtoR
+            // 
+            this.lCTtoR.AutoSize = true;
+            this.lCTtoR.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.lCTtoR.Location = new System.Drawing.Point(297, 138);
+            this.lCTtoR.Name = "lCTtoR";
+            this.lCTtoR.Size = new System.Drawing.Size(19, 13);
+            this.lCTtoR.TabIndex = 27;
+            this.lCTtoR.Text = "=>";
+            this.lCTtoR.Click += new System.EventHandler(this.lCTtoR_Click);
+            // 
+            // lDTToR
+            // 
+            this.lDTToR.AutoSize = true;
+            this.lDTToR.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.lDTToR.Location = new System.Drawing.Point(297, 167);
+            this.lDTToR.Name = "lDTToR";
+            this.lDTToR.Size = new System.Drawing.Size(19, 13);
+            this.lDTToR.TabIndex = 28;
+            this.lDTToR.Text = "=>";
+            this.lDTToR.Click += new System.EventHandler(this.lDTToR_Click);
+            // 
             // FilePropForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(465, 388);
+            this.Controls.Add(this.lDTToR);
+            this.Controls.Add(this.lCTtoR);
+            this.Controls.Add(this.tModifyAsNumber);
+            this.Controls.Add(this.tCreateAsNumber);
             this.Controls.Add(this.tWarnings);
             this.Controls.Add(this.lWarning);
             this.Controls.Add(this.tPaddingSize);
@@ -349,5 +395,9 @@
         private System.Windows.Forms.Label lPadding;
         private System.Windows.Forms.Label lWarning;
         private System.Windows.Forms.TextBox tWarnings;
+        private System.Windows.Forms.TextBox tCreateAsNumber;
+        private System.Windows.Forms.TextBox tModifyAsNumber;
+        private System.Windows.Forms.Label lCTtoR;
+        private System.Windows.Forms.Label lDTToR;
     }
 }

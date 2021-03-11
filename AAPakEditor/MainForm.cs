@@ -387,14 +387,16 @@ namespace AAPakEditor
                 }
                 try
                 {
+                    lCreateRaw.Text = "(" + pfi.createTime.ToString() + ")";
                     lfiCreateTime.Text = "Created: " + DateTime.FromFileTime(pfi.createTime).ToString();
                 }
                 catch
                 {
-                    lfiCreateTime.Text = "Invalid creation time";
+                    lfiCreateTime.Text = "CreateTime Invalid";
                 }
                 try
                 {
+                    lModifiedRaw.Text = "(" + pfi.modifyTime.ToString() + ")";
                     if (pfi.modifyTime != 0)
                         lfiModifyTime.Text = "Modified: " + DateTime.FromFileTime(pfi.modifyTime).ToString();
                     else
@@ -402,7 +404,7 @@ namespace AAPakEditor
                 }
                 catch
                 {
-                    lfiModifyTime.Text = "Invalid modified time";
+                    lfiModifyTime.Text = "ModifiedTime Invalid (" + pfi.modifyTime.ToString() + ")";
                 }
                 lfiStartOffset.Text = "Start Offset: 0x" + pfi.offset.ToString("X16");
                 lfiExtras.Text = "D1 0x" + pfi.dummy1.ToString("X") + "  D2 0x" + pfi.dummy2.ToString("X");
@@ -425,6 +427,8 @@ namespace AAPakEditor
                 lfiStartOffset.Text = "";
                 lfiExtras.Text = "";
                 lfiIndex.Text = "";
+                lCreateRaw.Text = "";
+                lModifiedRaw.Text = "";
             }
         }
 
@@ -527,9 +531,9 @@ namespace AAPakEditor
                 fs.Dispose();
 
                 // Update file details
-                File.SetCreationTime(destName, DateTime.FromFileTime(pfi.createTime));
+                File.SetCreationTime(destName, DateTime.FromFileTimeUtc(pfi.createTime));
                 if (pfi.modifyTime != 0)
-                    File.SetLastWriteTime(destName, DateTime.FromFileTime(pfi.modifyTime));
+                    File.SetLastWriteTime(destName, DateTime.FromFileTimeUtc(pfi.modifyTime));
             }
             catch
             {
@@ -653,7 +657,7 @@ namespace AAPakEditor
             sl.Add(s);
             foreach (AAPakFileInfo pfi in pak.files)
             {
-                DateTime modTime = DateTime.FromFileTime(pfi.modifyTime);
+                DateTime modTime = DateTime.FromFileTimeUtc(pfi.modifyTime);
                 if (modTime > newest)
                     newest = modTime;
 
@@ -661,7 +665,7 @@ namespace AAPakEditor
                 s += ";" + pfi.size.ToString();
                 s += ";" + pfi.offset.ToString();
                 s += ";" + BitConverter.ToString(pfi.md5).Replace("-","").ToUpper();
-                s += ";" + AAPak.DateTimeToDateTimeStr(DateTime.FromFileTime(pfi.createTime)); // .ToString("yyyy-MM-dd HH:mm:ss");
+                s += ";" + AAPak.DateTimeToDateTimeStr(DateTime.FromFileTimeUtc(pfi.createTime)); // .ToString("yyyy-MM-dd HH:mm:ss");
                 s += ";" + AAPak.DateTimeToDateTimeStr(modTime); // .ToString("yyyy-MM-dd HH:mm:ss");
                 s += ";" + pfi.sizeDuplicate.ToString();
                 s += ";" + pfi.paddingSize.ToString();

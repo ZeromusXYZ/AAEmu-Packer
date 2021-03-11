@@ -1118,6 +1118,11 @@ namespace AAPakEditor
             return res;
         }
 
+        /// <summary>
+        /// Creates a file time from a given specialized string
+        /// </summary>
+        /// <param name="encodedString"></param>
+        /// <returns>FILETIME as UTC</returns>
         public static long DateTimeStrToFILETIME(string encodedString)
         {
             long res = 0;
@@ -1138,7 +1143,7 @@ namespace AAPakEditor
                 if (!int.TryParse(encodedString.Substring(14, 2), out nn)) nn = 0;
                 if (!int.TryParse(encodedString.Substring(17, 2), out ss)) ss = 0;
 
-                res = (new DateTime(yyyy, mm, dd, hh, nn, ss)).ToFileTime();
+                res = (new DateTime(yyyy, mm, dd, hh, nn, ss)).ToFileTimeUtc();
             }
             catch
             {
@@ -1456,7 +1461,7 @@ namespace AAPakEditor
             pfi.paddingSize = (int)(endPos - pfi.size - pfi.offset);
             // Recalculate the MD5 hash
             UpdateMD5(pfi); // TODO: optimize this to calculate WHILE we are copying the stream
-            pfi.modifyTime = modifyTime.ToFileTime();
+            pfi.modifyTime = modifyTime.ToFileTimeUtc();
 
             if (PakType == PakFileType.TypeB)
                 pfi.dummy1 = 0x80000000;
@@ -1556,8 +1561,8 @@ namespace AAPakEditor
             newFile.offset = _header.FirstFileInfoOffset;
             newFile.size = sourceStream.Length;
             newFile.sizeDuplicate = newFile.size;
-            newFile.createTime = CreateTime.ToFileTime();
-            newFile.modifyTime = ModifyTime.ToFileTime();
+            newFile.createTime = CreateTime.ToFileTimeUtc();
+            newFile.modifyTime = ModifyTime.ToFileTimeUtc();
             newFile.paddingSize = 0;
             newFile.md5 = new byte[16];
             if (PakType == PakFileType.TypeB)

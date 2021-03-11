@@ -250,10 +250,27 @@ namespace AAPakEditor
 
                 tHash.Text = BitConverter.ToString(pfi.md5).ToUpper().Replace("-", "");
 
-                dtCreate.Value = DateTime.FromFileTime(pfi.createTime);
-                if (pfi.modifyTime != 0)
-                    dtModified.Value = DateTime.FromFileTime(pfi.modifyTime);
-                dtModified.Value = DateTime.UtcNow ;
+                dtCreate.Value = DateTime.UtcNow;
+                dtModified.Value = DateTime.UtcNow;
+                try
+                {
+                    dtCreate.Value = DateTime.FromFileTimeUtc(pfi.createTime);
+                }
+                catch
+                {
+                    dtCreate.Enabled = false;
+                    tCreateAsNumber.Text = pfi.createTime.ToString();
+                }
+
+                try
+                {
+                    dtModified.Value = DateTime.FromFileTimeUtc(pfi.modifyTime);
+                }
+                catch
+                {
+                    dtModified.Enabled = false;
+                    tModifyAsNumber.Text = pfi.modifyTime.ToString();
+                }
 
                 tOffset.Text = "0x" + pfi.offset.ToString("X");
 
@@ -368,7 +385,22 @@ namespace AAPakEditor
 
             try
             {
-                newInfo.createTime = dtCreate.Value.ToFileTime();
+                dtCreate.Enabled = string.IsNullOrWhiteSpace(tCreateAsNumber.Text);
+                if (dtCreate.Enabled)
+                    newInfo.createTime = dtCreate.Value.ToFileTimeUtc();
+                else
+                {
+                    if (TryFieldParse(tCreateAsNumber.Text, out long nCreateTime))
+                    {
+                        newInfo.createTime = nCreateTime;
+                    }
+                    else
+                    {
+                        warnings += "Create Time is not a valid number\r\n";
+                        res = false;
+                    }
+
+                }
             }
             catch
             {
@@ -378,7 +410,22 @@ namespace AAPakEditor
 
             try
             {
-                newInfo.modifyTime = dtModified.Value.ToFileTime();
+                dtModified.Enabled = string.IsNullOrWhiteSpace(tModifyAsNumber.Text);
+                if (dtModified.Enabled)
+                    newInfo.modifyTime = dtModified.Value.ToFileTimeUtc();
+                else
+                {
+                    if (TryFieldParse(tModifyAsNumber.Text, out long nModifiedTime))
+                    {
+                        newInfo.modifyTime = nModifiedTime;
+                    }
+                    else
+                    {
+                        warnings += "Modified Time is not a valid number\r\n";
+                        res = false;
+                    }
+
+                }
             }
             catch
             {
@@ -442,6 +489,18 @@ namespace AAPakEditor
         private void tFieldsChanged(object sender, EventArgs e)
         {
             btnSave.Enabled = ValidateFields() && hasChanged();
+        }
+
+        private void lCTtoR_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(tCreateAsNumber.Text))
+                tCreateAsNumber.Text = newInfo.createTime.ToString();
+        }
+
+        private void lDTToR_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(tModifyAsNumber.Text))
+                tModifyAsNumber.Text = newInfo.modifyTime.ToString();
         }
     }
 }

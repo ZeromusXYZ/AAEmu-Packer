@@ -354,7 +354,7 @@ namespace AAMod
                     var fileBackupStream = gamepak.ExportFileAsStream(fi.name);
                     fileBackupStream.Position = 0;
                     AAPakFileInfo restoreFileInfo = restorepak.nullAAPakFileInfo;
-                    if (!restorepak.AddFileFromStream(fi.name, fileBackupStream, DateTime.FromFileTime(gamefi.createTime), DateTime.FromFileTime(gamefi.modifyTime), false, out restoreFileInfo))
+                    if (!restorepak.AddFileFromStream(fi.name, fileBackupStream, DateTime.FromFileTimeUtc(gamefi.createTime), DateTime.FromFileTimeUtc(gamefi.modifyTime), false, out restoreFileInfo))
                     {
                         MessageBox.Show("Error making backup of " + fi.name);
                     }
@@ -363,7 +363,7 @@ namespace AAMod
                 var fileModStream = modpak.ExportFileAsStream(fi.name);
                 fileModStream.Position = 0;
                 AAPakFileInfo newModFile = gamepak.nullAAPakFileInfo;
-                if (!gamepak.AddFileFromStream(fi.name, fileModStream, DateTime.FromFileTime(fi.createTime), DateTime.FromFileTime(fi.modifyTime), false, out newModFile))
+                if (!gamepak.AddFileFromStream(fi.name, fileModStream, DateTime.FromFileTimeUtc(fi.createTime), DateTime.FromFileTimeUtc(fi.modifyTime), false, out newModFile))
                 {
                     MessageBox.Show("Error modding file " + fi.name);
                 }
@@ -417,7 +417,7 @@ namespace AAMod
                     var fileRestoreStream = restorepak.ExportFileAsStream(fi.name);
                     fileRestoreStream.Position = 0;
                     AAPakFileInfo restoreFileInfo = gamepak.nullAAPakFileInfo;
-                    if (!gamepak.AddFileFromStream(fi.name, fileRestoreStream, DateTime.FromFileTime(rfi.createTime), DateTime.FromFileTime(rfi.modifyTime), false, out restoreFileInfo))
+                    if (!gamepak.AddFileFromStream(fi.name, fileRestoreStream, DateTime.FromFileTimeUtc(rfi.createTime), DateTime.FromFileTimeUtc(rfi.modifyTime), false, out restoreFileInfo))
                     {
                         MessageBox.Show("Error restoring file " + fi.name);
                     }

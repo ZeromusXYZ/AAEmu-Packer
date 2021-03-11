@@ -50,8 +50,8 @@ namespace AAPakEditor
                 fs.Dispose();
 
                 // Update file details
-                File.SetCreationTime(destName, DateTime.FromFileTime(pfi.createTime));
-                File.SetLastWriteTime(destName, DateTime.FromFileTime(pfi.modifyTime));
+                File.SetCreationTime(destName, DateTime.FromFileTimeUtc(pfi.createTime));
+                File.SetLastWriteTime(destName, DateTime.FromFileTimeUtc(pfi.modifyTime));
             }
             catch
             {

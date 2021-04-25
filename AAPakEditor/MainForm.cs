@@ -377,7 +377,7 @@ namespace AAPakEditor
 
                 //var h = BitConverter.ToString(pfi.md5).ToUpper().Replace("-", "");
                 //if (h == pak._header.nullHashString)
-                if (Array.Equals(pfi.md5, AAPakFileHeader.nullHash))
+                if (pfi.md5.SequenceEqual(AAPakFileHeader.nullHash))
                 {
                     lfiHash.Text = "MD5: Invalid or not calculated !";
                 }
@@ -388,7 +388,10 @@ namespace AAPakEditor
                 try
                 {
                     lCreateRaw.Text = "(" + pfi.createTime.ToString() + ")";
-                    lfiCreateTime.Text = "Created: " + DateTime.FromFileTime(pfi.createTime).ToString();
+                    if (pfi.createTime != 0)
+                        lfiCreateTime.Text = "Created: " + DateTime.FromFileTime(pfi.createTime).ToString();
+                    else
+                        lfiCreateTime.Text = "<Created time not used>";
                 }
                 catch
                 {
@@ -531,7 +534,8 @@ namespace AAPakEditor
                 fs.Dispose();
 
                 // Update file details
-                File.SetCreationTime(destName, DateTime.FromFileTimeUtc(pfi.createTime));
+                if (pfi.createTime != 0)
+                    File.SetCreationTime(destName, DateTime.FromFileTimeUtc(pfi.createTime));
                 if (pfi.modifyTime != 0)
                     File.SetLastWriteTime(destName, DateTime.FromFileTimeUtc(pfi.modifyTime));
             }
@@ -1075,6 +1079,7 @@ namespace AAPakEditor
             }
             // Create and a new pakfile
             pak = new AAPak(openGamePakDialog.FileName, false, true);
+            // TODO: Add Pak-type selector (specialized dialog box)
             pak.ClosePak();
             // Re-open it in read/write mode
             LoadPakFile(openGamePakDialog.FileName, false);
@@ -1613,6 +1618,33 @@ namespace AAPakEditor
         private void MMFileS2_Click(object sender, EventArgs e)
         {
             MMFileTryOpenUsingKeyList.Visible = true;
+        }
+
+        private void MM_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        {
+
+        }
+
+        private void MMExtraMD5All_Click(object sender, EventArgs e)
+        {
+            if ((pak == null) || (!pak.isOpen))
+                return;
+
+            var res = MessageBox.Show("Do you want to re-calculate the MD5 hash for all files even those that already have a value set (takes long)\n" +
+                "Yes - recalculate all files\n" +
+                "No - recalculate only files that have a null-hash",
+                "Recalculate all files hashes", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+
+            if (res == DialogResult.Cancel)
+                return;
+
+            using (var rehashDlg = new ReMD5Dlg())
+            {
+                rehashDlg.pak = pak;
+                rehashDlg.allFiles = (res == DialogResult.Yes);
+                rehashDlg.ShowDialog();
+            }
+
         }
     }
 }

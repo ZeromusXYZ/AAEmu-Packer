@@ -68,11 +68,13 @@
             this.lbFiles = new System.Windows.Forms.ListBox();
             this.lFiles = new System.Windows.Forms.Label();
             this.pFileInfo = new System.Windows.Forms.Panel();
+            this.lfiCreateTime = new System.Windows.Forms.Label();
+            this.lfiModifyTime = new System.Windows.Forms.Label();
+            this.lModifiedRaw = new System.Windows.Forms.Label();
+            this.lCreateRaw = new System.Windows.Forms.Label();
             this.lfiIndex = new System.Windows.Forms.Label();
             this.lfiExtras = new System.Windows.Forms.Label();
-            this.lfiModifyTime = new System.Windows.Forms.Label();
             this.lfiStartOffset = new System.Windows.Forms.Label();
-            this.lfiCreateTime = new System.Windows.Forms.Label();
             this.lfiHash = new System.Windows.Forms.Label();
             this.lfiSize = new System.Windows.Forms.Label();
             this.lfiName = new System.Windows.Forms.Label();
@@ -87,8 +89,8 @@
             this.lbExtraFiles = new System.Windows.Forms.ListBox();
             this.lTypePak = new System.Windows.Forms.Label();
             this.openKeyListDialog = new System.Windows.Forms.OpenFileDialog();
-            this.lCreateRaw = new System.Windows.Forms.Label();
-            this.lModifiedRaw = new System.Windows.Forms.Label();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.MMExtraMD5All = new System.Windows.Forms.ToolStripMenuItem();
             this.MM.SuspendLayout();
             this.pFileInfo.SuspendLayout();
             this.tcDirectoryViews.SuspendLayout();
@@ -110,6 +112,7 @@
             this.MM.Size = new System.Drawing.Size(584, 24);
             this.MM.TabIndex = 0;
             this.MM.Text = "menuStrip1";
+            this.MM.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.MM_ItemClicked);
             // 
             // MMFile
             // 
@@ -265,7 +268,7 @@
             // 
             this.MMExportSelectedFile.Name = "MMExportSelectedFile";
             this.MMExportSelectedFile.ShortcutKeys = System.Windows.Forms.Keys.F5;
-            this.MMExportSelectedFile.Size = new System.Drawing.Size(172, 22);
+            this.MMExportSelectedFile.Size = new System.Drawing.Size(180, 22);
             this.MMExportSelectedFile.Text = "Selected &File ...";
             this.MMExportSelectedFile.Click += new System.EventHandler(this.MMExportSelectedFile_Click);
             // 
@@ -273,32 +276,32 @@
             // 
             this.MMExportSelectedFolder.Enabled = false;
             this.MMExportSelectedFolder.Name = "MMExportSelectedFolder";
-            this.MMExportSelectedFolder.Size = new System.Drawing.Size(172, 22);
+            this.MMExportSelectedFolder.Size = new System.Drawing.Size(180, 22);
             this.MMExportSelectedFolder.Text = "Selected F&older ...";
             this.MMExportSelectedFolder.Click += new System.EventHandler(this.MMExportSelectedFolder_Click);
             // 
             // MMExportS1
             // 
             this.MMExportS1.Name = "MMExportS1";
-            this.MMExportS1.Size = new System.Drawing.Size(169, 6);
+            this.MMExportS1.Size = new System.Drawing.Size(177, 6);
             // 
             // MMExportAll
             // 
             this.MMExportAll.Name = "MMExportAll";
             this.MMExportAll.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F5)));
-            this.MMExportAll.Size = new System.Drawing.Size(172, 22);
+            this.MMExportAll.Size = new System.Drawing.Size(180, 22);
             this.MMExportAll.Text = "&All Files ...";
             this.MMExportAll.Click += new System.EventHandler(this.MMExportAll_Click);
             // 
             // MMExportS2
             // 
             this.MMExportS2.Name = "MMExportS2";
-            this.MMExportS2.Size = new System.Drawing.Size(169, 6);
+            this.MMExportS2.Size = new System.Drawing.Size(177, 6);
             // 
             // MMExportDB
             // 
             this.MMExportDB.Name = "MMExportDB";
-            this.MMExportDB.Size = new System.Drawing.Size(172, 22);
+            this.MMExportDB.Size = new System.Drawing.Size(180, 22);
             this.MMExportDB.Text = "Export DB ...";
             this.MMExportDB.Click += new System.EventHandler(this.MMExportDB_Click);
             // 
@@ -306,6 +309,8 @@
             // 
             this.MMExtra.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.MMExtraMD5,
+            this.MMExtraMD5All,
+            this.toolStripSeparator1,
             this.MMExtraExportData,
             this.MMExtraMakeMod,
             this.MMExtraDebugTest});
@@ -316,28 +321,28 @@
             // MMExtraMD5
             // 
             this.MMExtraMD5.Name = "MMExtraMD5";
-            this.MMExtraMD5.Size = new System.Drawing.Size(206, 22);
+            this.MMExtraMD5.Size = new System.Drawing.Size(222, 22);
             this.MMExtraMD5.Text = "Re-Calculate MD5";
             this.MMExtraMD5.Click += new System.EventHandler(this.MMEXtraMD5_Click);
             // 
             // MMExtraExportData
             // 
             this.MMExtraExportData.Name = "MMExtraExportData";
-            this.MMExtraExportData.Size = new System.Drawing.Size(206, 22);
+            this.MMExtraExportData.Size = new System.Drawing.Size(222, 22);
             this.MMExtraExportData.Text = "Export File Data as CSV ...";
             this.MMExtraExportData.Click += new System.EventHandler(this.MMExtraExportData_Click);
             // 
             // MMExtraMakeMod
             // 
             this.MMExtraMakeMod.Name = "MMExtraMakeMod";
-            this.MMExtraMakeMod.Size = new System.Drawing.Size(206, 22);
+            this.MMExtraMakeMod.Size = new System.Drawing.Size(222, 22);
             this.MMExtraMakeMod.Text = "Export pak as mod ...";
             this.MMExtraMakeMod.Click += new System.EventHandler(this.MMExtraMakeMod_Click);
             // 
             // MMExtraDebugTest
             // 
             this.MMExtraDebugTest.Name = "MMExtraDebugTest";
-            this.MMExtraDebugTest.Size = new System.Drawing.Size(206, 22);
+            this.MMExtraDebugTest.Size = new System.Drawing.Size(222, 22);
             this.MMExtraDebugTest.Text = "DebugTest";
             this.MMExtraDebugTest.Visible = false;
             this.MMExtraDebugTest.Click += new System.EventHandler(this.MMExtraDebugTest_Click);
@@ -435,6 +440,44 @@
             this.pFileInfo.Size = new System.Drawing.Size(295, 150);
             this.pFileInfo.TabIndex = 6;
             // 
+            // lfiCreateTime
+            // 
+            this.lfiCreateTime.AutoSize = true;
+            this.lfiCreateTime.Location = new System.Drawing.Point(3, 54);
+            this.lfiCreateTime.Name = "lfiCreateTime";
+            this.lfiCreateTime.Size = new System.Drawing.Size(37, 13);
+            this.lfiCreateTime.TabIndex = 3;
+            this.lfiCreateTime.Text = "create";
+            // 
+            // lfiModifyTime
+            // 
+            this.lfiModifyTime.AutoSize = true;
+            this.lfiModifyTime.Location = new System.Drawing.Point(3, 70);
+            this.lfiModifyTime.Name = "lfiModifyTime";
+            this.lfiModifyTime.Size = new System.Drawing.Size(46, 13);
+            this.lfiModifyTime.TabIndex = 5;
+            this.lfiModifyTime.Text = "modified";
+            // 
+            // lModifiedRaw
+            // 
+            this.lModifiedRaw.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.lModifiedRaw.Location = new System.Drawing.Point(124, 70);
+            this.lModifiedRaw.Name = "lModifiedRaw";
+            this.lModifiedRaw.Size = new System.Drawing.Size(166, 13);
+            this.lModifiedRaw.TabIndex = 9;
+            this.lModifiedRaw.Text = "( )";
+            this.lModifiedRaw.TextAlign = System.Drawing.ContentAlignment.TopRight;
+            // 
+            // lCreateRaw
+            // 
+            this.lCreateRaw.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.lCreateRaw.Location = new System.Drawing.Point(124, 54);
+            this.lCreateRaw.Name = "lCreateRaw";
+            this.lCreateRaw.Size = new System.Drawing.Size(166, 13);
+            this.lCreateRaw.TabIndex = 8;
+            this.lCreateRaw.Text = "( )";
+            this.lCreateRaw.TextAlign = System.Drawing.ContentAlignment.TopRight;
+            // 
             // lfiIndex
             // 
             this.lfiIndex.AutoSize = true;
@@ -453,15 +496,6 @@
             this.lfiExtras.TabIndex = 6;
             this.lfiExtras.Text = "unknown";
             // 
-            // lfiModifyTime
-            // 
-            this.lfiModifyTime.AutoSize = true;
-            this.lfiModifyTime.Location = new System.Drawing.Point(3, 70);
-            this.lfiModifyTime.Name = "lfiModifyTime";
-            this.lfiModifyTime.Size = new System.Drawing.Size(46, 13);
-            this.lfiModifyTime.TabIndex = 5;
-            this.lfiModifyTime.Text = "modified";
-            // 
             // lfiStartOffset
             // 
             this.lfiStartOffset.AutoSize = true;
@@ -470,15 +504,6 @@
             this.lfiStartOffset.Size = new System.Drawing.Size(33, 13);
             this.lfiStartOffset.TabIndex = 4;
             this.lfiStartOffset.Text = "offset";
-            // 
-            // lfiCreateTime
-            // 
-            this.lfiCreateTime.AutoSize = true;
-            this.lfiCreateTime.Location = new System.Drawing.Point(3, 54);
-            this.lfiCreateTime.Name = "lfiCreateTime";
-            this.lfiCreateTime.Size = new System.Drawing.Size(37, 13);
-            this.lfiCreateTime.TabIndex = 3;
-            this.lfiCreateTime.Text = "create";
             // 
             // lfiHash
             // 
@@ -607,25 +632,17 @@
             this.openKeyListDialog.RestoreDirectory = true;
             this.openKeyListDialog.Title = "Open Key List";
             // 
-            // lCreateRaw
+            // toolStripSeparator1
             // 
-            this.lCreateRaw.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.lCreateRaw.Location = new System.Drawing.Point(124, 54);
-            this.lCreateRaw.Name = "lCreateRaw";
-            this.lCreateRaw.Size = new System.Drawing.Size(166, 13);
-            this.lCreateRaw.TabIndex = 8;
-            this.lCreateRaw.Text = "( )";
-            this.lCreateRaw.TextAlign = System.Drawing.ContentAlignment.TopRight;
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(219, 6);
             // 
-            // lModifiedRaw
+            // MMExtraMD5All
             // 
-            this.lModifiedRaw.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.lModifiedRaw.Location = new System.Drawing.Point(124, 70);
-            this.lModifiedRaw.Name = "lModifiedRaw";
-            this.lModifiedRaw.Size = new System.Drawing.Size(166, 13);
-            this.lModifiedRaw.TabIndex = 9;
-            this.lModifiedRaw.Text = "( )";
-            this.lModifiedRaw.TextAlign = System.Drawing.ContentAlignment.TopRight;
+            this.MMExtraMD5All.Name = "MMExtraMD5All";
+            this.MMExtraMD5All.Size = new System.Drawing.Size(222, 22);
+            this.MMExtraMD5All.Text = "Re-Calculate MD5 of all files";
+            this.MMExtraMD5All.Click += new System.EventHandler(this.MMExtraMD5All_Click);
             // 
             // MainForm
             // 
@@ -723,6 +740,8 @@
         private System.Windows.Forms.OpenFileDialog openKeyListDialog;
         private System.Windows.Forms.Label lModifiedRaw;
         private System.Windows.Forms.Label lCreateRaw;
+        private System.Windows.Forms.ToolStripMenuItem MMExtraMD5All;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
     }
 }
 

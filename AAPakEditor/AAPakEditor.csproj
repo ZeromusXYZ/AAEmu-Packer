@@ -98,71 +98,71 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\Common\AAPak.cs">
-      <Link>AAPak.cs</Link>
+      <Link>AAPak\AAPak.cs</Link>
     </Compile>
     <Compile Include="..\Common\SubStream.cs">
-      <Link>SubStream.cs</Link>
+      <Link>AAPak\SubStream.cs</Link>
     </Compile>
-    <Compile Include="FilePropForm.cs">
+    <Compile Include="Forms\FilePropForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FilePropForm.Designer.cs">
+    <Compile Include="Forms\FilePropForm.Designer.cs">
       <DependentUpon>FilePropForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="ImportFolderDlg.cs">
+    <Compile Include="Forms\ImportFolderDlg.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="ImportFolderDlg.Designer.cs">
+    <Compile Include="Forms\ImportFolderDlg.Designer.cs">
       <DependentUpon>ImportFolderDlg.cs</DependentUpon>
     </Compile>
-    <Compile Include="ExportAllDlg.cs">
+    <Compile Include="Forms\ExportAllDlg.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="ExportAllDlg.Designer.cs">
+    <Compile Include="Forms\ExportAllDlg.Designer.cs">
       <DependentUpon>ExportAllDlg.cs</DependentUpon>
     </Compile>
-    <Compile Include="AddFileDlg.cs">
+    <Compile Include="Forms\AddFileDlg.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="AddFileDlg.Designer.cs">
+    <Compile Include="Forms\AddFileDlg.Designer.cs">
       <DependentUpon>AddFileDlg.cs</DependentUpon>
     </Compile>
-    <Compile Include="MainForm.cs">
+    <Compile Include="Forms\MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MainForm.Designer.cs">
+    <Compile Include="Forms\MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="MakeModForm.cs">
+    <Compile Include="Forms\MakeModForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MakeModForm.Designer.cs">
+    <Compile Include="Forms\MakeModForm.Designer.cs">
       <DependentUpon>MakeModForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ReMD5Dlg.cs">
+    <Compile Include="Forms\ReMD5Dlg.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="ReMD5Dlg.Designer.cs">
+    <Compile Include="Forms\ReMD5Dlg.Designer.cs">
       <DependentUpon>ReMD5Dlg.cs</DependentUpon>
     </Compile>
-    <EmbeddedResource Include="FilePropForm.resx">
+    <EmbeddedResource Include="Forms\FilePropForm.resx">
       <DependentUpon>FilePropForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="ImportFolderDlg.resx">
+    <EmbeddedResource Include="Forms\ImportFolderDlg.resx">
       <DependentUpon>ImportFolderDlg.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="ExportAllDlg.resx">
+    <EmbeddedResource Include="Forms\ExportAllDlg.resx">
       <DependentUpon>ExportAllDlg.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="AddFileDlg.resx">
+    <EmbeddedResource Include="Forms\AddFileDlg.resx">
       <DependentUpon>AddFileDlg.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="MainForm.resx">
+    <EmbeddedResource Include="Forms\MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="MakeModForm.resx">
+    <EmbeddedResource Include="Forms\MakeModForm.resx">
       <DependentUpon>MakeModForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -175,7 +175,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <EmbeddedResource Include="ReMD5Dlg.resx">
+    <EmbeddedResource Include="Forms\ReMD5Dlg.resx">
       <DependentUpon>ReMD5Dlg.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="aa.bms" />

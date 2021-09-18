@@ -59,15 +59,15 @@
     <Compile Include="..\Common\SubStream.cs">
       <Link>SubStream.cs</Link>
     </Compile>
-    <Compile Include="ModMainForm.cs">
+    <Compile Include="Forms\ModMainForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="ModMainForm.Designer.cs">
+    <Compile Include="Forms\ModMainForm.Designer.cs">
       <DependentUpon>ModMainForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="ModMainForm.resx">
+    <EmbeddedResource Include="Forms\ModMainForm.resx">
       <DependentUpon>ModMainForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">

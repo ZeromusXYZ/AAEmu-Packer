@@ -13,6 +13,7 @@ namespace SubStreamHelper
         private readonly long length;
         private long position;
         private readonly long baseOffset;
+
         public SubStream(Stream baseStream, long offset, long length)
         {
             if (baseStream == null) throw new ArgumentNullException("baseStream");
@@ -28,7 +29,8 @@ namespace SubStreamHelper
                 baseStream.Seek(offset, SeekOrigin.Begin);
             }
             else
-            { // read it manually...
+            { 
+                // read it manually...
                 const int BUFFER_SIZE = 512;
                 byte[] buffer = new byte[BUFFER_SIZE];
                 while (offset > 0)
@@ -38,6 +40,7 @@ namespace SubStreamHelper
                 }
             }
         }
+
         public override int Read(byte[] buffer, int offset, int count)
         {
             CheckDisposed();
@@ -48,26 +51,32 @@ namespace SubStreamHelper
             position += read;
             return read;
         }
+
         private void CheckDisposed()
         {
             if (baseStream == null) throw new ObjectDisposedException(GetType().Name);
         }
+
         public override long Length
         {
             get { CheckDisposed(); return length; }
         }
+
         public override bool CanRead
         {
             get { CheckDisposed(); return true; }
         }
+
         public override bool CanWrite
         {
             get { CheckDisposed(); return false; }
         }
+
         public override bool CanSeek
         {
             get { CheckDisposed(); return false; }
         }
+
         public override long Position
         {
             get
@@ -84,18 +93,22 @@ namespace SubStreamHelper
                 baseStream.Position = baseOffset + position; 
             }
         }
+
         public override long Seek(long offset, SeekOrigin origin)
         {
             throw new NotSupportedException();
         }
+
         public override void SetLength(long value)
         {
             throw new NotSupportedException();
         }
+
         public override void Flush()
         {
             CheckDisposed(); baseStream.Flush();
         }
+
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
@@ -111,6 +124,7 @@ namespace SubStreamHelper
             }
             */
         }
+
         public override void Write(byte[] buffer, int offset, int count)
         {
             throw new NotImplementedException();

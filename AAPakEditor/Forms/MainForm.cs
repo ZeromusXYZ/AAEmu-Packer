@@ -106,10 +106,12 @@ namespace AAPakEditor
                 {
                     Text = baseTitle + " - " + pak._gpFilePath;
                 }
+                lPakExtraInfo.Text = pak.NewestFileDate.ToString("yyyy-MM-dd HH:mm:ss");
             }
             else
             {
                 Text = baseTitle;
+                lPakExtraInfo.Text = "...";
             }
         }
 
@@ -164,12 +166,12 @@ namespace AAPakEditor
         private void GenerateFolderViews()
         {
             lFileCount.Text = "Analyzing folder structure ... ";
-            lFileCount.Refresh();
+            //lFileCount.Refresh();
 
             pak.GenerateFolderList();
 
             lFileCount.Text = "Loading ... ";
-            lFileCount.Refresh();
+            //lFileCount.Refresh();
 
             lbFolders.Items.Clear();
             lbFiles.Items.Clear();
@@ -186,7 +188,7 @@ namespace AAPakEditor
                 if ((c % 250) == 0)
                 {
                     lFileCount.Text = "Loading folders ... " + c.ToString() + " / " + pak.folders.Count.ToString();
-                    lFileCount.Refresh();
+                    //lFileCount.Refresh();
                     //Thread.Sleep(1);
                 }
 
@@ -285,12 +287,12 @@ namespace AAPakEditor
             if (pak.isOpen)
             {
                 lFileCount.Text = "Closing pak ... ";
-                lFileCount.Refresh();
+                //lFileCount.Refresh();
                 pak.ClosePak();
             }
 
             lFileCount.Text = "Opening Pak ... ";
-            lFileCount.Refresh();
+            //lFileCount.Refresh();
             try
             {
                 LoadPakKeys(Path.GetDirectoryName(filename).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar);
@@ -315,6 +317,7 @@ namespace AAPakEditor
             else
             {
                 Text = baseTitle + " - " + pak._gpFilePath;
+
 
                 if (!quickLoad)
                     GenerateFolderViews();
@@ -1048,7 +1051,7 @@ namespace AAPakEditor
             tvFolders.Nodes.Clear();
             lFiles.Text = "";
             lFileCount.Text = "Closing pak";
-            lFileCount.Refresh();
+            //lFileCount.Refresh();
             pak.ClosePak();
             lFileCount.Text = "Pak Closed";
             Cursor.Current = Cursors.Default;
@@ -1644,6 +1647,11 @@ namespace AAPakEditor
                 rehashDlg.allFiles = (res == DialogResult.Yes);
                 rehashDlg.ShowDialog();
             }
+
+        }
+
+        private void statusBar_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        {
 
         }
     }

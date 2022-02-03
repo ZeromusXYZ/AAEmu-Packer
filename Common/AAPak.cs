@@ -622,6 +622,17 @@ namespace AAPakEditor
                     // Call the police, illegal Types are invading our safespace
                 }
 
+                try
+                {
+                    var fTime = DateTime.FromFileTime(pfi.modifyTime);
+                    if (fTime > _owner.NewestFileDate)
+                        _owner.NewestFileDate = fTime;
+                }
+                catch
+                {
+                    // Just ignore this
+                }
+
                 /*
                 // Debug stuff
                 if (pfi.name == "bin32/archeage.exe")
@@ -853,6 +864,7 @@ namespace AAPakEditor
         public bool paddingDeleteMode = false;
         public PakFileType PakType = PakFileType.TypeA ;
         public bool DebugMode = false;
+        public DateTime NewestFileDate = DateTime.MinValue;
 
         /// <summary>
         /// Creates and/or opens a game_pak file
@@ -1067,6 +1079,7 @@ namespace AAPakEditor
         /// <returns>Returns true if the read information makes a valid pakfile</returns>
         protected bool ReadHeader()
         {
+            NewestFileDate = DateTime.MinValue;
             files.Clear();
             extraFiles.Clear();
             folders.Clear();

@@ -19,7 +19,7 @@ namespace AAPakCLI.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -61,22 +61,26 @@ namespace AAPakCLI.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Command-Line options
-        ///---------------------
-        ///The Command-Line arguments are treated as a macro, and are executed in order
+        ///   Looks up a localized string similar to 	Command-Line options
+        ///----------------------------
+        ///	The Command-Line arguments are treated as a macro, and are executed in order
         ///
-        ///&lt;pakfile&gt;
-        ///Opens pakfile in read-only mode (mainly for use of  &quot;Open With ...&quot; in explorer)
+        ///	&lt;pakfile&gt;
+        ///		Opens pakfile in read-only mode (mainly used for exporting)
         ///
-        ///-o &lt;pakfile&gt;
-        ///Opens pakfile in read/write mode
+        ///	-o &lt;pakfile&gt;
+        ///		Opens pakfile in read/write mode
         ///
-        ///+c &lt;pakfile&gt;
-        ///Creates/Overwrites a pakfile and opens it in read/write mode
+        ///	+c &lt;pakfile&gt;
+        ///		Creates/Overwrites a pakfile and opens it in read/write mode
         ///
-        ///+sfx &lt;modtext|filename&gt;
-        ///Adds the mod installer into the pakfile, this must be the first thing added on a new pakfile to work 
-        ///You can either add a description fil [rest of string was truncated]&quot;;.
+        ///	+f &lt;sourcefilename&gt; &lt;filename&gt;
+        ///		Adds a single file as target filename
+        ///
+        ///	-f &lt;filename&gt;
+        ///		Deletes target filename from the pak
+        ///
+        ///	+d &lt;sourcedirecotry&gt; &lt;directory&gt; [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string cmdhelp {
             get {

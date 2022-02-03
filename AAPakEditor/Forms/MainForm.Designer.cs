@@ -56,6 +56,8 @@
             this.MMExportDB = new System.Windows.Forms.ToolStripMenuItem();
             this.MMExtra = new System.Windows.Forms.ToolStripMenuItem();
             this.MMExtraMD5 = new System.Windows.Forms.ToolStripMenuItem();
+            this.MMExtraMD5All = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.MMExtraExportData = new System.Windows.Forms.ToolStripMenuItem();
             this.MMExtraMakeMod = new System.Windows.Forms.ToolStripMenuItem();
             this.MMExtraDebugTest = new System.Windows.Forms.ToolStripMenuItem();
@@ -64,7 +66,6 @@
             this.MMVersionDiscord = new System.Windows.Forms.ToolStripMenuItem();
             this.openGamePakDialog = new System.Windows.Forms.OpenFileDialog();
             this.lbFolders = new System.Windows.Forms.ListBox();
-            this.lFileCount = new System.Windows.Forms.Label();
             this.lbFiles = new System.Windows.Forms.ListBox();
             this.lFiles = new System.Windows.Forms.Label();
             this.pFileInfo = new System.Windows.Forms.Panel();
@@ -87,16 +88,18 @@
             this.tpFlatDirView = new System.Windows.Forms.TabPage();
             this.tpExtraFiles = new System.Windows.Forms.TabPage();
             this.lbExtraFiles = new System.Windows.Forms.ListBox();
-            this.lTypePak = new System.Windows.Forms.Label();
             this.openKeyListDialog = new System.Windows.Forms.OpenFileDialog();
-            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            this.MMExtraMD5All = new System.Windows.Forms.ToolStripMenuItem();
+            this.statusBar = new System.Windows.Forms.StatusStrip();
+            this.lFileCount = new System.Windows.Forms.ToolStripStatusLabel();
+            this.lTypePak = new System.Windows.Forms.ToolStripStatusLabel();
+            this.lPakExtraInfo = new System.Windows.Forms.ToolStripStatusLabel();
             this.MM.SuspendLayout();
             this.pFileInfo.SuspendLayout();
             this.tcDirectoryViews.SuspendLayout();
             this.tpTreeView.SuspendLayout();
             this.tpFlatDirView.SuspendLayout();
             this.tpExtraFiles.SuspendLayout();
+            this.statusBar.SuspendLayout();
             this.SuspendLayout();
             // 
             // MM
@@ -268,7 +271,7 @@
             // 
             this.MMExportSelectedFile.Name = "MMExportSelectedFile";
             this.MMExportSelectedFile.ShortcutKeys = System.Windows.Forms.Keys.F5;
-            this.MMExportSelectedFile.Size = new System.Drawing.Size(180, 22);
+            this.MMExportSelectedFile.Size = new System.Drawing.Size(172, 22);
             this.MMExportSelectedFile.Text = "Selected &File ...";
             this.MMExportSelectedFile.Click += new System.EventHandler(this.MMExportSelectedFile_Click);
             // 
@@ -276,32 +279,32 @@
             // 
             this.MMExportSelectedFolder.Enabled = false;
             this.MMExportSelectedFolder.Name = "MMExportSelectedFolder";
-            this.MMExportSelectedFolder.Size = new System.Drawing.Size(180, 22);
+            this.MMExportSelectedFolder.Size = new System.Drawing.Size(172, 22);
             this.MMExportSelectedFolder.Text = "Selected F&older ...";
             this.MMExportSelectedFolder.Click += new System.EventHandler(this.MMExportSelectedFolder_Click);
             // 
             // MMExportS1
             // 
             this.MMExportS1.Name = "MMExportS1";
-            this.MMExportS1.Size = new System.Drawing.Size(177, 6);
+            this.MMExportS1.Size = new System.Drawing.Size(169, 6);
             // 
             // MMExportAll
             // 
             this.MMExportAll.Name = "MMExportAll";
             this.MMExportAll.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F5)));
-            this.MMExportAll.Size = new System.Drawing.Size(180, 22);
+            this.MMExportAll.Size = new System.Drawing.Size(172, 22);
             this.MMExportAll.Text = "&All Files ...";
             this.MMExportAll.Click += new System.EventHandler(this.MMExportAll_Click);
             // 
             // MMExportS2
             // 
             this.MMExportS2.Name = "MMExportS2";
-            this.MMExportS2.Size = new System.Drawing.Size(177, 6);
+            this.MMExportS2.Size = new System.Drawing.Size(169, 6);
             // 
             // MMExportDB
             // 
             this.MMExportDB.Name = "MMExportDB";
-            this.MMExportDB.Size = new System.Drawing.Size(180, 22);
+            this.MMExportDB.Size = new System.Drawing.Size(172, 22);
             this.MMExportDB.Text = "Export DB ...";
             this.MMExportDB.Click += new System.EventHandler(this.MMExportDB_Click);
             // 
@@ -324,6 +327,18 @@
             this.MMExtraMD5.Size = new System.Drawing.Size(222, 22);
             this.MMExtraMD5.Text = "Re-Calculate MD5";
             this.MMExtraMD5.Click += new System.EventHandler(this.MMEXtraMD5_Click);
+            // 
+            // MMExtraMD5All
+            // 
+            this.MMExtraMD5All.Name = "MMExtraMD5All";
+            this.MMExtraMD5All.Size = new System.Drawing.Size(222, 22);
+            this.MMExtraMD5All.Text = "Re-Calculate MD5 of all files";
+            this.MMExtraMD5All.Click += new System.EventHandler(this.MMExtraMD5All_Click);
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(219, 6);
             // 
             // MMExtraExportData
             // 
@@ -389,16 +404,6 @@
             this.lbFolders.Size = new System.Drawing.Size(245, 381);
             this.lbFolders.TabIndex = 1;
             this.lbFolders.SelectedIndexChanged += new System.EventHandler(this.lbFolders_SelectedIndexChanged);
-            // 
-            // lFileCount
-            // 
-            this.lFileCount.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.lFileCount.AutoSize = true;
-            this.lFileCount.Location = new System.Drawing.Point(13, 454);
-            this.lFileCount.Name = "lFileCount";
-            this.lFileCount.Size = new System.Drawing.Size(40, 13);
-            this.lFileCount.TabIndex = 2;
-            this.lFileCount.Text = "no files";
             // 
             // lbFiles
             // 
@@ -615,16 +620,6 @@
             this.lbExtraFiles.TabIndex = 2;
             this.lbExtraFiles.SelectedIndexChanged += new System.EventHandler(this.LbExtraFiles_SelectedIndexChanged);
             // 
-            // lTypePak
-            // 
-            this.lTypePak.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.lTypePak.Location = new System.Drawing.Point(472, 454);
-            this.lTypePak.Name = "lTypePak";
-            this.lTypePak.Size = new System.Drawing.Size(100, 16);
-            this.lTypePak.TabIndex = 9;
-            this.lTypePak.Text = "...";
-            this.lTypePak.TextAlign = System.Drawing.ContentAlignment.TopRight;
-            // 
             // openKeyListDialog
             // 
             this.openKeyListDialog.DefaultExt = "csv";
@@ -632,29 +627,51 @@
             this.openKeyListDialog.RestoreDirectory = true;
             this.openKeyListDialog.Title = "Open Key List";
             // 
-            // toolStripSeparator1
+            // statusBar
             // 
-            this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(219, 6);
+            this.statusBar.GripStyle = System.Windows.Forms.ToolStripGripStyle.Visible;
+            this.statusBar.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.lFileCount,
+            this.lPakExtraInfo,
+            this.lTypePak});
+            this.statusBar.Location = new System.Drawing.Point(0, 454);
+            this.statusBar.Name = "statusBar";
+            this.statusBar.Size = new System.Drawing.Size(584, 22);
+            this.statusBar.TabIndex = 9;
+            this.statusBar.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.statusBar_ItemClicked);
             // 
-            // MMExtraMD5All
+            // lFileCount
             // 
-            this.MMExtraMD5All.Name = "MMExtraMD5All";
-            this.MMExtraMD5All.Size = new System.Drawing.Size(222, 22);
-            this.MMExtraMD5All.Text = "Re-Calculate MD5 of all files";
-            this.MMExtraMD5All.Click += new System.EventHandler(this.MMExtraMD5All_Click);
+            this.lFileCount.Name = "lFileCount";
+            this.lFileCount.Size = new System.Drawing.Size(45, 17);
+            this.lFileCount.Text = "no files";
+            this.lFileCount.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // lTypePak
+            // 
+            this.lTypePak.Name = "lTypePak";
+            this.lTypePak.Size = new System.Drawing.Size(16, 17);
+            this.lTypePak.Text = "...";
+            this.lTypePak.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // lPakExtraInfo
+            // 
+            this.lPakExtraInfo.Name = "lPakExtraInfo";
+            this.lPakExtraInfo.Size = new System.Drawing.Size(477, 17);
+            this.lPakExtraInfo.Spring = true;
+            this.lPakExtraInfo.Text = "...";
+            this.lPakExtraInfo.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(584, 476);
-            this.Controls.Add(this.lTypePak);
+            this.Controls.Add(this.statusBar);
             this.Controls.Add(this.tcDirectoryViews);
             this.Controls.Add(this.pFileInfo);
             this.Controls.Add(this.lFiles);
             this.Controls.Add(this.lbFiles);
-            this.Controls.Add(this.lFileCount);
             this.Controls.Add(this.MM);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.MM;
@@ -673,6 +690,8 @@
             this.tpTreeView.ResumeLayout(false);
             this.tpFlatDirView.ResumeLayout(false);
             this.tpExtraFiles.ResumeLayout(false);
+            this.statusBar.ResumeLayout(false);
+            this.statusBar.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -686,7 +705,6 @@
         private System.Windows.Forms.ToolStripMenuItem MMFileOpen;
         private System.Windows.Forms.OpenFileDialog openGamePakDialog;
         private System.Windows.Forms.ListBox lbFolders;
-        private System.Windows.Forms.Label lFileCount;
         private System.Windows.Forms.ListBox lbFiles;
         private System.Windows.Forms.Label lFiles;
         private System.Windows.Forms.Panel pFileInfo;
@@ -733,7 +751,6 @@
         private System.Windows.Forms.ToolStripMenuItem MMExtraMakeMod;
         private System.Windows.Forms.TabPage tpExtraFiles;
         private System.Windows.Forms.ListBox lbExtraFiles;
-        private System.Windows.Forms.Label lTypePak;
         private System.Windows.Forms.Label lfiIndex;
         private System.Windows.Forms.ToolStripMenuItem MMEditFileProp;
         private System.Windows.Forms.ToolStripMenuItem MMFileTryOpenUsingKeyList;
@@ -742,6 +759,10 @@
         private System.Windows.Forms.Label lCreateRaw;
         private System.Windows.Forms.ToolStripMenuItem MMExtraMD5All;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.StatusStrip statusBar;
+        private System.Windows.Forms.ToolStripStatusLabel lFileCount;
+        private System.Windows.Forms.ToolStripStatusLabel lTypePak;
+        private System.Windows.Forms.ToolStripStatusLabel lPakExtraInfo;
     }
 }
 

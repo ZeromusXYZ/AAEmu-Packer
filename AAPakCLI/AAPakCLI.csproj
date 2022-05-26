@@ -13,6 +13,7 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
     <TargetFrameworkProfile />
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -73,9 +74,9 @@
     <Content Include="aapakcli_icon.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\AAPak\AAPak.csproj">
+    <ProjectReference Include="..\AAPacker\AAPacker.csproj">
       <Project>{66655932-62c0-44f6-a0b9-788e386751df}</Project>
-      <Name>AAPak</Name>
+      <Name>AAPacker</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

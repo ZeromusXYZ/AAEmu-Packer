@@ -1,4 +1,4 @@
-﻿namespace AAMod
+﻿namespace AAMod.Forms
 {
     partial class ModMainForm
     {

@@ -2,31 +2,27 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AAPakEditor;
+using AAPakCLI.Properties;
+using AAPacker;
 
 namespace AAPakCLI
 {
-    class Program
+    internal class Program
     {
-        static AAPak pak;
-        static bool useCustomKey = false;
-        static AAPak oldpak;
+        private static AAPak pak;
+        private static readonly bool useCustomKey = false;
 
-        static private void LoadPakFile(ref AAPak pak, string filename, bool openAsReadOnly, bool showWriteWarning = true, bool quickLoad = false)
+        private static void LoadPakFile(ref AAPak pak, string filename, bool openAsReadOnly, 
+            bool showWriteWarning = true, bool quickLoad = false)
         {
-            if (pak == null)
-            {
-                pak = new AAPak("", true);
-            }
+            if (pak == null) pak = new AAPak("");
             if (pak.isOpen)
             {
                 Console.WriteLine("[PAK] Closing pak ... ");
                 pak.ClosePak();
             }
 
-            Console.WriteLine("[PAK] Opening Pak ... {0}",filename);
+            Console.WriteLine("[PAK] Opening Pak ... {0}", filename);
             /* Currently disabled custom key support
             try
             {
@@ -47,13 +43,12 @@ namespace AAPakCLI
                     Console.WriteLine("[ERROR] Failed to open {0}", filename);
             }
 
-            if (pak.PakType != PakFileType.TypeA)
-            {
-                Console.WriteLine("[PAK] PakFileType = {0}", pak.PakType.ToString());
-            }
+            if (pak.PakType != PakFileType.TypeA) Console.WriteLine("[PAK] PakFileType = {0}", pak.PakType.ToString());
 
-            if ((pak.files.Count <= 0) && (pak.extraFiles.Count <= 0))
+            if (pak.files.Count <= 0 && pak.extraFiles.Count <= 0)
+            {
                 Console.WriteLine("[PAK] contains no files");
+            }
             else
             {
                 if (pak.files.Count > 0)
@@ -63,9 +58,9 @@ namespace AAPakCLI
             }
         }
 
-        static private int AddDirectory(ref AAPak pak, string sourceDir, string targetDir)
+        private static int AddDirectory(ref AAPak pak, string sourceDir, string targetDir)
         {
-            int filesAdded = 0;
+            var filesAdded = 0;
             // Make sure slashes are correct
             sourceDir = sourceDir.Replace('/', Path.DirectorySeparatorChar);
             if (sourceDir.Last() != Path.DirectorySeparatorChar)
@@ -76,6 +71,7 @@ namespace AAPakCLI
                 if (targetDir.Last() != '/')
                     targetDir += '/';
             }
+
             var dirs = Directory.GetDirectories(sourceDir);
             foreach (var dir in dirs)
             {
@@ -84,7 +80,7 @@ namespace AAPakCLI
             }
 
             var files = Directory.GetFiles(sourceDir);
-            foreach(var file in files)
+            foreach (var file in files)
             {
                 var fn = Path.GetFileName(file);
                 if (pak.AddFileFromFile(sourceDir + fn, targetDir + fn, false))
@@ -94,17 +90,14 @@ namespace AAPakCLI
             return filesAdded;
         }
 
-        static private void CreateCSVFile(ref AAPak pak, string filename = "")
+        private static void CreateCSVFile(ref AAPak pak, string filename = "")
         {
-            if (filename == string.Empty)
-            {
-                return;
-            }
+            if (filename == string.Empty) return;
 
-            DateTime newest = new DateTime(1600, 1, 1);
+            var newest = new DateTime(1600, 1, 1);
 
-            List<string> sl = new List<string>();
-            string s = "";
+            var sl = new List<string>();
+            var s = "";
             s = "name";
             s += ";size";
             s += ";offset";
@@ -116,35 +109,36 @@ namespace AAPakCLI
             s += ";dummy1";
             s += ";dummy2";
             sl.Add(s);
-            foreach (AAPakFileInfo pfi in pak.files)
+            foreach (var pfi in pak.files)
             {
-                DateTime modTime = DateTime.FromFileTimeUtc(pfi.modifyTime);
+                var modTime = DateTime.FromFileTimeUtc(pfi.modifyTime);
                 if (modTime > newest)
                     newest = modTime;
 
                 s = pfi.name;
-                s += ";" + pfi.size.ToString();
-                s += ";" + pfi.offset.ToString();
+                s += ";" + pfi.size;
+                s += ";" + pfi.offset;
                 s += ";" + BitConverter.ToString(pfi.md5).Replace("-", "").ToUpper();
-                s += ";" + AAPak.DateTimeToDateTimeStr(DateTime.FromFileTimeUtc(pfi.createTime));// DateTimeToDateTimeStr DateTime.FromFileTimeUtc(pfi.createTime).ToString("yyyy-MM-dd HH:mm:ss");
+                s += ";" + AAPak.DateTimeToDateTimeStr(
+                    DateTime.FromFileTimeUtc(pfi
+                        .createTime)); // DateTimeToDateTimeStr DateTime.FromFileTimeUtc(pfi.createTime).ToString("yyyy-MM-dd HH:mm:ss");
                 s += ";" + AAPak.DateTimeToDateTimeStr(modTime); // .ToString("yyyy-MM-dd HH:mm:ss");
-                s += ";" + pfi.sizeDuplicate.ToString();
-                s += ";" + pfi.paddingSize.ToString();
-                s += ";" + pfi.dummy1.ToString();
-                s += ";" + pfi.dummy2.ToString();
+                s += ";" + pfi.sizeDuplicate;
+                s += ";" + pfi.paddingSize;
+                s += ";" + pfi.dummy1;
+                s += ";" + pfi.dummy2;
                 sl.Add(s);
-
             }
 
             File.WriteAllLines(filename, sl);
         }
 
 
-        static private bool HandleCommandLine()
+        private static bool HandleCommandLine()
         {
-            bool closeWhenDone = false;
+            var closeWhenDone = false;
 
-            string cmdErrors = string.Empty;
+            var cmdErrors = string.Empty;
             var args = Environment.GetCommandLineArgs();
             if (args.Length <= 1)
             {
@@ -152,7 +146,8 @@ namespace AAPakCLI
                 Console.WriteLine("[INFO] Run this tool with -? command-line to get a list of available arguments");
                 return true;
             }
-            for (int i = 1; i < args.Length; i++)
+
+            for (var i = 1; i < args.Length; i++)
             {
                 var arg = args[i];
                 var arg1 = "";
@@ -162,20 +157,15 @@ namespace AAPakCLI
                 if (i + 2 < args.Length)
                     arg2 = args[i + 2];
 
-                if ((arg == "-o") || (arg == "+o"))
+                if (arg == "-o" || arg == "+o")
                 {
                     i++; // take one arg
                     if (pak != null)
                         pak.ClosePak();
                     LoadPakFile(ref pak, arg1, false, false, true);
-                    if ((pak == null) || (!pak.isOpen))
-                    {
-                        cmdErrors += "[ERROR] Failed to open for r/w: " + arg1 + "\r\n";
-                    }
+                    if (pak == null || !pak.isOpen) cmdErrors += "[ERROR] Failed to open for r/w: " + arg1 + "\r\n";
                 }
-                else
-
-                if (arg == "+c")
+                else if (arg == "+c")
                 {
                     i++; // take one arg
 
@@ -183,118 +173,105 @@ namespace AAPakCLI
                         pak.ClosePak();
                     // Create and a new pakfile
                     pak = new AAPak(arg1, false, true);
-                    if ((pak == null) || (!pak.isOpen))
+                    if (pak == null || !pak.isOpen)
                     {
                         cmdErrors += "[ERROR] Failed to created file: " + arg1 + "\r\n";
                         continue;
                     }
+
                     pak.ClosePak();
                     // Re-open it in read/write mode
                     LoadPakFile(ref pak, arg1, false, false, true);
 
-                    if ((pak == null) || (!pak.isOpen))
-                    {
+                    if (pak == null || !pak.isOpen)
                         cmdErrors += "[ERROR] Failed to re-open created file: " + arg1 + "\r\n";
-                    }
                     else
-                    {
                         Console.WriteLine("[PAK] Created pak file {0}", arg1);
-                    }
                 }
                 else
-
-                /* Currently disable SFX support for command-line
-                if (arg == "+sfx")
-                {
-                    i++;
-                    if ((pak == null) || (!pak.isOpen) || (pak.readOnly))
+                    /* Currently disable SFX support for command-line
+                    if (arg == "+sfx")
                     {
-                        cmdErrors += "Pak file needs to be opened in read/write mode to be able to add a mod installer !\r\n";
-                    }
-                    else
-                    {
-                        // add MODSFX
-                        MemoryStream sfxStream = new MemoryStream(Properties.Resources.AAModSFX);
-                        // We will be possibly be editing the icon, so it's a good idea to have some spare space here
-                        if (!pak.AddFileFromStream(MakeModForm.SFXInfoFileName, sfxStream, DateTime.Now, DateTime.Now, true, out _))
+                        i++;
+                        if ((pak == null) || (!pak.isOpen) || (pak.readOnly))
                         {
-                            cmdErrors += "Failed to add SFX executable\r\n";
-                        }
-
-                        if (File.Exists(arg1))
-                        {
-                            if (!pak.AddFileFromFile(arg1, MakeModForm.ModInfoFileName, false))
-                            {
-                                cmdErrors += "Failed to add SFX description file: \r\n" + arg1;
-                            }
+                            cmdErrors += "Pak file needs to be opened in read/write mode to be able to add a mod installer !\r\n";
                         }
                         else
                         {
-                            // Consider the provided arg as a name
-                            MemoryStream modDescStream = new MemoryStream();
-                            var descBytes = Encoding.UTF8.GetBytes(arg1);
-                            modDescStream.Write(descBytes, 0, descBytes.Length);
-                            modDescStream.Position = 0;
-
-                            if (!pak.AddFileFromStream(MakeModForm.ModInfoFileName, modDescStream, DateTime.Now, DateTime.Now, false, out _))
+                            // add MODSFX
+                            MemoryStream sfxStream = new MemoryStream(Properties.Resources.AAModSFX);
+                            // We will be possibly be editing the icon, so it's a good idea to have some spare space here
+                            if (!pak.AddFileFromStream(MakeModForm.SFXInfoFileName, sfxStream, DateTime.Now, DateTime.Now, true, out _))
                             {
-                                cmdErrors += "Failed to add SFX description text: \r\n" + arg1;
+                                cmdErrors += "Failed to add SFX executable\r\n";
                             }
-
+    
+                            if (File.Exists(arg1))
+                            {
+                                if (!pak.AddFileFromFile(arg1, MakeModForm.ModInfoFileName, false))
+                                {
+                                    cmdErrors += "Failed to add SFX description file: \r\n" + arg1;
+                                }
+                            }
+                            else
+                            {
+                                // Consider the provided arg as a name
+                                MemoryStream modDescStream = new MemoryStream();
+                                var descBytes = Encoding.UTF8.GetBytes(arg1);
+                                modDescStream.Write(descBytes, 0, descBytes.Length);
+                                modDescStream.Position = 0;
+    
+                                if (!pak.AddFileFromStream(MakeModForm.ModInfoFileName, modDescStream, DateTime.Now, DateTime.Now, false, out _))
+                                {
+                                    cmdErrors += "Failed to add SFX description text: \r\n" + arg1;
+                                }
+    
+                            }
                         }
                     }
-                }
-                else
-                */
+                    else
+                    */
 
                 if (arg == "+f")
                 {
                     i += 2; // take two args
-                    if ((pak == null) || (!pak.isOpen) || (pak.readOnly))
+                    if (pak == null || !pak.isOpen || pak.readOnly)
                     {
-                        cmdErrors += "[ERROR] Pak file needs to be opened in read/write mode to be able to add a file !\r\n";
+                        cmdErrors +=
+                            "[ERROR] Pak file needs to be opened in read/write mode to be able to add a file !\r\n";
                     }
                     else
                     {
                         if (!pak.AddFileFromFile(arg1, arg2, false))
-                        {
                             cmdErrors += "[ERROR] Failed to add file: " + arg1 + " => " + arg2 + "\r\n";
-                        }
                         else
-                        {
                             Console.WriteLine("[PAK] Added file {0} => {1}", arg1, arg2);
-                        }
                     }
                 }
-                else
-
-                if (arg == "-f")
+                else if (arg == "-f")
                 {
                     i++; // take one arg
-                    if ((pak == null) || (!pak.isOpen) || (pak.readOnly))
+                    if (pak == null || !pak.isOpen || pak.readOnly)
                     {
-                        cmdErrors += "[ERROR] Pak file needs to be opened in read/write mode to be able to delete a file !\r\n";
+                        cmdErrors +=
+                            "[ERROR] Pak file needs to be opened in read/write mode to be able to delete a file !\r\n";
                     }
                     else
                     {
                         if (!pak.DeleteFile(arg1))
-                        {
                             // Technically, this could never fail as it only can return false if it's in read-only
                             cmdErrors += "[ERROR] Failed to delete file:\r\n" + arg1;
-                        }
                         else
-                        {
                             Console.WriteLine("[PAK] Deleted file {0}", arg1);
-                        }
                     }
                 }
-                else
-
-                if ((arg == "-s") || (arg == "+s"))
+                else if (arg == "-s" || arg == "+s")
                 {
-                    if ((pak == null) || (!pak.isOpen) || (pak.readOnly))
+                    if (pak == null || !pak.isOpen || pak.readOnly)
                     {
-                        cmdErrors += "[ERROR] Pak file needs to be opened in read/write mode to be able save it !\r\n";
+                        cmdErrors +=
+                            "[ERROR] Pak file needs to be opened in read/write mode to be able save it !\r\n";
                     }
                     else
                     {
@@ -302,18 +279,17 @@ namespace AAPakCLI
                         pak.SaveHeader();
                     }
                 }
-                else
-
-                if (arg == "+d")
+                else if (arg == "+d")
                 {
                     i += 2; // take two args
-                    if ((pak == null) || (!pak.isOpen) || (pak.readOnly))
+                    if (pak == null || !pak.isOpen || pak.readOnly)
                     {
-                        cmdErrors += "[ERROR] Pak file needs to be opened in read/write mode to be able to add a file !\r\n";
+                        cmdErrors +=
+                            "[ERROR] Pak file needs to be opened in read/write mode to be able to add a file !\r\n";
                     }
                     else
                     {
-                        Console.WriteLine("[PAK] Adding directory {0} => {1}",arg1,arg2);
+                        Console.WriteLine("[PAK] Adding directory {0} => {1}", arg1, arg2);
                         try
                         {
                             var filesAdded = AddDirectory(ref pak, arg1, arg2);
@@ -325,14 +301,13 @@ namespace AAPakCLI
                         }
                     }
                 }
-                else
-
-                if (arg == "-d")
+                else if (arg == "-d")
                 {
                     i += 1; // takes one arg
-                    if ((pak == null) || (!pak.isOpen) || (pak.readOnly))
+                    if (pak == null || !pak.isOpen || pak.readOnly)
                     {
-                        cmdErrors += "[ERROR] Pak file needs to be opened in read/write mode to be able to add a file !\r\n";
+                        cmdErrors +=
+                            "[ERROR] Pak file needs to be opened in read/write mode to be able to add a file !\r\n";
                     }
                     else
                     {
@@ -340,19 +315,18 @@ namespace AAPakCLI
                         try
                         {
                             var filesDeleted = 0;
-                            string delDir = arg1.ToLower();
+                            var delDir = arg1.ToLower();
                             if (delDir.Last() != '/')
                                 delDir += '/';
-                            for(int n = pak.files.Count - 1;n >= 0;n--)
-                            //foreach(AAPakFileInfo pfi in pak.files)
+                            for (var n = pak.files.Count - 1; n >= 0; n--)
+                                //foreach(AAPakFileInfo pfi in pak.files)
                             {
-                                AAPakFileInfo pfi = pak.files[n];
+                                var pfi = pak.files[n];
                                 if (pfi.name.ToLower().StartsWith(delDir))
-                                {
                                     if (pak.DeleteFile(pfi))
                                         filesDeleted++;
-                                }
                             }
+
                             Console.WriteLine("[PAK] Deleted {0} file(s)", filesDeleted);
                         }
                         catch (Exception x)
@@ -361,70 +335,56 @@ namespace AAPakCLI
                         }
                     }
                 }
-                else
-
-                if ((arg == "-x") || (arg == "+x"))
+                else if (arg == "-x" || arg == "+x")
                 {
-                    if ((pak == null) || (!pak.isOpen))
-                    {
+                    if (pak == null || !pak.isOpen)
                         cmdErrors += "[ERROR] Pak file needs to be opened before you can close it !\r\n";
-                    }
                     else
-                    {
                         pak.ClosePak();
-                    }
                     if (arg == "+x")
                         closeWhenDone = true;
                 }
-                else
-
-                if ((arg == "-m") || (arg == "+m"))
+                else if (arg == "-m" || arg == "+m")
                 {
                     i++;
-                    Console.WriteLine("[INFO] {0} ",arg1);
+                    Console.WriteLine("[INFO] {0} ", arg1);
                     Console.Write("Press ENTER to continue ...");
                     _ = Console.ReadLine();
                 }
-                else
-
-                if ((arg == "-csv") || (arg == "+csv"))
+                else if (arg == "-csv" || arg == "+csv")
                 {
                     i++; // take one arg
-                    if ((pak == null) || (!pak.isOpen))
+                    if (pak == null || !pak.isOpen)
                     {
                         cmdErrors += "[ERROR] Pak file needs to be opened to be able generate a CSV file !\r\n";
                     }
                     else
                     {
                         if (arg1 == string.Empty)
-                        {
                             Console.WriteLine("[ERROR] you need to provide a filename to export to");
-                        }
                         else
-                        {
                             CreateCSVFile(ref pak, arg1);
-                        }
                     }
                 }
-                else
-
-                if ((arg == "-patchbycompare") || (arg == "+patchbycompare") || (arg == "-pbc") || (arg == "+pbc"))
+                else if (arg == "-patchbycompare" || arg == "+patchbycompare" || arg == "-pbc" || arg == "+pbc")
                 {
                     i += 2; // take two args
-                    if ((pak == null) || (!pak.isOpen))
+                    if (pak == null || !pak.isOpen)
                     {
-                        cmdErrors += "[ERROR] A Pak file needs to be opened before you can create a patch by compare !\r\n";
+                        cmdErrors +=
+                            "[ERROR] A Pak file needs to be opened before you can create a patch by compare !\r\n";
                     }
                     else
                     {
                         if (arg1 == string.Empty)
                         {
-                            Console.WriteLine("[ERROR] you need to provide a older pak or csv filename to compare with.");
+                            Console.WriteLine(
+                                "[ERROR] you need to provide a older pak or csv filename to compare with.");
                         }
-                        else
-                        if (arg2 == string.Empty)
+                        else if (arg2 == string.Empty)
                         {
-                            Console.WriteLine("[ERROR] you need to provide a patch filename to write the updated files to.");
+                            Console.WriteLine(
+                                "[ERROR] you need to provide a patch filename to write the updated files to.");
                         }
                         else
                         {
@@ -435,27 +395,20 @@ namespace AAPakCLI
                         }
                     }
                 }
-                else
-
-                if ((arg == "-h") || (arg == "--h") || (arg == "--help") || (arg == "-help") || (arg == "-?") || (arg == "--?") || (arg == "/?") || (arg == "/help"))
+                else if (arg == "-h" || arg == "--h" || arg == "--help" || arg == "-help" || arg == "-?" ||
+                         arg == "--?" || arg == "/?" || arg == "/help")
                 {
-
                     Console.WriteLine("[HELP] AAPakCLI the Command-Line pak editor");
-                    Console.WriteLine(Properties.Resources.cmdhelp);
+                    Console.WriteLine(Resources.cmdhelp);
                     closeWhenDone = true;
                 }
-                else
-
-                if (File.Exists(arg))
+                else if (File.Exists(arg))
                 {
                     // Open file in read-only mode if nothing is specified and it's a valid filename
                     if (pak != null)
                         pak.ClosePak();
                     LoadPakFile(ref pak, arg, true, true, true);
-                    if ((pak == null) || (!pak.isOpen))
-                    {
-                        cmdErrors += "[ERROR] Failed to open: " + arg + "\r\n";
-                    }
+                    if (pak == null || !pak.isOpen) cmdErrors += "[ERROR] Failed to open: " + arg + "\r\n";
                 }
                 else
                 {
@@ -463,15 +416,12 @@ namespace AAPakCLI
                 }
             }
 
-            if (cmdErrors != string.Empty)
-            {
-                Console.WriteLine(cmdErrors);
-            }
-            
+            if (cmdErrors != string.Empty) Console.WriteLine(cmdErrors);
+
             return closeWhenDone;
         }
 
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             try
             {
@@ -481,20 +431,23 @@ namespace AAPakCLI
             {
                 Console.WriteLine("[EXCEPTION] {0}\r\n", x.Message);
             }
+
             try
             {
-                if ((pak != null) && (pak.isOpen))
+                if (pak != null && pak.isOpen)
                 {
                     if (pak.isDirty)
                         Console.WriteLine("[PAK] Saving pak ... {0}", pak._gpFilePath);
                     else
-                        Console.WriteLine("[PAK] Closing pak ... {0}",pak._gpFilePath);
+                        Console.WriteLine("[PAK] Closing pak ... {0}", pak._gpFilePath);
                     pak.ClosePak();
                 }
             }
             catch (Exception x)
             {
-                Console.WriteLine("[EXCEPTION] Error closing or saving pak file, possibly data corruption !\r\n{0}", x.Message);
+                Console.WriteLine(
+                    "[EXCEPTION] Error closing or saving pak file, possibly data corruption !\r\n{0}",
+                    x.Message);
             }
         }
     }

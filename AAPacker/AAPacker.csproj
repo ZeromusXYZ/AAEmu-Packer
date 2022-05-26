@@ -3,8 +3,9 @@
     <PropertyGroup>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>disable</Nullable>
-        <TargetFramework>net48</TargetFramework>
         <LangVersion>default</LangVersion>
+        <TargetFrameworks>net48;net6.0</TargetFrameworks>
+        <RootNamespace>AAPak</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>

@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AAMod", "AAMod\AAMod.csproj
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AAPakCLI", "AAPakCLI\AAPakCLI.csproj", "{2B8C2FF6-F5D5-4FB1-BEB8-2DA60EEA45D1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AAPak", "AAPak\AAPak.csproj", "{66655932-62C0-44F6-A0B9-788E386751DF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AAPacker", "AAPacker\AAPacker.csproj", "{66655932-62C0-44F6-A0B9-788E386751DF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

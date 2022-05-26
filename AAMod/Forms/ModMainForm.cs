@@ -1,43 +1,45 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 using System.IO;
-using AAPakEditor;
+using System.Linq;
+using System.Windows.Forms;
+using AAMod.Properties;
+using AAPacker;
 
-namespace AAMod
+namespace AAMod.Forms
 {
     public partial class ModMainForm : Form
     {
-        static string appVerDate = "V20190518";
-        static string GamePakFileName = "game_pak";
-        static string ModPakFileName = string.Empty;
-        static string RestorePakFileName = string.Empty;
-        static string ModFileFolderName = "aamod/";
-        static string SFXInfoFileName = ModFileFolderName + "aamod.exe"; // if present, this needs to be the first file in the pak
-        static string ModInfoFileName = ModFileFolderName + "aamod.txt";
-        static string ModPNGImageFileName = ModFileFolderName + "aamod.png";
-        static string ModJPGImageFileName = ModFileFolderName + "aamod.jpg";
-        static string ModNewFilesFileName = ModFileFolderName + "newfiles.txt";
+        private static readonly string appVerDate = "V20190518";
+        private static string GamePakFileName = "game_pak";
+        private static string ModPakFileName = string.Empty;
+        private static string RestorePakFileName = string.Empty;
+        private static readonly string ModFileFolderName = "aamod/";
+
+        private static string
+            SFXInfoFileName = ModFileFolderName + "aamod.exe"; // if present, this needs to be the first file in the pak
+
+        private static readonly string ModInfoFileName = ModFileFolderName + "aamod.txt";
+        private static readonly string ModPNGImageFileName = ModFileFolderName + "aamod.png";
+        private static readonly string ModJPGImageFileName = ModFileFolderName + "aamod.jpg";
+        private static readonly string ModNewFilesFileName = ModFileFolderName + "newfiles.txt";
         private string DefaultTitle;
-        private string helpText = "Command-Line Arguments:\n\n" +
-            "-m <modfile> : use custom mod file\n\n" +
-            "-g <gamepak> : use specified game_pak. If no gamepak is provided, a file open dialog will pop up to ask the location\n\n" +
-            "-r <restorefile> : Use a custom restore file (not recommended)\n\n" +
-            "-? : This help message";
-        private AAPak gamepak = new AAPak("");
-        private AAPak modpak = new AAPak("");
-        private AAPak restorepak = new AAPak("");
-        private List<AAPakFileInfo> FilesToMod = new List<AAPakFileInfo>();
-        private List<AAPakFileInfo> FilesToInstall = new List<AAPakFileInfo>();
-        private List<AAPakFileInfo> FilesToUnInstall = new List<AAPakFileInfo>();
-        private List<AAPakFileInfo> FilesAddedWithInstall = new List<AAPakFileInfo>();
-        private List<string> RestoreNewFilesList = new List<string>();
+        private readonly List<AAPakFileInfo> FilesAddedWithInstall = new();
+        private readonly List<AAPakFileInfo> FilesToInstall = new();
+        private readonly List<AAPakFileInfo> FilesToMod = new();
+        private readonly List<AAPakFileInfo> FilesToUnInstall = new();
+        private readonly AAPak gamepak = new("");
+
+        private readonly string helpText = "Command-Line Arguments:\n\n" +
+                                           "-m <modfile> : use custom mod file\n\n" +
+                                           "-g <gamepak> : use specified game_pak. If no gamepak is provided, a file open dialog will pop up to ask the location\n\n" +
+                                           "-r <restorefile> : Use a custom restore file (not recommended)\n\n" +
+                                           "-? : This help message";
+
+        private readonly AAPak modpak = new("");
+        private readonly List<string> RestoreNewFilesList = new();
+        private readonly AAPak restorepak = new("");
 
         public ModMainForm()
         {
@@ -46,20 +48,17 @@ namespace AAMod
 
         private bool HandleArgs()
         {
-            bool showHelp = false;
+            var showHelp = false;
 
             var args = Environment.GetCommandLineArgs();
-            for (int i = 1; i < args.Length; i++)
+            for (var i = 1; i < args.Length; i++)
             {
                 var larg = args[i].ToLower();
-                string nextArg = "";
-                if (i < args.Length-1)
-                {
-                    nextArg = args[i + 1];
-                }
+                var nextArg = "";
+                if (i < args.Length - 1) nextArg = args[i + 1];
 
 
-                switch(larg)
+                switch (larg)
                 {
                     case "-m":
                         // Mod source
@@ -86,14 +85,14 @@ namespace AAMod
                         showHelp = true;
                         break;
                 }
-
             }
 
 
             if (showHelp)
             {
                 Hide();
-                MessageBox.Show(helpText, "AAMod - Command-Line Help", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show(helpText, "AAMod - Command-Line Help", MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
                 return false;
             }
 
@@ -101,7 +100,8 @@ namespace AAMod
             if (ModPakFileName == string.Empty)
             {
                 ModPakFileName = Application.ExecutablePath;
-                Text = DefaultTitle + " - Self-Extractor - " + Path.GetFileNameWithoutExtension(Application.ExecutablePath);
+                Text = DefaultTitle + " - Self-Extractor - " +
+                       Path.GetFileNameWithoutExtension(Application.ExecutablePath);
             }
             else
             {
@@ -110,23 +110,29 @@ namespace AAMod
 
             if (!File.Exists(ModPakFileName))
             {
-                MessageBox.Show("Mod-file not found\n" + ModPakFileName, "aamod Open Error", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                MessageBox.Show("Mod-file not found\n" + ModPakFileName, "aamod Open Error", MessageBoxButtons.OK,
+                    MessageBoxIcon.Stop);
                 return false;
             }
-            if (!modpak.OpenPak(ModPakFileName,true))
+
+            if (!modpak.OpenPak(ModPakFileName, true))
             {
                 if (ModPakFileName == Application.ExecutablePath)
                 {
                     // show a different error if you tried to open it without any parameters and tried to use the exe as a pak and failed
                     Visible = false;
                     MessageBox.Show("This program cannot be used as a stand-alone program.\n" +
-                        "You either need to provide command-line arguments or this file needs to be generated by AAPakEditor to contain pak information.\n\n" +
-                        "Use -? to get a list of possible arguments.", "AAMod Open Error", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                                    "You either need to provide command-line arguments or this file needs to be generated by AAPakEditor to contain pak information.\n\n" +
+                                    "Use -? to get a list of possible arguments.", "AAMod Open Error",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Stop);
                 }
                 else
                 {
-                    MessageBox.Show("Failed to open mod-file for reading\n" + ModPakFileName, "aamod Open Error", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                    MessageBox.Show("Failed to open mod-file for reading\n" + ModPakFileName, "aamod Open Error",
+                        MessageBoxButtons.OK, MessageBoxIcon.Stop);
                 }
+
                 return false;
             }
 
@@ -141,6 +147,7 @@ namespace AAMod
             {
                 tDescription.Text = "No description provided for this mod file.";
             }
+
             tDescription.SelectionLength = 0;
 
             if (modpak.FileExists(ModPNGImageFileName))
@@ -149,8 +156,7 @@ namespace AAMod
                 var img = Image.FromStream(picStream);
                 modIcon.Image = img;
             }
-            else
-            if (modpak.FileExists(ModJPGImageFileName))
+            else if (modpak.FileExists(ModJPGImageFileName))
             {
                 var picStream = modpak.ExportFileAsStream(ModJPGImageFileName);
                 var img = Image.FromStream(picStream);
@@ -159,16 +165,10 @@ namespace AAMod
 
 
             while (!File.Exists(GamePakFileName))
-            {
                 if (openGamePakDlg.ShowDialog() == DialogResult.OK)
-                {
                     GamePakFileName = openGamePakDlg.FileName;
-                }
                 else
-                {
                     return false;
-                }
-            }
             Refresh();
             lInstallLocation.Text = "Loading, please wait ...";
             lInstallLocation.Refresh();
@@ -179,26 +179,35 @@ namespace AAMod
             }
             else
             {
-                MessageBox.Show("Failed to open ArcheAge game pak for writing\n" + GamePakFileName, "game_pak Open Error", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                MessageBox.Show("Failed to open ArcheAge game pak for writing\n" + GamePakFileName,
+                    "game_pak Open Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Stop);
                 return false;
             }
 
             if (RestorePakFileName == string.Empty)
-            {
-                RestorePakFileName = Path.GetDirectoryName(GamePakFileName).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar + ".aamod"+ Path.DirectorySeparatorChar + "restore_pak" ;
-            }
+                RestorePakFileName = Path.GetDirectoryName(GamePakFileName).TrimEnd(Path.DirectorySeparatorChar) +
+                                     Path.DirectorySeparatorChar + ".aamod" + Path.DirectorySeparatorChar +
+                                     "restore_pak";
 
             if (File.Exists(RestorePakFileName))
             {
                 if (!restorepak.OpenPak(RestorePakFileName, false))
                 {
-                    MessageBox.Show("Failed to open mod uninstall file for writing\n" + RestorePakFileName+"\n\nThis is most likely due to a corrupted restore file. Previously backed-up data is lost !", "restore_pak Open Error", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                    MessageBox.Show(
+                        "Failed to open mod uninstall file for writing\n" + RestorePakFileName +
+                        "\n\nThis is most likely due to a corrupted restore file. Previously backed-up data is lost !",
+                        "restore_pak Open Error", MessageBoxButtons.OK, MessageBoxIcon.Stop);
                     restorepak.ClosePak();
-                    if (MessageBox.Show("Do you want to create a new restore file ?\nThis step is required to be able to continue.","Re-Create backup file",MessageBoxButtons.YesNo,MessageBoxIcon.Question) == DialogResult.Yes)
+                    if (MessageBox.Show(
+                            "Do you want to create a new restore file ?\nThis step is required to be able to continue.",
+                            "Re-Create backup file", MessageBoxButtons.YesNo, MessageBoxIcon.Question) ==
+                        DialogResult.Yes)
                     {
                         if (!restorepak.NewPak(RestorePakFileName))
                         {
-                            MessageBox.Show("Failed to re-create mod uninstall file\n" + RestorePakFileName, "restore_pak Create Error", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                            MessageBox.Show("Failed to re-create mod uninstall file\n" + RestorePakFileName,
+                                "restore_pak Create Error", MessageBoxButtons.OK, MessageBoxIcon.Stop);
                             return false;
                         }
                     }
@@ -216,13 +225,16 @@ namespace AAMod
                 }
                 catch
                 {
-                    MessageBox.Show("Failed to create mod uninstall directory for \n" + RestorePakFileName, "restore_pak Directory Error", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                    MessageBox.Show("Failed to create mod uninstall directory for \n" + RestorePakFileName,
+                        "restore_pak Directory Error", MessageBoxButtons.OK, MessageBoxIcon.Stop);
                     return false;
                 }
+
                 // create a new one if none exists yet
                 if (!restorepak.NewPak(RestorePakFileName))
                 {
-                    MessageBox.Show("Failed to create mod uninstall file\n" + RestorePakFileName, "restore_pak Create Error", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                    MessageBox.Show("Failed to create mod uninstall file\n" + RestorePakFileName,
+                        "restore_pak Create Error", MessageBoxButtons.OK, MessageBoxIcon.Stop);
                     return false;
                 }
             }
@@ -236,7 +248,7 @@ namespace AAMod
         private void ReadNewFilesFromRestore()
         {
             RestoreNewFilesList.Clear();
-            AAPakFileInfo rnfl = restorepak.nullAAPakFileInfo;
+            var rnfl = restorepak.nullAAPakFileInfo;
             if (restorepak.GetFileByName(ModNewFilesFileName, ref rnfl))
             {
                 var rf = restorepak.ExportFileAsStream(rnfl);
@@ -254,7 +266,7 @@ namespace AAMod
         private void ModMainForm_Load(object sender, EventArgs e)
         {
             DefaultTitle = Text;
-            Icon = AAMod.Properties.Resources.aamod_icon;
+            Icon = Resources.aamod_icon;
         }
 
         private void ModMainForm_Shown(object sender, EventArgs e)
@@ -280,8 +292,7 @@ namespace AAMod
             // TODO: Enabled buttons depending on the state of game_pak and restore_pak compared to the aamod pak
             // Get file list from mod pak
             FilesToMod.Clear();
-            foreach(var fi in modpak.files)
-            {
+            foreach (var fi in modpak.files)
                 if (fi.name.StartsWith(ModFileFolderName))
                 {
                     // Don't include own mod files
@@ -291,19 +302,15 @@ namespace AAMod
                     // TODO: compare to gamepak to check if installed or not
                     FilesToMod.Add(fi);
                 }
-            }
 
             FilesToInstall.Clear();
             FilesAddedWithInstall.Clear();
             foreach (var fi in FilesToMod)
             {
-                AAPakFileInfo gfi = gamepak.nullAAPakFileInfo ;
+                var gfi = gamepak.nullAAPakFileInfo;
                 if (gamepak.GetFileByName(fi.name, ref gfi))
                 {
-                    if ( (fi.size != gfi.size) || (!fi.md5.SequenceEqual(gfi.md5)) )
-                    {
-                        FilesToInstall.Add(fi);
-                    }
+                    if (fi.size != gfi.size || !fi.md5.SequenceEqual(gfi.md5)) FilesToInstall.Add(fi);
                 }
                 else
                 {
@@ -314,59 +321,56 @@ namespace AAMod
 
             FilesToUnInstall.Clear();
             foreach (var fi in FilesToMod)
-            {
                 if (restorepak.FileExists(fi.name))
                     FilesToUnInstall.Add(fi);
-            }
 
             if (FilesToInstall.Count > 0)
             {
                 btnInstall.Enabled = true;
-                string s = string.Empty;
+                var s = string.Empty;
                 if (FilesToMod.Count != 1)
-                    s += "Mod " + FilesToMod.Count.ToString() + " file(s)";
+                    s += "Mod " + FilesToMod.Count + " file(s)";
                 else
-                    s += "Mod " + FilesToMod.Count.ToString() + " file";
+                    s += "Mod " + FilesToMod.Count + " file";
                 if (FilesAddedWithInstall.Count > 0)
-                    s += ", with " + FilesAddedWithInstall.Count.ToString() + " new";
+                    s += ", with " + FilesAddedWithInstall.Count + " new";
                 lInstallInfo.Text = s;
             }
 
             // Check if these same files are all present in the restore pak
             // If not, disable the uninstall option (likely not installed)
             // TODO: 
-            btnUninstall.Enabled = (FilesToUnInstall.Count > 0);
+            btnUninstall.Enabled = FilesToUnInstall.Count > 0;
         }
 
         private void BtnInstall_Click(object sender, EventArgs e)
         {
             btnInstall.Enabled = false;
             pb.Minimum = 0;
-            pb.Maximum = FilesToMod.Count ;
+            pb.Maximum = FilesToMod.Count;
             pb.Step = 1;
             lInstallInfo.Text = "Creating restore files";
-            foreach(var fi in FilesToInstall)
+            foreach (var fi in FilesToInstall)
             {
                 // If file exists in gamepak, make a backup
-                AAPakFileInfo gamefi = gamepak.nullAAPakFileInfo;
+                var gamefi = gamepak.nullAAPakFileInfo;
                 if (gamepak.GetFileByName(fi.name, ref gamefi))
                 {
                     var fileBackupStream = gamepak.ExportFileAsStream(fi.name);
                     fileBackupStream.Position = 0;
-                    AAPakFileInfo restoreFileInfo = restorepak.nullAAPakFileInfo;
-                    if (!restorepak.AddFileFromStream(fi.name, fileBackupStream, DateTime.FromFileTimeUtc(gamefi.createTime), DateTime.FromFileTimeUtc(gamefi.modifyTime), false, out restoreFileInfo))
-                    {
-                        MessageBox.Show("Error making backup of " + fi.name);
-                    }
+                    var restoreFileInfo = restorepak.nullAAPakFileInfo;
+                    if (!restorepak.AddFileFromStream(fi.name, fileBackupStream,
+                            DateTime.FromFileTimeUtc(gamefi.createTime), DateTime.FromFileTimeUtc(gamefi.modifyTime),
+                            false,
+                            out restoreFileInfo)) MessageBox.Show("Error making backup of " + fi.name);
                 }
 
                 var fileModStream = modpak.ExportFileAsStream(fi.name);
                 fileModStream.Position = 0;
-                AAPakFileInfo newModFile = gamepak.nullAAPakFileInfo;
-                if (!gamepak.AddFileFromStream(fi.name, fileModStream, DateTime.FromFileTimeUtc(fi.createTime), DateTime.FromFileTimeUtc(fi.modifyTime), false, out newModFile))
-                {
+                var newModFile = gamepak.nullAAPakFileInfo;
+                if (!gamepak.AddFileFromStream(fi.name, fileModStream, DateTime.FromFileTimeUtc(fi.createTime),
+                        DateTime.FromFileTimeUtc(fi.modifyTime), false, out newModFile))
                     MessageBox.Show("Error modding file " + fi.name);
-                }
 
                 pb.PerformStep();
                 pb.Refresh();
@@ -382,10 +386,8 @@ namespace AAMod
             ReadNewFilesFromRestore();
             // Add newly added files to the newfiles.txt
             foreach (var fi in FilesAddedWithInstall)
-            {
                 if (RestoreNewFilesList.IndexOf(fi.name) < 0)
                     RestoreNewFilesList.Add(fi.name);
-            }
             WriteNewFilesForRestore();
             restorepak.SaveHeader();
             pb.Value = pb.Maximum;
@@ -411,20 +413,17 @@ namespace AAMod
             foreach (var fi in FilesToMod)
             {
                 // If file exists in gamepak, make a backup
-                AAPakFileInfo rfi = restorepak.nullAAPakFileInfo;
-                if (restorepak.GetFileByName(fi.name,ref rfi))
+                var rfi = restorepak.nullAAPakFileInfo;
+                if (restorepak.GetFileByName(fi.name, ref rfi))
                 {
                     var fileRestoreStream = restorepak.ExportFileAsStream(fi.name);
                     fileRestoreStream.Position = 0;
-                    AAPakFileInfo restoreFileInfo = gamepak.nullAAPakFileInfo;
-                    if (!gamepak.AddFileFromStream(fi.name, fileRestoreStream, DateTime.FromFileTimeUtc(rfi.createTime), DateTime.FromFileTimeUtc(rfi.modifyTime), false, out restoreFileInfo))
-                    {
+                    var restoreFileInfo = gamepak.nullAAPakFileInfo;
+                    if (!gamepak.AddFileFromStream(fi.name, fileRestoreStream, DateTime.FromFileTimeUtc(rfi.createTime),
+                            DateTime.FromFileTimeUtc(rfi.modifyTime), false, out restoreFileInfo))
                         MessageBox.Show("Error restoring file " + fi.name);
-                    }
                     else
-                    {
                         restorepak.DeleteFile(rfi);
-                    }
                 }
 
                 pb.PerformStep();
@@ -437,13 +436,13 @@ namespace AAMod
             if (restorepak.FileExists(ModNewFilesFileName))
             {
                 ReadNewFilesFromRestore();
-                                
+
                 foreach (var fn in FilesToMod)
                 {
                     if (RestoreNewFilesList.IndexOf(fn.name) < 0)
                         continue;
-                    AAPakFileInfo delFileInfo = gamepak.nullAAPakFileInfo;
-                    if (gamepak.GetFileByName(fn.name,ref delFileInfo))
+                    var delFileInfo = gamepak.nullAAPakFileInfo;
+                    if (gamepak.GetFileByName(fn.name, ref delFileInfo))
                     {
                         gamepak.DeleteFile(delFileInfo);
                         RestoreNewFilesList.Remove(fn.name);
@@ -461,30 +460,31 @@ namespace AAMod
 
             MessageBox.Show("Mod has been uninstalled", "Uninstall", MessageBoxButtons.OK, MessageBoxIcon.Information);
             ValidateInstallOptions();
-
         }
 
         private void ModMainForm_KeyDown(object sender, KeyEventArgs e)
         {
-            if ((e.KeyCode == Keys.V) && (e.Control) && (e.Alt))
+            if (e.KeyCode == Keys.V && e.Control && e.Alt)
                 MessageBox.Show("AAMod Installer " + appVerDate);
         }
 
-        private void TryLoadCustomKey(AAPak aPak,string pakFileName)
+        private void TryLoadCustomKey(AAPak aPak, string pakFileName)
         {
-            byte[] customKey = new byte[16];
+            var customKey = new byte[16];
             string fn;
 
             // PAK-Header Key
-            fn = Path.GetDirectoryName(pakFileName).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar + "game_pak.key";
+            fn = Path.GetDirectoryName(pakFileName).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar +
+                 "game_pak.key";
             if (File.Exists(fn))
             {
-                FileStream fs = new FileStream(fn, FileMode.Open, FileAccess.Read);
+                var fs = new FileStream(fn, FileMode.Open, FileAccess.Read);
                 if (fs.Length != 16)
                 {
                     fs.Dispose();
                     return;
                 }
+
                 fs.Read(customKey, 0, 16);
                 fs.Dispose();
                 aPak._header.SetCustomKey(customKey);

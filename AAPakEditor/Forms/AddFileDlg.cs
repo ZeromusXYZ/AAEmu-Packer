@@ -1,36 +1,28 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 using System.IO;
+using System.Windows.Forms;
 
-namespace AAPakEditor
+namespace AAPakEditor;
+
+public partial class AddFileDialog : Form
 {
-    public partial class AddFileDialog : Form
+    public string suggestedDir = "";
+
+    public AddFileDialog()
     {
-        public string suggestedDir = "";
+        InitializeComponent();
+    }
 
-        public AddFileDialog()
-        {
-            InitializeComponent();
-        }
+    private void btnSearchFile_Click(object sender, EventArgs e)
+    {
+        if (openFileDlg.ShowDialog() != DialogResult.OK)
+            return;
+        eDiskFileName.Text = openFileDlg.FileName;
+        ePakFileName.Text = suggestedDir + Path.GetFileName(eDiskFileName.Text).ToLower();
+    }
 
-        private void btnSearchFile_Click(object sender, EventArgs e)
-        {
-            if (openFileDlg.ShowDialog() != DialogResult.OK)
-                return;
-            eDiskFileName.Text = openFileDlg.FileName;
-            ePakFileName.Text = suggestedDir + Path.GetFileName(eDiskFileName.Text).ToLower();
-        }
-
-        private void AddFileDialog_Load(object sender, EventArgs e)
-        {
-            ePakFileName.Text = suggestedDir;
-        }
+    private void AddFileDialog_Load(object sender, EventArgs e)
+    {
+        ePakFileName.Text = suggestedDir;
     }
 }

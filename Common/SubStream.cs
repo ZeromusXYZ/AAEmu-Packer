@@ -9,10 +9,10 @@ namespace SubStreamHelper
 
     public class SubStream : Stream
     {
-        private Stream baseStream;
+        private readonly long baseOffset;
+        private readonly Stream baseStream;
         private readonly long length;
         private long position;
-        private readonly long baseOffset;
 
         public SubStream(Stream baseStream, long offset, long length)
         {
@@ -21,7 +21,7 @@ namespace SubStreamHelper
             if (offset < 0) throw new ArgumentOutOfRangeException("offset");
 
             this.baseStream = baseStream;
-            this.baseOffset = offset;
+            baseOffset = offset;
             this.length = length;
 
             if (baseStream.CanSeek)
@@ -29,52 +29,52 @@ namespace SubStreamHelper
                 baseStream.Seek(offset, SeekOrigin.Begin);
             }
             else
-            { 
+            {
                 // read it manually...
                 const int BUFFER_SIZE = 512;
-                byte[] buffer = new byte[BUFFER_SIZE];
+                var buffer = new byte[BUFFER_SIZE];
                 while (offset > 0)
                 {
-                    int read = baseStream.Read(buffer, 0, offset < BUFFER_SIZE ? (int)offset : BUFFER_SIZE);
+                    var read = baseStream.Read(buffer, 0, offset < BUFFER_SIZE ? (int)offset : BUFFER_SIZE);
                     offset -= read;
                 }
             }
         }
 
-        public override int Read(byte[] buffer, int offset, int count)
-        {
-            CheckDisposed();
-            long remaining = length - position;
-            if (remaining <= 0) return 0;
-            if (remaining < count) count = (int)remaining;
-            int read = baseStream.Read(buffer, offset, count);
-            position += read;
-            return read;
-        }
-
-        private void CheckDisposed()
-        {
-            if (baseStream == null) throw new ObjectDisposedException(GetType().Name);
-        }
-
         public override long Length
         {
-            get { CheckDisposed(); return length; }
+            get
+            {
+                CheckDisposed();
+                return length;
+            }
         }
 
         public override bool CanRead
         {
-            get { CheckDisposed(); return true; }
+            get
+            {
+                CheckDisposed();
+                return true;
+            }
         }
 
         public override bool CanWrite
         {
-            get { CheckDisposed(); return false; }
+            get
+            {
+                CheckDisposed();
+                return false;
+            }
         }
 
         public override bool CanSeek
         {
-            get { CheckDisposed(); return false; }
+            get
+            {
+                CheckDisposed();
+                return false;
+            }
         }
 
         public override long Position
@@ -90,8 +90,24 @@ namespace SubStreamHelper
                     position = length;
                 else
                     position = value;
-                baseStream.Position = baseOffset + position; 
+                baseStream.Position = baseOffset + position;
             }
+        }
+
+        public override int Read(byte[] buffer, int offset, int count)
+        {
+            CheckDisposed();
+            var remaining = length - position;
+            if (remaining <= 0) return 0;
+            if (remaining < count) count = (int)remaining;
+            var read = baseStream.Read(buffer, offset, count);
+            position += read;
+            return read;
+        }
+
+        private void CheckDisposed()
+        {
+            if (baseStream == null) throw new ObjectDisposedException(GetType().Name);
         }
 
         public override long Seek(long offset, SeekOrigin origin)
@@ -106,7 +122,8 @@ namespace SubStreamHelper
 
         public override void Flush()
         {
-            CheckDisposed(); baseStream.Flush();
+            CheckDisposed();
+            baseStream.Flush();
         }
 
         protected override void Dispose(bool disposing)

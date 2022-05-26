@@ -43,13 +43,9 @@
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\Common\AAPak.cs">
-      <Link>AAPak.cs</Link>
-    </Compile>
     <Compile Include="..\Common\SubStream.cs">
       <Link>SubStream.cs</Link>
     </Compile>
@@ -75,6 +71,12 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="aapakcli_icon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AAPak\AAPak.csproj">
+      <Project>{66655932-62c0-44f6-a0b9-788e386751df}</Project>
+      <Name>AAPak</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

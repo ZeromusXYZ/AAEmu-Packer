@@ -233,7 +233,7 @@ public partial class MainForm : Form
             fs.Read(customKey, 0, 16);
             fs.Dispose();
             useCustomKey = true;
-            pak._header.SetCustomKey(customKey);
+            pak.SetCustomKey(customKey);
         }
     }
 
@@ -333,7 +333,7 @@ public partial class MainForm : Form
 
             //var h = BitConverter.ToString(pfi.md5).ToUpper().Replace("-", "");
             //if (h == pak._header.nullHashString)
-            if (pfi.md5.SequenceEqual(AAPakFileHeader.nullHash))
+            if (pfi.md5.SequenceEqual(AAPakFileHeader.NullHash))
                 lfiHash.Text = "MD5: Invalid or not calculated !";
             else
                 lfiHash.Text = "MD5: " + BitConverter.ToString(pfi.md5).ToUpper().Replace("-", "");
@@ -806,7 +806,7 @@ public partial class MainForm : Form
         var fsraw = new MemoryStream();
         try
         {
-            if (AAPakFileHeader.EncryptStreamAES(pf, fsraw, dbKey, false, true))
+            if (AAPakFileHeader.EncryptStreamAes(pf, fsraw, dbKey, false, true))
             {
                 fsraw.Position = 16;
                 fsraw.CopyTo(fs);
@@ -814,7 +814,7 @@ public partial class MainForm : Form
             }
             else
             {
-                MessageBox.Show("Decryption failed:\r\n" + AAPakFileHeader.LastAESError, "Error");
+                MessageBox.Show("Decryption failed:\r\n" + AAPakFileHeader.LastAesError, "Error");
             }
         }
         catch (Exception x)
@@ -928,7 +928,7 @@ public partial class MainForm : Form
                         var buf = new byte[rest];
                         var decBuf = new byte[rest];
                         fStream.Read(buf, 0, rest);
-                        decBuf = AAPakFileHeader.EncryptAES(buf, dbKey, true);
+                        decBuf = AAPakFileHeader.EncryptAes(buf, dbKey, true);
                         mStream.Write(decBuf, 0, decBuf.Length);
                     }
 
@@ -1112,11 +1112,11 @@ public partial class MainForm : Form
         var fs = new FileStream(exportFileDialog.FileName, FileMode.Create);
         try
         {
-            AAPakFileHeader.LastAESError = string.Empty;
-            if (AAPakFileHeader.EncryptStreamAES(pf, fs, dbKey, false))
+            AAPakFileHeader.LastAesError = string.Empty;
+            if (AAPakFileHeader.EncryptStreamAes(pf, fs, dbKey, false))
                 MessageBox.Show("ExportDB: Done");
             else
-                MessageBox.Show("Decryption failed:\r\n" + AAPakFileHeader.LastAESError, "Error");
+                MessageBox.Show("Decryption failed:\r\n" + AAPakFileHeader.LastAesError, "Error");
         }
         catch (Exception x)
         {
@@ -1456,7 +1456,7 @@ public partial class MainForm : Form
         {
             var pak = new AAPak("");
             pak.DebugMode = useDebug;
-            pak._header.SetCustomKey(key);
+            pak.SetCustomKey(key);
             if (pak.OpenPak(openGamePakDialog.FileName, true))
             {
                 if (MessageBox.Show(

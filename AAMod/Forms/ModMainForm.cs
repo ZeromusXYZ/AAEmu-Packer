@@ -487,7 +487,7 @@ namespace AAMod.Forms
 
                 fs.Read(customKey, 0, 16);
                 fs.Dispose();
-                aPak._header.SetCustomKey(customKey);
+                aPak.SetCustomKey(customKey);
             }
         }
     }

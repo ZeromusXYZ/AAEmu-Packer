@@ -274,16 +274,16 @@ namespace AAPacker
             folders.Clear();
 
             // Read the last 512 bytes as raw header data
-            _gpFileStream.Seek(-_header.Size, SeekOrigin.End);
+            _gpFileStream.Seek(-AAPakFileHeader.Size, SeekOrigin.End);
 
             // Mark correct location as header offset location
-            _gpFileStream.Read(_header.rawData, 0,
-                _header.Size); // We don't need to read the entire thing, just the first 32 bytes contain data
+            _gpFileStream.Read(_header.RawData, 0,
+                AAPakFileHeader.Size); // We don't need to read the entire thing, just the first 32 bytes contain data
             // _gpFileStream.Read(_header.rawData, 0, _header.Size);
 
             _header.DecryptHeaderData();
 
-            if (_header.isValid)
+            if (_header.IsValid)
             {
                 // Only allow editing for TypeA
                 // if (PakType != PakFileType.PakTypeA) readOnly = true;
@@ -295,7 +295,7 @@ namespace AAPacker
                 _header.FAT.SetLength(0);
             }
 
-            return _header.isValid;
+            return _header.IsValid;
         }
 
         public static byte[] StringToByteArray(string hex)
@@ -380,16 +380,16 @@ namespace AAPacker
                 csvHead += ";dummy2";
 
                 if (lines[0].ToLower() != csvHead)
-                    _header.isValid = true;
+                    _header.IsValid = true;
                 else
-                    _header.isValid = false;
+                    _header.IsValid = false;
             }
             else
             {
-                _header.isValid = false;
+                _header.IsValid = false;
             }
 
-            if (_header.isValid)
+            if (_header.IsValid)
                 for (var i = 1; i < lines.Length; i++)
                 {
                     var line = lines[i];
@@ -416,12 +416,12 @@ namespace AAPacker
                         }
                         catch
                         {
-                            _header.isValid = false;
+                            _header.IsValid = false;
                             return false;
                         }
                 }
 
-            return _header.isValid;
+            return _header.IsValid;
         }
 
 
@@ -433,7 +433,7 @@ namespace AAPacker
         {
             // There is no actual directory info stored in the pak file, so we just generate it based on filenames
             folders.Clear();
-            if (!isOpen || !_header.isValid) return;
+            if (!isOpen || !_header.IsValid) return;
             foreach (var pfi in files)
             {
                 if (pfi.name == string.Empty)
@@ -880,6 +880,24 @@ namespace AAPacker
         {
             var byteArray = Encoding.UTF8.GetBytes(src);
             return new MemoryStream(byteArray);
+        }
+        
+        /// <summary>
+        ///     If you want to use custom keys on your pak file, use this function to change the key that is used for
+        ///     encryption/decryption of the FAT and header data
+        /// </summary>
+        /// <param name="newKey"></param>
+        public void SetCustomKey(byte[] newKey)
+        {
+            _header.SetCustomKey(newKey);
+        }
+        
+        /// <summary>
+        ///     Reverts back to the original encryption key, this function is also automatically called when closing a file
+        /// </summary>
+        public void SetDefaultKey()
+        {
+            _header.SetDefaultKey();
         }
     }
 }

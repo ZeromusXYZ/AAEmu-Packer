@@ -1,5 +1,4 @@
 ﻿using System.Security.Cryptography;
-using AAPacker;
 using SubStreamHelper;
 
 namespace AAPacker
@@ -9,57 +8,57 @@ namespace AAPacker
     /// </summary>
     public class AAPakFileHeader
     {
-        protected static readonly int headerSize = 0x200;
-        protected static readonly int fileInfoSize = 0x150;
+        private const int HeaderSize = 0x200;
+        private const int FileInfoSize = 0x150;
 
         /// <summary>
         ///     Empty MD5 Hash to compare against
         /// </summary>
-        public static byte[] nullHash = new byte[16] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        public static readonly byte[] NullHash = new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
         /// <summary>
         ///     Empty MD5 Hash as a hex string to compare against
         /// </summary>
-        public static string nullHashString = "".PadRight(32, '0');
+        public static string NullHashString = "".PadRight(32, '0');
 
-        public static string LastAESError = string.Empty;
+        public static string LastAesError = string.Empty;
 
         /// <summary>
-        ///     Default AES128 key used by XLGames for ArcheAge as encryption key for header and fileinfo data
+        ///     Default AES128 key used by XLGames for ArcheAge as encryption key for header and fileInfo data
         ///     32 1F 2A EE AA 58 4A B4 9A 6C 9E 09 D5 9E 9C 6F
         /// </summary>
-        private readonly byte[] XLGamesKey =
+        private readonly byte[] _xlGamesKey =
             { 0x32, 0x1F, 0x2A, 0xEE, 0xAA, 0x58, 0x4A, 0xB4, 0x9A, 0x6C, 0x9E, 0x09, 0xD5, 0x9E, 0x9C, 0x6F };
 
-        public AAPak _owner;
-        public long AddFileOffset;
-        public byte[] data = new byte[headerSize]; // decrypted header data
+        private readonly AAPak _owner;
+        private long _addFileOffset;
+        private byte[] _data = new byte[HeaderSize]; // decrypted header data
 
         /// <summary>
         ///     Number of unused "deleted" files inside this pak
         /// </summary>
-        public uint extraFileCount;
+        private uint _extraFileCount;
 
         /// <summary>
         ///     Memory stream that holds the encrypted file information + header part of the file
         /// </summary>
-        public MemoryStream FAT = new();
+        public readonly MemoryStream FAT = new();
 
         /// <summary>
         ///     Number of used files inside this pak
         /// </summary>
-        public uint fileCount;
+        private uint _fileCount;
 
         public long FirstFileInfoOffset;
-        public bool isValid;
+        public bool IsValid;
 
         /// <summary>
         ///     Current encryption key
         /// </summary>
-        private byte[] key;
+        private byte[] _key;
 
-        public byte[] rawData = new byte[headerSize]; // unencrypted header
-        public int Size = headerSize;
+        public byte[] RawData = new byte[HeaderSize]; // unencrypted header
+        public const int Size = HeaderSize;
 
         /// <summary>
         ///     Creates a new Header Block for a Pak file
@@ -68,12 +67,7 @@ namespace AAPacker
         public AAPakFileHeader(AAPak owner)
         {
             _owner = owner;
-            SetCustomKey(XLGamesKey);
-        }
-
-        ~AAPakFileHeader()
-        {
-            // FAT.Dispose();
+            SetCustomKey(_xlGamesKey);
         }
 
         /// <summary>
@@ -81,18 +75,18 @@ namespace AAPacker
         ///     encryption/decryption of the FAT and header data
         /// </summary>
         /// <param name="newKey"></param>
-        public void SetCustomKey(byte[] newKey)
+        protected internal void SetCustomKey(byte[] newKey)
         {
-            key = new byte[newKey.Length];
-            newKey.CopyTo(key, 0);
+            _key = new byte[newKey.Length];
+            newKey.CopyTo(_key, 0);
         }
 
         /// <summary>
         ///     Reverts back to the original encryption key, this function is also automatically called when closing a file
         /// </summary>
-        public void SetDefaultKey()
+        protected internal void SetDefaultKey()
         {
-            XLGamesKey.CopyTo(key, 0);
+            _xlGamesKey.CopyTo(_key, 0);
         }
 
         /// <summary>
@@ -103,7 +97,7 @@ namespace AAPacker
         /// <param name="key">Encryption key to use</param>
         /// <param name="doEncryption">False = Decrypt, True = Encrypt</param>
         /// <returns>Returns a new byte array containing the processed data</returns>
-        public static byte[] EncryptAES(byte[] message, byte[] key, bool doEncryption)
+        public static byte[] EncryptAes(byte[] message, byte[] key, bool doEncryption)
         {
             try
             {
@@ -113,24 +107,18 @@ namespace AAPacker
                 aes.Mode = CipherMode.CBC;
                 aes.Padding = PaddingMode.None;
 
-                ICryptoTransform cipher;
-
-                if (doEncryption)
-                    cipher = aes.CreateEncryptor();
-                else
-                    cipher = aes.CreateDecryptor();
+                var cipher = doEncryption ? aes.CreateEncryptor() : aes.CreateDecryptor();
 
                 return cipher.TransformFinalBlock(message, 0, message.Length);
             }
             catch (Exception x)
             {
-                LastAESError = x.Message;
+                LastAesError = x.Message;
                 return null;
             }
         }
 
-        public static bool EncryptStreamAES(Stream source, Stream target, byte[] key, bool doEncryption,
-            bool leaveOpen = false)
+        public static bool EncryptStreamAes(Stream source, Stream target, byte[] key, bool doEncryption, bool leaveOpen = false)
         {
             try
             {
@@ -140,31 +128,19 @@ namespace AAPacker
                 aes.Mode = CipherMode.CBC;
                 aes.Padding = PaddingMode.None;
 
-                ICryptoTransform cipher;
-
-                if (doEncryption)
-                    cipher = aes.CreateEncryptor();
-                else
-                    cipher = aes.CreateDecryptor();
+                var cipher = doEncryption ? aes.CreateEncryptor() : aes.CreateDecryptor();
 
                 // Create the streams used for encryption.
-
                 var csEncrypt = new CryptoStream(target, cipher, CryptoStreamMode.Write);
                 source.CopyTo(csEncrypt);
                 if (!leaveOpen)
                     csEncrypt.Dispose();
 
-                /*
-                using (CryptoStream csEncrypt = new CryptoStream(target, cipher, CryptoStreamMode.Write))
-                {
-                    source.CopyTo(csEncrypt);
-                }
-                */
                 return true;
             }
             catch (Exception x)
             {
-                LastAESError = x.Message;
+                LastAesError = x.Message;
                 return false;
             }
         }
@@ -178,22 +154,22 @@ namespace AAPacker
             // Read all File Table Data into Memory
             FAT.SetLength(0);
 
-            var TotalFileInfoSize = (fileCount + extraFileCount) * fileInfoSize;
+            var totalFileInfoSize = (_fileCount + _extraFileCount) * FileInfoSize;
             _owner._gpFileStream.Seek(0, SeekOrigin.End);
             FirstFileInfoOffset = _owner._gpFileStream.Position;
 
-            // Search for the first file location, it needs to be alligned to a 0x200 size block
-            FirstFileInfoOffset -= headerSize;
-            FirstFileInfoOffset -= TotalFileInfoSize;
+            // Search for the first file location, it needs to be aligned to a 0x200 size block
+            FirstFileInfoOffset -= HeaderSize;
+            FirstFileInfoOffset -= totalFileInfoSize;
             var dif = FirstFileInfoOffset % 0x200;
             // Align to previous block of 512 bytes
             FirstFileInfoOffset -= dif;
 
             _owner._gpFileStream.Position = FirstFileInfoOffset;
 
-            var _fat = new SubStream(_owner._gpFileStream, FirstFileInfoOffset,
+            var fat = new SubStream(_owner._gpFileStream, FirstFileInfoOffset,
                 _owner._gpFileStream.Length - FirstFileInfoOffset);
-            _fat.CopyTo(FAT);
+            fat.CopyTo(FAT);
 
             return true;
         }
@@ -210,9 +186,8 @@ namespace AAPacker
             // Read all File Table Data into Memory
             FAT.SetLength(0);
 
-            var bufSize = 0x150; // Marshal.SizeOf(typeof(AAPakFileInfo));
-            var ms = new MemoryStream(
-                bufSize); // Could probably do without the intermediate memorystream, but it's easier to process
+            const int bufSize = 0x150; // Marshal.SizeOf(typeof(AAPakFileInfo));
+            var ms = new MemoryStream(bufSize); // Could probably do without the intermediate memoryStream, but it's easier to process
             var writer = new BinaryWriter(ms);
 
             // Init File Counts
@@ -225,9 +200,9 @@ namespace AAPacker
             {
                 ms.Position = 0;
 
-                AAPakFileInfo pfi = null;
+                AAPakFileInfo pfi;
 
-                if (_owner.PakType == PakFileType.TypeA || _owner.PakType == PakFileType.TypeF)
+                if (_owner.PakType is PakFileType.TypeA or PakFileType.TypeF)
                 {
                     // TypeA has files first, extra files after that
                     if (filesToGo > 0)
@@ -245,7 +220,6 @@ namespace AAPacker
                     else
                     {
                         // If we get here, your PC cannot math and something went wrong
-                        pfi = null;
                         break;
                     }
                 }
@@ -267,7 +241,6 @@ namespace AAPacker
                     else
                     {
                         // If we get here, your PC cannot math and something went wrong
-                        pfi = null;
                         break;
                     }
                 }
@@ -350,7 +323,7 @@ namespace AAPacker
                 var decryptedFileData = new byte[bufSize];
                 ms.Position = 0;
                 ms.Read(decryptedFileData, 0, bufSize);
-                var rawFileData = EncryptAES(decryptedFileData, key, true); // encrypt header data
+                var rawFileData = EncryptAes(decryptedFileData, _key, true); // encrypt header data
                 FAT.Write(rawFileData, 0, bufSize);
             }
 
@@ -366,14 +339,14 @@ namespace AAPacker
             }
 
             // Update header info
-            fileCount = (uint)_owner.files.Count;
-            extraFileCount = (uint)_owner.extraFiles.Count;
+            _fileCount = (uint)_owner.files.Count;
+            _extraFileCount = (uint)_owner.extraFiles.Count;
             // Stretch size for header
-            FAT.SetLength(FAT.Length + headerSize);
+            FAT.SetLength(FAT.Length + HeaderSize);
             // Encrypt the Header data
             EncryptHeaderData();
             // Write encrypted header
-            FAT.Write(rawData, 0, 0x20);
+            FAT.Write(RawData, 0, 0x20);
 
             return true;
         }
@@ -388,23 +361,23 @@ namespace AAPacker
 
             var bufSize = 0x150; // Marshal.SizeOf(typeof(AAPakFileInfo));
             var ms = new MemoryStream(
-                bufSize); // Could probably do without the intermediate memorystream, but it's easier to process
+                bufSize); // Could probably do without the intermediate memoryStream, but it's easier to process
             var reader = new BinaryReader(ms);
 
             // Read the Files
             _owner.files.Clear();
             _owner.extraFiles.Clear();
-            var totalFileCount = fileCount + extraFileCount;
-            var filesToGo = fileCount;
-            var extraToGo = extraFileCount;
+            var totalFileCount = _fileCount + _extraFileCount;
+            var filesToGo = _fileCount;
+            var extraToGo = _extraFileCount;
             var fileIndexCounter = -1;
             var deletedIndexCounter = -1;
             for (uint i = 0; i < totalFileCount; i++)
             {
-                // Read and decrypt a fileinfo block
+                // Read and decrypt a fileInfo block
                 var rawFileData = new byte[bufSize]; // decrypted header data
                 FAT.Read(rawFileData, 0, bufSize);
-                var decryptedFileData = EncryptAES(rawFileData, key, false);
+                var decryptedFileData = EncryptAes(rawFileData, _key, false);
 
                 // Read decrypted data into a AAPakFileInfo
                 ms.SetLength(0);
@@ -485,7 +458,7 @@ namespace AAPacker
                     pfi.modifyTime = reader.ReadInt64(); // For TypeF this is typically zero
                 }
 
-                if (_owner.PakType == PakFileType.TypeA || _owner.PakType == PakFileType.TypeF)
+                if (_owner.PakType is PakFileType.TypeA or PakFileType.TypeF)
                 {
                     // TypeA has files first and extra files last
                     if (filesToGo > 0)
@@ -499,7 +472,7 @@ namespace AAPacker
                     else if (extraToGo > 0)
                     {
                         // "Extra" Files. It looks like these are old deleted files renamed to "__unused__"
-                        // There might be more to these, but can't be sure at this moment, looks like they are 512 byte blocks on my paks
+                        // There might be more to these, but can't be sure at this moment, looks like they are 512 byte blocks on my pak files
                         deletedIndexCounter++;
                         pfi.deletedIndexNumber = deletedIndexCounter;
 
@@ -528,7 +501,7 @@ namespace AAPacker
                     }
                 }
 
-                // determin the newest date, use both creating and modify date for this
+                // determine the newest date, use both creating and modify date for this
                 try
                 {
                     var fTime = DateTime.FromFileTime(pfi.createTime);
@@ -551,18 +524,9 @@ namespace AAPacker
                     // Just ignore this
                 }
 
-                /*
-                // Debug stuff
-                if (pfi.name == "bin32/archeage.exe")
-                {
-                    ByteArrayToHexFile(decryptedFileData, "file-"+ i.ToString() + ".hex");
-                    File.WriteAllBytes("file-" + i.ToString() + ".bin",decryptedFileData);
-                }
-                */
-
                 // Update our "end of file data" location if needed
-                if (pfi.offset + pfi.size + pfi.paddingSize > AddFileOffset)
-                    AddFileOffset = pfi.offset + pfi.size + pfi.paddingSize;
+                if (pfi.offset + pfi.size + pfi.paddingSize > _addFileOffset)
+                    _addFileOffset = pfi.offset + pfi.size + pfi.paddingSize;
             }
 
             ms.Dispose();
@@ -599,7 +563,9 @@ namespace AAPacker
         /// <summary>
         ///     Helper function for debugging, write byte array as a hex text file
         /// </summary>
-        /// <param name="bytes"></param>
+        /// <param name="bytes">Input byte array</param>
+        /// <param name="spacingText">String to use for spacing between bytes</param>
+        /// <param name="lineFeed">String to use as newline every 16 bytes</param>
         public static string ByteArrayToHexString(byte[] bytes, string spacingText = " ", string lineFeed = "\r\n")
         {
             var s = "";
@@ -628,44 +594,44 @@ namespace AAPacker
         /// </summary>
         public void DecryptHeaderData()
         {
-            data = EncryptAES(rawData, key, false);
+            _data = EncryptAes(RawData, _key, false);
 
             // A valid header/footer is check by it's identifier
-            if (data[0] == 'W' && data[1] == 'I' && data[2] == 'B' && data[3] == 'O')
+            if (_data[0] == 'W' && _data[1] == 'I' && _data[2] == 'B' && _data[3] == 'O')
             {
                 // W I B O = 0x57 0x49 0x42 0x4F
                 _owner.PakType = PakFileType.TypeA;
-                fileCount = BitConverter.ToUInt32(data, 8);
-                extraFileCount = BitConverter.ToUInt32(data, 12);
-                isValid = true;
+                _fileCount = BitConverter.ToUInt32(_data, 8);
+                _extraFileCount = BitConverter.ToUInt32(_data, 12);
+                IsValid = true;
             }
-            else if (data[8] == 'I' && data[9] == 'D' && data[10] == 'E' && data[11] == 'J')
+            else if (_data[8] == 'I' && _data[9] == 'D' && _data[10] == 'E' && _data[11] == 'J')
             {
                 // I D E J = 0x49 0x44 0x45 0x4A
                 _owner.PakType = PakFileType.TypeB;
-                fileCount = BitConverter.ToUInt32(data, 12);
-                extraFileCount = BitConverter.ToUInt32(data, 0);
-                isValid = true;
+                _fileCount = BitConverter.ToUInt32(_data, 12);
+                _extraFileCount = BitConverter.ToUInt32(_data, 0);
+                IsValid = true;
             }
-            else if (data[0] == 'Z' && data[1] == 'E' && data[2] == 'R' && data[3] == 'O')
+            else if (_data[0] == 'Z' && _data[1] == 'E' && _data[2] == 'R' && _data[3] == 'O')
             {
                 // Z E R O = 0x5A 0x45 0x52 0x4F
                 _owner.PakType = PakFileType.TypeF;
-                fileCount = BitConverter.ToUInt32(data, 8);
-                extraFileCount = BitConverter.ToUInt32(data, 12);
-                isValid = true;
+                _fileCount = BitConverter.ToUInt32(_data, 8);
+                _extraFileCount = BitConverter.ToUInt32(_data, 12);
+                IsValid = true;
             }
             else
             {
                 // Doesn't look like this is a pak file, the file is corrupted, or is in a unknown layout/format
-                fileCount = 0;
-                extraFileCount = 0;
-                isValid = false;
+                _fileCount = 0;
+                _extraFileCount = 0;
+                IsValid = false;
 
                 if (_owner.DebugMode)
                 {
-                    var hex = ByteArrayToHexString(key, "", "");
-                    File.WriteAllBytes("game_pak_failed_header_" + hex + ".key", data);
+                    var hex = ByteArrayToHexString(_key, "", "");
+                    File.WriteAllBytes("game_pak_failed_header_" + hex + ".key", _data);
                 }
             }
         }
@@ -673,10 +639,10 @@ namespace AAPacker
         /// <summary>
         ///     Encrypt the current header data
         /// </summary>
-        public void EncryptHeaderData()
+        private void EncryptHeaderData()
         {
             var ms = new MemoryStream();
-            ms.Write(data, 0, headerSize);
+            ms.Write(_data, 0, HeaderSize);
             ms.Position = 0;
             var writer = new BinaryWriter(ms);
 
@@ -687,20 +653,20 @@ namespace AAPacker
                 writer.Write((byte)'B');
                 writer.Write((byte)'O');
                 writer.Seek(8, SeekOrigin.Begin);
-                writer.Write(fileCount);
+                writer.Write(_fileCount);
                 writer.Seek(12, SeekOrigin.Begin);
-                writer.Write(extraFileCount);
+                writer.Write(_extraFileCount);
             }
             else if (_owner.PakType == PakFileType.TypeB)
             {
-                writer.Write(extraFileCount);
+                writer.Write(_extraFileCount);
                 writer.Seek(8, SeekOrigin.Begin);
                 writer.Write((byte)'I');
                 writer.Write((byte)'D');
                 writer.Write((byte)'E');
                 writer.Write((byte)'J');
                 writer.Seek(12, SeekOrigin.Begin);
-                writer.Write(fileCount);
+                writer.Write(_fileCount);
             }
             else if (_owner.PakType == PakFileType.TypeF)
             {
@@ -709,16 +675,16 @@ namespace AAPacker
                 writer.Write((byte)'R');
                 writer.Write((byte)'O');
                 writer.Seek(8, SeekOrigin.Begin);
-                writer.Write(fileCount);
+                writer.Write(_fileCount);
                 writer.Seek(12, SeekOrigin.Begin);
-                writer.Write(extraFileCount);
+                writer.Write(_extraFileCount);
             }
 
             ms.Position = 0;
-            ms.Read(data, 0, headerSize);
+            ms.Read(_data, 0, HeaderSize);
             ms.Dispose();
             // Encrypted our stored data into rawData
-            rawData = EncryptAES(data, key, true);
+            RawData = EncryptAes(_data, _key, true);
         }
     }
 }

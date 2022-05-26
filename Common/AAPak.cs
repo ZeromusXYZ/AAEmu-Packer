@@ -622,6 +622,17 @@ namespace AAPakEditor
                     // Call the police, illegal Types are invading our safespace
                 }
 
+                // determin the newest date, use both creating and modify date for this
+                try
+                {
+                    var fTime = DateTime.FromFileTime(pfi.createTime);
+                    if (fTime > _owner.NewestFileDate)
+                        _owner.NewestFileDate = fTime;
+                }
+                catch
+                {
+                    // Just ignore this
+                }
                 try
                 {
                     var fTime = DateTime.FromFileTime(pfi.modifyTime);

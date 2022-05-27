@@ -16,7 +16,7 @@ namespace AAPakCLI
             bool showWriteWarning = true, bool quickLoad = false)
         {
             if (pak == null) pak = new AAPak("");
-            if (pak.isOpen)
+            if (pak.IsOpen)
             {
                 Console.WriteLine("[PAK] Closing pak ... ");
                 pak.ClosePak();
@@ -45,16 +45,16 @@ namespace AAPakCLI
 
             if (pak.PakType != PakFileType.TypeA) Console.WriteLine("[PAK] PakFileType = {0}", pak.PakType.ToString());
 
-            if (pak.files.Count <= 0 && pak.extraFiles.Count <= 0)
+            if (pak.Files.Count <= 0 && pak.ExtraFiles.Count <= 0)
             {
                 Console.WriteLine("[PAK] contains no files");
             }
             else
             {
-                if (pak.files.Count > 0)
-                    Console.WriteLine("[PAK] contains {0} file(s)", pak.files.Count);
-                if (pak.extraFiles.Count > 0)
-                    Console.WriteLine("[PAK] contains {0} extra/deleted file(s)", pak.extraFiles.Count);
+                if (pak.Files.Count > 0)
+                    Console.WriteLine("[PAK] contains {0} file(s)", pak.Files.Count);
+                if (pak.ExtraFiles.Count > 0)
+                    Console.WriteLine("[PAK] contains {0} extra/deleted file(s)", pak.ExtraFiles.Count);
             }
         }
 
@@ -109,7 +109,7 @@ namespace AAPakCLI
             s += ";dummy1";
             s += ";dummy2";
             sl.Add(s);
-            foreach (var pfi in pak.files)
+            foreach (var pfi in pak.Files)
             {
                 var modTime = DateTime.FromFileTimeUtc(pfi.modifyTime);
                 if (modTime > newest)
@@ -163,7 +163,7 @@ namespace AAPakCLI
                     if (pak != null)
                         pak.ClosePak();
                     LoadPakFile(ref pak, arg1, false, false, true);
-                    if (pak == null || !pak.isOpen) cmdErrors += "[ERROR] Failed to open for r/w: " + arg1 + "\r\n";
+                    if (pak == null || !pak.IsOpen) cmdErrors += "[ERROR] Failed to open for r/w: " + arg1 + "\r\n";
                 }
                 else if (arg == "+c")
                 {
@@ -173,7 +173,7 @@ namespace AAPakCLI
                         pak.ClosePak();
                     // Create and a new pakfile
                     pak = new AAPak(arg1, false, true);
-                    if (pak == null || !pak.isOpen)
+                    if (pak == null || !pak.IsOpen)
                     {
                         cmdErrors += "[ERROR] Failed to created file: " + arg1 + "\r\n";
                         continue;
@@ -183,7 +183,7 @@ namespace AAPakCLI
                     // Re-open it in read/write mode
                     LoadPakFile(ref pak, arg1, false, false, true);
 
-                    if (pak == null || !pak.isOpen)
+                    if (pak == null || !pak.IsOpen)
                         cmdErrors += "[ERROR] Failed to re-open created file: " + arg1 + "\r\n";
                     else
                         Console.WriteLine("[PAK] Created pak file {0}", arg1);
@@ -236,7 +236,7 @@ namespace AAPakCLI
                 if (arg == "+f")
                 {
                     i += 2; // take two args
-                    if (pak == null || !pak.isOpen || pak.readOnly)
+                    if (pak == null || !pak.IsOpen || pak.ReadOnly)
                     {
                         cmdErrors +=
                             "[ERROR] Pak file needs to be opened in read/write mode to be able to add a file !\r\n";
@@ -252,7 +252,7 @@ namespace AAPakCLI
                 else if (arg == "-f")
                 {
                     i++; // take one arg
-                    if (pak == null || !pak.isOpen || pak.readOnly)
+                    if (pak == null || !pak.IsOpen || pak.ReadOnly)
                     {
                         cmdErrors +=
                             "[ERROR] Pak file needs to be opened in read/write mode to be able to delete a file !\r\n";
@@ -268,7 +268,7 @@ namespace AAPakCLI
                 }
                 else if (arg == "-s" || arg == "+s")
                 {
-                    if (pak == null || !pak.isOpen || pak.readOnly)
+                    if (pak == null || !pak.IsOpen || pak.ReadOnly)
                     {
                         cmdErrors +=
                             "[ERROR] Pak file needs to be opened in read/write mode to be able save it !\r\n";
@@ -282,7 +282,7 @@ namespace AAPakCLI
                 else if (arg == "+d")
                 {
                     i += 2; // take two args
-                    if (pak == null || !pak.isOpen || pak.readOnly)
+                    if (pak == null || !pak.IsOpen || pak.ReadOnly)
                     {
                         cmdErrors +=
                             "[ERROR] Pak file needs to be opened in read/write mode to be able to add a file !\r\n";
@@ -304,7 +304,7 @@ namespace AAPakCLI
                 else if (arg == "-d")
                 {
                     i += 1; // takes one arg
-                    if (pak == null || !pak.isOpen || pak.readOnly)
+                    if (pak == null || !pak.IsOpen || pak.ReadOnly)
                     {
                         cmdErrors +=
                             "[ERROR] Pak file needs to be opened in read/write mode to be able to add a file !\r\n";
@@ -318,10 +318,10 @@ namespace AAPakCLI
                             var delDir = arg1.ToLower();
                             if (delDir.Last() != '/')
                                 delDir += '/';
-                            for (var n = pak.files.Count - 1; n >= 0; n--)
+                            for (var n = pak.Files.Count - 1; n >= 0; n--)
                                 //foreach(AAPakFileInfo pfi in pak.files)
                             {
-                                var pfi = pak.files[n];
+                                var pfi = pak.Files[n];
                                 if (pfi.name.ToLower().StartsWith(delDir))
                                     if (pak.DeleteFile(pfi))
                                         filesDeleted++;
@@ -337,7 +337,7 @@ namespace AAPakCLI
                 }
                 else if (arg == "-x" || arg == "+x")
                 {
-                    if (pak == null || !pak.isOpen)
+                    if (pak == null || !pak.IsOpen)
                         cmdErrors += "[ERROR] Pak file needs to be opened before you can close it !\r\n";
                     else
                         pak.ClosePak();
@@ -354,7 +354,7 @@ namespace AAPakCLI
                 else if (arg == "-csv" || arg == "+csv")
                 {
                     i++; // take one arg
-                    if (pak == null || !pak.isOpen)
+                    if (pak == null || !pak.IsOpen)
                     {
                         cmdErrors += "[ERROR] Pak file needs to be opened to be able generate a CSV file !\r\n";
                     }
@@ -369,7 +369,7 @@ namespace AAPakCLI
                 else if (arg == "-patchbycompare" || arg == "+patchbycompare" || arg == "-pbc" || arg == "+pbc")
                 {
                     i += 2; // take two args
-                    if (pak == null || !pak.isOpen)
+                    if (pak == null || !pak.IsOpen)
                     {
                         cmdErrors +=
                             "[ERROR] A Pak file needs to be opened before you can create a patch by compare !\r\n";
@@ -408,7 +408,7 @@ namespace AAPakCLI
                     if (pak != null)
                         pak.ClosePak();
                     LoadPakFile(ref pak, arg, true, true, true);
-                    if (pak == null || !pak.isOpen) cmdErrors += "[ERROR] Failed to open: " + arg + "\r\n";
+                    if (pak == null || !pak.IsOpen) cmdErrors += "[ERROR] Failed to open: " + arg + "\r\n";
                 }
                 else
                 {
@@ -434,9 +434,9 @@ namespace AAPakCLI
 
             try
             {
-                if (pak != null && pak.isOpen)
+                if (pak != null && pak.IsOpen)
                 {
-                    if (pak.isDirty)
+                    if (pak.IsDirty)
                         Console.WriteLine("[PAK] Saving pak ... {0}", pak._gpFilePath);
                     else
                         Console.WriteLine("[PAK] Closing pak ... {0}", pak._gpFilePath);

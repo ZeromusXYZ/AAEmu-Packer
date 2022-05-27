@@ -61,7 +61,7 @@ public partial class ExportAllDlg : Form
         TotalSize = 0;
         TotalExportedSize = 0;
         TotalFileCountToExport = 0;
-        foreach (var pfi in pak.files)
+        foreach (var pfi in pak.Files)
         {
             if (bgwExport.CancellationPending)
                 return;
@@ -76,7 +76,7 @@ public partial class ExportAllDlg : Form
 
         filesDone = 0;
 
-        foreach (var pfi in pak.files)
+        foreach (var pfi in pak.Files)
         {
             if (bgwExport.CancellationPending)
                 break;

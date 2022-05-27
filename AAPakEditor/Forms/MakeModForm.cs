@@ -36,7 +36,7 @@ public partial class MakeModForm : Form
     private void MakeModForm_Load(object sender, EventArgs e)
     {
         addFiles.Clear();
-        foreach (var fi in mainPak.files)
+        foreach (var fi in mainPak.Files)
             if (!fi.name.StartsWith(ModFileFolderName))
                 addFiles.Add(fi.name);
 
@@ -365,7 +365,7 @@ public partial class MakeModForm : Form
 
 
             // Copy all files
-            foreach (var fi in mainPak.files)
+            foreach (var fi in mainPak.Files)
             {
                 if (fi.name.StartsWith(ModFileFolderName))
                     continue;

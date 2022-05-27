@@ -28,11 +28,11 @@ public partial class ReMD5Dlg : Form
         bgwRehash.RunWorkerAsync();
         btnCancel.Enabled = true;
         btnCancel.Text = "Cancel";
-        lInfo.Text = "Scanning " + pak.files.Count + " files ...";
+        lInfo.Text = "Scanning " + pak.Files.Count + " files ...";
         toUpdate = 0;
 
         // Count files
-        foreach (var pfi in pak.files)
+        foreach (var pfi in pak.Files)
         {
             if (bgwRehash.CancellationPending)
                 break;
@@ -50,7 +50,7 @@ public partial class ReMD5Dlg : Form
         Thread.Sleep(1000);
 
         // Actually update
-        foreach (var pfi in pak.files)
+        foreach (var pfi in pak.Files)
         {
             if (bgwRehash.CancellationPending)
                 break;

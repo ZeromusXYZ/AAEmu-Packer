@@ -138,7 +138,7 @@ public partial class ImportFolderDlg : Form
             var pfn = importFileList[i].Replace(Path.DirectorySeparatorChar, '/');
             var fi = new FileInfo(fn);
             var fs = new FileStream(fn, FileMode.Open, FileAccess.Read);
-            var pfi = pak.nullAAPakFileInfo;
+            var pfi = pak.NullAAPakFileInfo;
             var res = pak.AddFileFromStream(pakRoot + pfn, fs, fi.CreationTime, fi.LastWriteTime, false, out pfi);
             if (res)
             {
@@ -160,7 +160,7 @@ public partial class ImportFolderDlg : Form
         etaTimeString = " almost done ...";
         bgwImport.ReportProgress(99);
 
-        if (pak.isDirty)
+        if (pak.IsDirty)
             pak.SaveHeader();
 
         bgwImport.ReportProgress(100);

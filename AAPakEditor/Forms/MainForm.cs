@@ -36,50 +36,42 @@ public partial class MainForm : Form
 
     private void UpdateMM()
     {
-        MMFileSave.Enabled = pak != null && pak.isOpen && !pak.readOnly && pak.isDirty;
-        MMFileClose.Enabled = pak != null && pak.isOpen;
+        MMFileSave.Enabled = pak != null && pak.IsOpen && !pak.ReadOnly && pak.IsDirty;
+        MMFileClose.Enabled = pak != null && pak.IsOpen;
 
-        MMEditAddFile.Enabled = pak != null && pak.isOpen && pak.readOnly == false && pak.PakType != PakFileType.CSV;
-        MMEditImportFiles.Enabled =
-            pak != null && pak.isOpen && pak.readOnly == false && pak.PakType != PakFileType.CSV;
-        MMEditDeleteSelected.Enabled = pak != null && pak.isOpen && pak.readOnly == false &&
-                                       lbFiles.SelectedIndex >= 0 && pak.PakType != PakFileType.CSV;
-        MMEditReplace.Enabled = pak != null && pak.isOpen && pak.PakType != PakFileType.CSV && pak.readOnly == false &&
-                                lbFiles.SelectedIndex >= 0;
-        MMEditFileProp.Enabled = pak != null && pak.isOpen && pak.PakType != PakFileType.CSV && pak.readOnly == false &&
-                                 lbFiles.SelectedIndex >= 0;
-        MMEdit.Visible = pak != null && pak.isOpen && pak.PakType != PakFileType.CSV && pak.readOnly == false;
+        MMEditAddFile.Enabled = pak != null && pak.IsOpen && pak.ReadOnly == false && !pak.IsVirtual;
+        MMEditImportFiles.Enabled = pak != null && pak.IsOpen && pak.ReadOnly == false && !pak.IsVirtual;
+        MMEditDeleteSelected.Enabled = pak != null && pak.IsOpen && pak.ReadOnly == false && lbFiles.SelectedIndex >= 0 && !pak.IsVirtual;
+        MMEditReplace.Enabled = pak != null && pak.IsOpen && !pak.IsVirtual && pak.ReadOnly == false && lbFiles.SelectedIndex >= 0;
+        MMEditFileProp.Enabled = pak != null && pak.IsOpen && !pak.IsVirtual && pak.ReadOnly == false && lbFiles.SelectedIndex >= 0;
+        MMEdit.Visible = pak != null && pak.IsOpen && !pak.IsVirtual && pak.ReadOnly == false;
 
-        MMExportSelectedFile.Enabled =
-            pak != null && pak.isOpen && pak.PakType != PakFileType.CSV && lbFiles.SelectedIndex >= 0;
-        MMExportSelectedFolder.Enabled =
-            pak != null && pak.isOpen && pak.PakType != PakFileType.CSV && currentFileViewFolder != "";
-        MMExportAll.Enabled = pak != null && pak.isOpen && pak.PakType != PakFileType.CSV;
-        MMExportDB.Enabled = pak != null && pak.isOpen && pak.PakType != PakFileType.CSV &&
-                             lbFiles.SelectedIndex >= 0 && useDBKey &&
-                             Path.GetExtension(lbFiles.SelectedItem.ToString()).StartsWith(".sql");
-        MMExportDB.Visible = pak != null && pak.isOpen && pak.PakType != PakFileType.CSV && useDBKey;
+        MMExportSelectedFile.Enabled = pak != null && pak.IsOpen && !pak.IsVirtual && lbFiles.SelectedIndex >= 0;
+        MMExportSelectedFolder.Enabled = pak != null && pak.IsOpen && !pak.IsVirtual && currentFileViewFolder != "";
+        MMExportAll.Enabled = pak != null && pak.IsOpen && !pak.IsVirtual;
+        MMExportDB.Enabled = pak != null && pak.IsOpen && !pak.IsVirtual && lbFiles.SelectedIndex >= 0 && useDBKey && Path.GetExtension(lbFiles.SelectedItem.ToString()).StartsWith(".sql");
+        MMExportDB.Visible = pak != null && pak.IsOpen && !pak.IsVirtual && useDBKey;
         MMExportS2.Visible = MMExportDB.Visible;
-        MMExport.Visible = pak != null && pak.isOpen && pak.PakType != PakFileType.CSV;
+        MMExport.Visible = pak != null && pak.IsOpen && !pak.IsVirtual;
 
-        MMExtraMD5.Enabled = pak != null && pak.isOpen && pak.PakType != PakFileType.CSV && pak.readOnly == false &&
+        MMExtraMD5.Enabled = pak != null && pak.IsOpen && !pak.IsVirtual && pak.ReadOnly == false &&
                              lbFiles.SelectedIndex >= 0;
-        MMExtraExportData.Enabled = pak != null && pak.isOpen && pak.PakType != PakFileType.CSV;
-        MMExtraMakeMod.Enabled = pak != null && pak.isOpen && pak.PakType != PakFileType.CSV;
-        MMExtra.Visible = pak != null && pak.isOpen;
+        MMExtraExportData.Enabled = pak != null && pak.IsOpen && !pak.IsVirtual;
+        MMExtraMakeMod.Enabled = pak != null && pak.IsOpen && !pak.IsVirtual;
+        MMExtra.Visible = pak != null && pak.IsOpen;
 
-        if (pak != null && pak.isOpen)
+        if (pak != null && pak.IsOpen)
         {
-            if (pak.isDirty)
-                Text = baseTitle + " - *" + pak._gpFilePath;
+            if (pak.IsDirty)
+                Text = baseTitle + @" - *" + pak._gpFilePath;
             else
-                Text = baseTitle + " - " + pak._gpFilePath;
+                Text = baseTitle + @" - " + pak._gpFilePath;
             lPakExtraInfo.Text = pak.NewestFileDate.ToString("yyyy-MM-dd HH:mm:ss");
         }
         else
         {
             Text = baseTitle;
-            lPakExtraInfo.Text = "...";
+            lPakExtraInfo.Text = @"...";
         }
     }
 
@@ -124,7 +116,7 @@ public partial class MainForm : Form
 
     private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
     {
-        if (pak != null && pak.isOpen)
+        if (pak != null && pak.IsOpen)
         {
             pak.ClosePak();
             pak = null;
@@ -151,12 +143,12 @@ public partial class MainForm : Form
         TreeNode foundNode = null;
         var c = 0;
         lbFolders.Items.Add("<root>");
-        foreach (var s in pak.folders)
+        foreach (var s in pak.Folders)
         {
             lbFolders.Items.Add(s);
             c++;
             if (c % 250 == 0)
-                lFileCount.Text = "Loading folders ... " + c + " / " + pak.folders.Count;
+                lFileCount.Text = "Loading folders ... " + c + " / " + pak.Folders.Count;
             //lFileCount.Refresh();
             //Thread.Sleep(1);
 
@@ -192,8 +184,8 @@ public partial class MainForm : Form
         }
 
         rootNode.Expand();
-        lFileCount.Text = pak.files.Count + " files in " + pak.folders.Count + " folders";
-        foreach (var pfi in pak.extraFiles) lbExtraFiles.Items.Add(pfi.name);
+        lFileCount.Text = pak.Files.Count + " files in " + pak.Folders.Count + " folders";
+        foreach (var pfi in pak.ExtraFiles) lbExtraFiles.Items.Add(pfi.name);
         UpdateMM();
     }
 
@@ -241,7 +233,7 @@ public partial class MainForm : Form
     {
         lTypePak.Text = string.Empty;
         if (pak == null) pak = new AAPak("");
-        if (pak.isOpen)
+        if (pak.IsOpen)
         {
             lFileCount.Text = "Closing pak ... ";
             //lFileCount.Refresh();
@@ -282,7 +274,7 @@ public partial class MainForm : Form
                 GenerateFolderViews();
 
             // Only show this waring if this is not a new pak file
-            if (openAsReadOnly == false && pak.files.Count > 0 && showWriteWarning)
+            if (openAsReadOnly == false && pak.Files.Count > 0 && showWriteWarning)
                 MessageBox.Show("!!! Warning !!!\r\n" +
                                 "You have opened this pak in read/write mode !\r\n" +
                                 "\r\n" +
@@ -300,8 +292,8 @@ public partial class MainForm : Form
                     "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
 
-        if (pak.PakType != PakFileType.TypeA)
-            lTypePak.Text = pak.PakType.ToString();
+        if (pak.PakType == PakFileType.Custom)
+            lTypePak.Text = pak.Reader?.ReaderName ?? "Invalid Reader";
         else
             lTypePak.Text = string.Empty;
     }
@@ -309,7 +301,7 @@ public partial class MainForm : Form
     private void lbFolders_SelectedIndexChanged(object sender, EventArgs e)
     {
         lbFiles.Items.Clear();
-        if (pak == null || !pak.isOpen)
+        if (pak == null || !pak.IsOpen)
             return;
 
         var d = (sender as ListBox).SelectedItem.ToString();
@@ -386,7 +378,7 @@ public partial class MainForm : Form
 
     private void lbFiles_SelectedIndexChanged(object sender, EventArgs e)
     {
-        if (pak == null || !pak.isOpen)
+        if (pak == null || !pak.IsOpen)
             return;
 
         if (lbFiles.SelectedIndex < 0)
@@ -398,7 +390,7 @@ public partial class MainForm : Form
         var d = currentFileViewFolder;
         if (d != "") d += "/";
         d += lbFiles.SelectedItem.ToString();
-        ref var pfi = ref pak.nullAAPakFileInfo;
+        ref var pfi = ref pak.NullAAPakFileInfo;
 
         try
         {
@@ -418,7 +410,7 @@ public partial class MainForm : Form
 
     private void MMExportSelectedFile_Click(object sender, EventArgs e)
     {
-        if (pak == null || !pak.isOpen)
+        if (pak == null || !pak.IsOpen)
             return;
 
         if (lbFiles.SelectedIndex < 0)
@@ -492,7 +484,7 @@ public partial class MainForm : Form
 
     public bool ExportFile(string sourceName, string destName)
     {
-        ref var pfi = ref pak.nullAAPakFileInfo;
+        ref var pfi = ref pak.NullAAPakFileInfo;
         if (pak.GetFileByName(sourceName, ref pfi))
             return ExportFile(pfi, destName);
         return false;
@@ -500,7 +492,7 @@ public partial class MainForm : Form
 
     private void MMExportAll_Click(object sender, EventArgs e)
     {
-        if (pak == null || !pak.isOpen)
+        if (pak == null || !pak.IsOpen)
             return;
 
         exportFolderDialog.Description = "Select a folder to where to export all files to";
@@ -537,7 +529,7 @@ public partial class MainForm : Form
 
     private void MMEXtraMD5_Click(object sender, EventArgs e)
     {
-        if (pak == null || !pak.isOpen)
+        if (pak == null || !pak.IsOpen)
             return;
 
         if (lbFiles.SelectedIndex < 0)
@@ -550,7 +542,7 @@ public partial class MainForm : Form
         if (d != "") d += "/";
         d += lbFiles.SelectedItem.ToString();
 
-        ref var pfi = ref pak.nullAAPakFileInfo;
+        ref var pfi = ref pak.NullAAPakFileInfo;
         if (pak.GetFileByName(d, ref pfi))
             MessageBox.Show("MD5 Hash updated to " + pak.UpdateMD5(pfi));
         else
@@ -560,7 +552,7 @@ public partial class MainForm : Form
 
     private void MMFileSave_Click(object sender, EventArgs e)
     {
-        if (!pak.readOnly && pak.isDirty)
+        if (!pak.ReadOnly && pak.IsDirty)
         {
             Application.UseWaitCursor = true;
             Cursor.Current = Cursors.WaitCursor;
@@ -575,7 +567,7 @@ public partial class MainForm : Form
 
     private void MMExtraExportData_Click(object sender, EventArgs e)
     {
-        if (pak == null || !pak.isOpen)
+        if (pak == null || !pak.IsOpen)
             return;
         CreateCSVFile();
     }
@@ -597,7 +589,7 @@ public partial class MainForm : Form
         s += ";dummy1";
         s += ";dummy2";
         sl.Add(s);
-        foreach (var pfi in pak.files)
+        foreach (var pfi in pak.Files)
         {
             var modTime = DateTime.FromFileTimeUtc(pfi.modifyTime);
             if (modTime > newest)
@@ -631,10 +623,10 @@ public partial class MainForm : Form
 
     private void MMEditReplace_Click(object sender, EventArgs e)
     {
-        if (pak == null || !pak.isOpen || lbFiles.SelectedIndex < 0)
+        if (pak == null || !pak.IsOpen || lbFiles.SelectedIndex < 0)
             return;
 
-        if (pak.readOnly)
+        if (pak.ReadOnly)
         {
             MessageBox.Show("Pak is opened in Read-Only mode, cannot add/replace files.");
             return;
@@ -764,7 +756,7 @@ public partial class MainForm : Form
 
     private void tvFolders_AfterSelect(object sender, TreeViewEventArgs e)
     {
-        if (pak == null || !pak.isOpen)
+        if (pak == null || !pak.IsOpen)
             return;
 
 
@@ -778,7 +770,7 @@ public partial class MainForm : Form
 
     private void MMExtraDebugTest_Click(object sender, EventArgs e)
     {
-        if (pak == null || !pak.isOpen)
+        if (pak == null || !pak.IsOpen)
             return;
 
 
@@ -830,10 +822,10 @@ public partial class MainForm : Form
 
     private void MMEditDeleteSelected_Click(object sender, EventArgs e)
     {
-        if (pak == null || !pak.isOpen || lbFiles.SelectedIndex < 0)
+        if (pak == null || !pak.IsOpen || lbFiles.SelectedIndex < 0)
             return;
 
-        if (pak.readOnly)
+        if (pak.ReadOnly)
         {
             MessageBox.Show("Pak is opened in Read-Only mode, cannot delete files.");
             return;
@@ -910,7 +902,7 @@ public partial class MainForm : Form
 
                 var cTime = File.GetCreationTime(diskfn);
                 var mTime = File.GetLastWriteTime(diskfn);
-                var pfi = pak.nullAAPakFileInfo;
+                var pfi = pak.NullAAPakFileInfo;
                 Stream fs;
                 var fStream = new FileStream(diskfn, FileMode.Open, FileAccess.Read);
                 var mStream = new MemoryStream();
@@ -948,7 +940,7 @@ public partial class MainForm : Form
                 {
                     MessageBox.Show("File:\r\n" + diskfn + "\r\n\r\nadded as:\r\n" + pfi.name);
 
-                    if (pak.folders.IndexOf(newpakfilepath) < 0)
+                    if (pak.Folders.IndexOf(newpakfilepath) < 0)
                         // We added to a new folder
                         GenerateFolderViews();
 
@@ -1024,7 +1016,7 @@ public partial class MainForm : Form
 
     private void MMExportSelectedFolder_Click(object sender, EventArgs e)
     {
-        if (pak == null || !pak.isOpen)
+        if (pak == null || !pak.IsOpen)
             return;
 
         exportFolderDialog.Description = "Select a folder to where to export \r\n" + currentFileViewFolder;
@@ -1096,7 +1088,7 @@ public partial class MainForm : Form
 
     private void MMExportDB_Click(object sender, EventArgs e)
     {
-        if (pak == null || !pak.isOpen)
+        if (pak == null || !pak.IsOpen)
             return;
 
         var d = currentFileViewFolder;
@@ -1159,13 +1151,13 @@ public partial class MainForm : Form
 
     private void LbExtraFiles_SelectedIndexChanged(object sender, EventArgs e)
     {
-        if (pak == null || !pak.isOpen)
+        if (pak == null || !pak.IsOpen)
             return;
 
         lbFiles.Items.Clear();
         lFiles.Text = "";
         var d = (sender as ListBox).SelectedIndex;
-        if (d >= 0 && d < pak.extraFiles.Count) ShowFileInfo(pak.extraFiles[d]);
+        if (d >= 0 && d < pak.ExtraFiles.Count) ShowFileInfo(pak.ExtraFiles[d]);
         UpdateMM();
     }
 
@@ -1193,7 +1185,7 @@ public partial class MainForm : Form
                 if (pak != null)
                     pak.ClosePak();
                 LoadPakFile(arg1, false, false, true);
-                if (pak == null || !pak.isOpen) cmdErrors += "Failed to open for r/w: " + arg1 + "\r\n";
+                if (pak == null || !pak.IsOpen) cmdErrors += "Failed to open for r/w: " + arg1 + "\r\n";
             }
             else if (arg == "+c")
             {
@@ -1203,7 +1195,7 @@ public partial class MainForm : Form
                     pak.ClosePak();
                 // Create and a new pakfile
                 pak = new AAPak(arg1, false, true);
-                if (pak == null || !pak.isOpen)
+                if (pak == null || !pak.IsOpen)
                 {
                     cmdErrors += "Failed to created file: " + arg1 + "\r\n";
                     continue;
@@ -1213,12 +1205,12 @@ public partial class MainForm : Form
                 // Re-open it in read/write mode
                 LoadPakFile(arg1, false, false, true);
 
-                if (pak == null || !pak.isOpen) cmdErrors += "Failed to re-open created file: " + arg1 + "\r\n";
+                if (pak == null || !pak.IsOpen) cmdErrors += "Failed to re-open created file: " + arg1 + "\r\n";
             }
             else if (arg == "+sfx")
             {
                 i++;
-                if (pak == null || !pak.isOpen || pak.readOnly)
+                if (pak == null || !pak.IsOpen || pak.ReadOnly)
                 {
                     cmdErrors +=
                         "Pak file needs to be opened in read/write mode to be able to add a mod installer !\r\n";
@@ -1253,7 +1245,7 @@ public partial class MainForm : Form
             else if (arg == "+f")
             {
                 i += 2; // take two args
-                if (pak == null || !pak.isOpen || pak.readOnly)
+                if (pak == null || !pak.IsOpen || pak.ReadOnly)
                 {
                     cmdErrors += "Pak file needs to be opened in read/write mode to be able to add a file !\r\n";
                 }
@@ -1266,7 +1258,7 @@ public partial class MainForm : Form
             else if (arg == "-f")
             {
                 i++; // take one arg
-                if (pak == null || !pak.isOpen || pak.readOnly)
+                if (pak == null || !pak.IsOpen || pak.ReadOnly)
                 {
                     cmdErrors += "Pak file needs to be opened in read/write mode to be able to delete a file !\r\n";
                 }
@@ -1279,7 +1271,7 @@ public partial class MainForm : Form
             }
             else if (arg == "-s" || arg == "+s")
             {
-                if (pak == null || !pak.isOpen || pak.readOnly)
+                if (pak == null || !pak.IsOpen || pak.ReadOnly)
                     cmdErrors += "Pak file needs to be opened in read/write mode to be able save it !\r\n";
                 else
                     pak.SaveHeader();
@@ -1287,7 +1279,7 @@ public partial class MainForm : Form
             else if (arg == "+d")
             {
                 i += 2; // take two args
-                if (pak == null || !pak.isOpen || pak.readOnly)
+                if (pak == null || !pak.IsOpen || pak.ReadOnly)
                     cmdErrors += "Pak file needs to be opened in read/write mode to be able to add a file !\r\n";
                 else
                     using (var importFolder = new ImportFolderDlg())
@@ -1308,7 +1300,7 @@ public partial class MainForm : Form
             else if (arg == "-d")
             {
                 i += 1; // take one arg
-                if (pak == null || !pak.isOpen || pak.readOnly)
+                if (pak == null || !pak.IsOpen || pak.ReadOnly)
                     cmdErrors += "Pak file needs to be opened in read/write mode to be able to delete a file !\r\n";
                 else
                     // Delete the files
@@ -1318,10 +1310,10 @@ public partial class MainForm : Form
                         var delDir = arg1.ToLower();
                         if (delDir.Last() != '/')
                             delDir += '/';
-                        for (var n = pak.files.Count - 1; n >= 0; n--)
+                        for (var n = pak.Files.Count - 1; n >= 0; n--)
                             //foreach(AAPakFileInfo pfi in pak.files)
                         {
-                            var pfi = pak.files[n];
+                            var pfi = pak.Files[n];
                             if (pfi.name.ToLower().StartsWith(delDir))
                                 if (pak.DeleteFile(pfi))
                                     filesDeleted++;
@@ -1334,7 +1326,7 @@ public partial class MainForm : Form
             }
             else if (arg == "-x" || arg == "+x")
             {
-                if (pak == null || !pak.isOpen)
+                if (pak == null || !pak.IsOpen)
                     cmdErrors += "Pak file needs to be opened before you can close it !\r\n";
                 else
                     pak.ClosePak();
@@ -1349,7 +1341,7 @@ public partial class MainForm : Form
             else if (arg == "-csv" || arg == "+csv")
             {
                 i++; // take one arg
-                if (pak == null || !pak.isOpen)
+                if (pak == null || !pak.IsOpen)
                     cmdErrors += "Pak file needs to be opened to be able generate a CSV file !\r\n";
                 else
                     CreateCSVFile(arg1);
@@ -1367,7 +1359,7 @@ public partial class MainForm : Form
                 if (pak != null)
                     pak.ClosePak();
                 LoadPakFile(arg, true, true, true);
-                if (pak == null || !pak.isOpen) cmdErrors += "Failed to open: " + arg + "\r\n";
+                if (pak == null || !pak.IsOpen) cmdErrors += "Failed to open: " + arg + "\r\n";
             }
             else
             {
@@ -1378,7 +1370,7 @@ public partial class MainForm : Form
         if (cmdErrors != string.Empty)
             MessageBox.Show(cmdErrors, "Command-Line Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
 
-        if (pak != null && pak.isOpen) GenerateFolderViews();
+        if (pak != null && pak.IsOpen) GenerateFolderViews();
 
         Application.UseWaitCursor = false;
         Cursor.Current = Cursors.Default;
@@ -1393,10 +1385,10 @@ public partial class MainForm : Form
 
     private void manualEditFileMD5ToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        if (pak == null || !pak.isOpen)
+        if (pak == null || !pak.IsOpen)
             return;
 
-        if (pak.readOnly)
+        if (pak.ReadOnly)
             return;
 
         if (lbFiles.SelectedIndex < 0)
@@ -1409,7 +1401,7 @@ public partial class MainForm : Form
         if (d != "") d += "/";
         d += lbFiles.SelectedItem.ToString();
 
-        ref var pfi = ref pak.nullAAPakFileInfo;
+        ref var pfi = ref pak.NullAAPakFileInfo;
         if (pak.GetFileByName(d, ref pfi))
             using (var fp = new FilePropForm())
             {
@@ -1427,7 +1419,7 @@ public partial class MainForm : Form
                     pfi.offset = fp.newInfo.offset;
                     pfi.dummy1 = fp.newInfo.dummy1;
                     pfi.dummy2 = fp.newInfo.dummy2;
-                    pak.isDirty = true;
+                    pak.IsDirty = true;
                     ShowFileInfo(pfi);
                 }
             }
@@ -1487,7 +1479,7 @@ public partial class MainForm : Form
 
     private void MMExtraMD5All_Click(object sender, EventArgs e)
     {
-        if (pak == null || !pak.isOpen)
+        if (pak == null || !pak.IsOpen)
             return;
 
         var res = MessageBox.Show(

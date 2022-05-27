@@ -9,56 +9,57 @@ namespace AAPacker
     /// </summary>
     public class AAPak
     {
+        public AAPakFileFormatReader Reader = new();
         /// <summary>
         ///     points to this pakfile's header
         /// </summary>
-        public AAPakFileHeader _header;
+        public AAPakFileHeader Header;
 
         public bool DebugMode = false;
 
         /// <summary>
         ///     List of all unused files, normally these are all named "__unused__"
         /// </summary>
-        public List<AAPakFileInfo> extraFiles = new();
+        public List<AAPakFileInfo> ExtraFiles = new();
 
         /// <summary>
         ///     List of all used files
         /// </summary>
-        public List<AAPakFileInfo> files = new();
+        public List<AAPakFileInfo> Files = new();
 
         /// <summary>
         ///     Virtual list of all folder names, use GenerateFolderList() to populate this list (might take a while)
         /// </summary>
-        public List<string> folders = new();
+        public List<string> Folders = new();
 
         /// <summary>
         ///     Set to true if there have been changes made that require a rewrite of the FAT and/or header
         /// </summary>
-        public bool isDirty;
+        public bool IsDirty;
 
         /// <summary>
         ///     Checks if current pakfile information is loaded into memory
         /// </summary>
-        public bool isOpen;
+        public bool IsOpen;
 
         /// <summary>
         ///     Set to true if this is not a pak file, but rather information loaded from somewhere else
         /// </summary>
-        public bool isVirtual;
+        public bool IsVirtual;
 
         public DateTime NewestFileDate = DateTime.MinValue;
 
         /// <summary>
         ///     Virtual data to return as a null value for file details, can be used as to initialize a var to pass as a ref
         /// </summary>
-        public AAPakFileInfo nullAAPakFileInfo = new();
+        public AAPakFileInfo NullAAPakFileInfo = new();
 
         /// <summary>
         ///     If set to true, adds the freed space from a delete to the previous file's padding.
         ///     If false (default), it "moves" the file into extraFiles for freeing up space, allowing it to be reused instead.
         ///     Should only need to be changed if you are writing your own specialized patcher, and only in special cases
         /// </summary>
-        public bool paddingDeleteMode = false;
+        public bool PaddingDeleteMode = false;
 
         public PakFileType PakType = PakFileType.TypeA;
 
@@ -73,37 +74,18 @@ namespace AAPacker
         /// </param>
         public AAPak(string filePath, bool openAsReadOnly = true, bool createAsNewPak = false)
         {
-            _header = new AAPakFileHeader(this);
+            Reader = new AAPakFileFormatReader();
+            Header = new AAPakFileHeader(this);
             if (filePath != "")
             {
-                var isLoaded = false;
-
-                /*
-                var ext = Path.GetExtension(filePath).ToLower();
-                if (ext == "csv") 
-                {
-                    if ((openAsReadOnly == true) && (createAsNewPak == false))
-                    {
-                        // Open file as CVS data
-                        isLoaded = OpenVirtualCSVPak(filePath);
-                        return;
-                    }
-                    // We will only allow opening as a CVS file when it's set to readonly (and not a new file)
-                }
-                */
-
                 if (createAsNewPak)
-                    isLoaded = NewPak(filePath);
+                    IsOpen = NewPak(filePath);
                 else
-                    isLoaded = OpenPak(filePath, openAsReadOnly);
-                if (isLoaded)
-                    isOpen = ReadHeader();
-                else
-                    isOpen = false;
+                    IsOpen = OpenPak(filePath, openAsReadOnly);
             }
             else
             {
-                isOpen = false;
+                IsOpen = false;
             }
         }
 
@@ -111,13 +93,13 @@ namespace AAPacker
         public FileStream _gpFileStream { get; private set; }
 
         /// <summary>
-        ///     Show if this pakfile is opened in read-only mode
+        ///     Show if this pakFile is opened in read-only mode
         /// </summary>
-        public bool readOnly { get; private set; }
+        public bool ReadOnly { get; private set; }
 
         ~AAPak()
         {
-            if (isOpen)
+            if (IsOpen)
                 ClosePak();
         }
 
@@ -130,19 +112,19 @@ namespace AAPacker
         public bool OpenPak(string filePath, bool openAsReadOnly)
         {
             // Fail if already open
-            if (isOpen)
+            if (IsOpen)
                 return false;
 
             // Check if it exists
             if (!File.Exists(filePath)) return false;
 
-            isVirtual = false;
+            IsVirtual = false;
 
             var ext = Path.GetExtension(filePath).ToLower();
             if (ext == ".csv")
             {
                 openAsReadOnly = true;
-                readOnly = true;
+                ReadOnly = true;
                 // Open file as CVS data
                 return OpenVirtualCSVPak(filePath);
             }
@@ -155,16 +137,16 @@ namespace AAPacker
                 else
                     _gpFileStream = new FileStream(filePath, FileMode.Open, FileAccess.ReadWrite);
                 _gpFilePath = filePath;
-                isDirty = false;
-                isOpen = true;
-                readOnly = openAsReadOnly;
+                IsDirty = false;
+                IsOpen = true;
+                ReadOnly = openAsReadOnly;
                 return ReadHeader();
             }
             catch
             {
                 _gpFilePath = null;
-                isOpen = false;
-                readOnly = true;
+                IsOpen = false;
+                ReadOnly = true;
                 return false;
             }
         }
@@ -177,25 +159,25 @@ namespace AAPacker
         public bool NewPak(string filePath)
         {
             // Fail if already open
-            if (isOpen)
+            if (IsOpen)
                 return false;
-            isVirtual = false;
+            IsVirtual = false;
             try
             {
                 // Create new file stream
                 _gpFileStream = new FileStream(filePath, FileMode.Create, FileAccess.ReadWrite);
                 _gpFilePath = filePath;
-                readOnly = false;
-                isOpen = true;
-                isDirty = true;
+                ReadOnly = false;
+                IsOpen = true;
+                IsDirty = true;
                 SaveHeader(); // Save blank data
                 return ReadHeader(); // read blank data to confirm
             }
             catch
             {
                 _gpFilePath = null;
-                isOpen = false;
-                readOnly = true;
+                IsOpen = false;
+                ReadOnly = true;
                 return false;
             }
         }
@@ -204,27 +186,27 @@ namespace AAPacker
         public bool OpenVirtualCSVPak(string csvfilePath)
         {
             // Fail if already open
-            if (isOpen)
+            if (IsOpen)
                 return false;
 
             // Check if it exists
             if (!File.Exists(csvfilePath)) return false;
-            isVirtual = true;
+            IsVirtual = true;
             _gpFileStream = null; // Not used on virtual paks
             try
             {
                 // Open stream
                 _gpFilePath = csvfilePath;
-                isDirty = false;
-                isOpen = true;
-                readOnly = true;
+                IsDirty = false;
+                IsOpen = true;
+                ReadOnly = true;
                 PakType = PakFileType.CSV;
                 return ReadCSVData();
             }
             catch
             {
-                isOpen = false;
-                readOnly = true;
+                IsOpen = false;
+                ReadOnly = true;
                 return false;
             }
         }
@@ -234,16 +216,16 @@ namespace AAPacker
         /// </summary>
         public void ClosePak()
         {
-            if (!isOpen)
+            if (!IsOpen)
                 return;
-            if (isDirty && readOnly == false)
+            if (IsDirty && ReadOnly == false)
                 SaveHeader();
             if (_gpFileStream != null)
                 _gpFileStream.Close();
             _gpFileStream = null;
             _gpFilePath = null;
-            isOpen = false;
-            _header.SetDefaultKey();
+            IsOpen = false;
+            Header.SetDefaultKey();
         }
 
         /// <summary>
@@ -253,13 +235,13 @@ namespace AAPacker
         /// </summary>
         public void SaveHeader()
         {
-            _header.WriteToFAT();
-            _gpFileStream.Position = _header.FirstFileInfoOffset;
-            _header.FAT.Position = 0;
-            _header.FAT.CopyTo(_gpFileStream);
+            Header.WriteToFAT();
+            _gpFileStream.Position = Header.FirstFileInfoOffset;
+            Header.FAT.Position = 0;
+            Header.FAT.CopyTo(_gpFileStream);
             _gpFileStream.SetLength(_gpFileStream.Position);
 
-            isDirty = false;
+            IsDirty = false;
         }
 
         /// <summary>
@@ -269,33 +251,31 @@ namespace AAPacker
         protected bool ReadHeader()
         {
             NewestFileDate = DateTime.MinValue;
-            files.Clear();
-            extraFiles.Clear();
-            folders.Clear();
+            Files.Clear();
+            ExtraFiles.Clear();
+            Folders.Clear();
 
             // Read the last 512 bytes as raw header data
             _gpFileStream.Seek(-AAPakFileHeader.Size, SeekOrigin.End);
 
             // Mark correct location as header offset location
-            _gpFileStream.Read(_header.RawData, 0,
-                AAPakFileHeader.Size); // We don't need to read the entire thing, just the first 32 bytes contain data
-            // _gpFileStream.Read(_header.rawData, 0, _header.Size);
+            _gpFileStream.Read(Header.RawData, 0, AAPakFileHeader.Size); // We don't need to read the entire thing, just the first 32 bytes contain data
 
-            _header.DecryptHeaderData();
+            Header.DecryptHeaderData();
 
-            if (_header.IsValid)
+            if (Header.IsValid)
             {
                 // Only allow editing for TypeA
                 // if (PakType != PakFileType.PakTypeA) readOnly = true;
-                _header.LoadRawFAT();
-                _header.ReadFileTable();
+                Header.LoadRawFAT();
+                Header.ReadFileTable();
             }
             else
             {
-                _header.FAT.SetLength(0);
+                Header.FAT.SetLength(0);
             }
 
-            return _header.IsValid;
+            return Header.IsValid;
         }
 
         public static byte[] StringToByteArray(string hex)
@@ -359,9 +339,9 @@ namespace AAPacker
 
         protected bool ReadCSVData()
         {
-            files.Clear();
-            extraFiles.Clear();
-            folders.Clear();
+            Files.Clear();
+            ExtraFiles.Clear();
+            Folders.Clear();
 
             var lines = File.ReadAllLines(_gpFilePath);
 
@@ -380,16 +360,16 @@ namespace AAPacker
                 csvHead += ";dummy2";
 
                 if (lines[0].ToLower() != csvHead)
-                    _header.IsValid = true;
+                    Header.IsValid = true;
                 else
-                    _header.IsValid = false;
+                    Header.IsValid = false;
             }
             else
             {
-                _header.IsValid = false;
+                Header.IsValid = false;
             }
 
-            if (_header.IsValid)
+            if (Header.IsValid)
                 for (var i = 1; i < lines.Length; i++)
                 {
                     var line = lines[i];
@@ -412,16 +392,16 @@ namespace AAPacker
                             fni.dummy2 = uint.Parse(fields[9]);
 
                             // TODO: check if this reads correctly
-                            files.Add(fni);
+                            Files.Add(fni);
                         }
                         catch
                         {
-                            _header.IsValid = false;
+                            Header.IsValid = false;
                             return false;
                         }
                 }
 
-            return _header.IsValid;
+            return Header.IsValid;
         }
 
 
@@ -432,9 +412,9 @@ namespace AAPacker
         public void GenerateFolderList(bool sortTheList = true)
         {
             // There is no actual directory info stored in the pak file, so we just generate it based on filenames
-            folders.Clear();
-            if (!isOpen || !_header.IsValid) return;
-            foreach (var pfi in files)
+            Folders.Clear();
+            if (!IsOpen || !Header.IsValid) return;
+            foreach (var pfi in Files)
             {
                 if (pfi.name == string.Empty)
                     continue;
@@ -443,10 +423,10 @@ namespace AAPacker
                     // Horror function, I know :p
                     var n = Path.GetDirectoryName(pfi.name.ToLower().Replace('/', Path.DirectorySeparatorChar))
                         .Replace(Path.DirectorySeparatorChar, '/');
-                    var pos = folders.IndexOf(n);
+                    var pos = Folders.IndexOf(n);
                     if (pos >= 0)
                         continue;
-                    folders.Add(n);
+                    Folders.Add(n);
                 }
                 catch
                 {
@@ -454,7 +434,7 @@ namespace AAPacker
             }
 
             if (sortTheList)
-                folders.Sort();
+                Folders.Sort();
         }
 
         /// <summary>
@@ -466,7 +446,7 @@ namespace AAPacker
         {
             var res = new List<AAPakFileInfo>();
             dirname = dirname.ToLower();
-            foreach (var pfi in files)
+            foreach (var pfi in Files)
             {
                 // extract dir name
                 var n = string.Empty;
@@ -495,27 +475,27 @@ namespace AAPacker
         /// <returns>Returns true if the file was found</returns>
         public bool GetFileByName(string filename, ref AAPakFileInfo fileInfo)
         {
-            foreach (var pfi in files)
+            foreach (var pfi in Files)
                 if (pfi.name == filename)
                 {
                     fileInfo = pfi;
                     return true;
                 }
 
-            fileInfo = nullAAPakFileInfo; // return null file if it fails
+            fileInfo = NullAAPakFileInfo; // return null file if it fails
             return false;
         }
 
         public bool GetFileByIndex(int fileIndex, ref AAPakFileInfo fileInfo)
         {
-            foreach (var pfi in files)
+            foreach (var pfi in Files)
                 if (pfi.entryIndexNumber == fileIndex)
                 {
                     fileInfo = pfi;
                     return true;
                 }
 
-            fileInfo = nullAAPakFileInfo; // return null file if it fails
+            fileInfo = NullAAPakFileInfo; // return null file if it fails
             return false;
         }
 
@@ -526,7 +506,7 @@ namespace AAPacker
         /// <returns>Returns true if the file was found</returns>
         public bool FileExists(string filename)
         {
-            foreach (var pfi in files)
+            foreach (var pfi in Files)
                 if (pfi.name == filename)
                     return true;
             return false;
@@ -549,7 +529,7 @@ namespace AAPacker
         /// <returns>Returns a SubStream of file within the pak</returns>
         public Stream ExportFileAsStream(string fileName)
         {
-            var file = nullAAPakFileInfo;
+            var file = NullAAPakFileInfo;
             if (GetFileByName(fileName, ref file))
                 return new SubStream(_gpFileStream, file.offset, file.size);
             return new MemoryStream();
@@ -570,7 +550,7 @@ namespace AAPacker
             {
                 // Only update if different
                 newHash.CopyTo(file.md5, 0);
-                isDirty = true;
+                IsDirty = true;
             }
 
             return BitConverter.ToString(file.md5).Replace("-", ""); // Return the (updated) md5 as a string
@@ -587,7 +567,7 @@ namespace AAPacker
             if (file == null || newHash == null || newHash.Length != 16)
                 return false;
             newHash.CopyTo(file.md5, 0);
-            isDirty = true;
+            IsDirty = true;
             return true;
         }
 
@@ -601,14 +581,14 @@ namespace AAPacker
         /// <returns>Returns true if the location was found to be inside a valid file</returns>
         public bool FindFileByOffset(long offset, ref AAPakFileInfo fileInfo)
         {
-            foreach (var pfi in files)
+            foreach (var pfi in Files)
                 if (offset >= pfi.offset && offset <= pfi.offset + pfi.size + pfi.paddingSize)
                 {
                     fileInfo = pfi;
                     return true;
                 }
 
-            fileInfo = nullAAPakFileInfo;
+            fileInfo = NullAAPakFileInfo;
             return false;
         }
 
@@ -624,7 +604,7 @@ namespace AAPacker
         {
             // Overwrite a existing file in the pak
 
-            if (readOnly)
+            if (ReadOnly)
                 return false;
 
             // Fail if the new file is too big
@@ -659,7 +639,7 @@ namespace AAPacker
                 pfi.dummy1 = 0x80000000;
 
             // Mark File Table as dirty
-            isDirty = true;
+            IsDirty = true;
 
             return true;
         }
@@ -672,16 +652,16 @@ namespace AAPacker
         public bool DeleteFile(AAPakFileInfo pfi)
         {
             // When we detele a file from the pak, we remove the entry from the FileTable and expand the previous file's padding to take up the space
-            if (readOnly)
+            if (ReadOnly)
                 return false;
 
-            if (paddingDeleteMode)
+            if (PaddingDeleteMode)
             {
-                var prevPfi = nullAAPakFileInfo;
+                var prevPfi = NullAAPakFileInfo;
                 if (FindFileByOffset(pfi.offset - 1, ref prevPfi))
                     // If we have a previous file, expand it's padding area with the free space from this file
                     prevPfi.paddingSize += (int)pfi.size + pfi.paddingSize;
-                files.Remove(pfi);
+                Files.Remove(pfi);
             }
             else
             {
@@ -696,12 +676,12 @@ namespace AAPacker
                 if (PakType == PakFileType.TypeB)
                     eFile.dummy1 = 0x80000000;
 
-                extraFiles.Add(eFile);
+                ExtraFiles.Add(eFile);
 
-                files.Remove(pfi);
+                Files.Remove(pfi);
             }
 
-            isDirty = true;
+            IsDirty = true;
             return true;
         }
 
@@ -712,10 +692,10 @@ namespace AAPacker
         /// <returns>Returns true on success or if the file didn't exist</returns>
         public bool DeleteFile(string filename)
         {
-            if (readOnly)
+            if (ReadOnly)
                 return false;
 
-            var pfi = nullAAPakFileInfo;
+            var pfi = NullAAPakFileInfo;
             if (GetFileByName(filename, ref pfi))
                 return DeleteFile(pfi);
             return true;
@@ -738,9 +718,9 @@ namespace AAPacker
             bool autoSpareSpace, out AAPakFileInfo pfi)
         {
             // When we have a new file, or previous space wasn't enough, we will add it where the file table starts, and move the file table
-            if (readOnly)
+            if (ReadOnly)
             {
-                pfi = nullAAPakFileInfo;
+                pfi = NullAAPakFileInfo;
                 return false;
             }
 
@@ -748,7 +728,7 @@ namespace AAPacker
 
             var newFile = new AAPakFileInfo();
             newFile.name = filename;
-            newFile.offset = _header.FirstFileInfoOffset;
+            newFile.offset = Header.FirstFileInfoOffset;
             newFile.size = sourceStream.Length;
             newFile.sizeDuplicate = newFile.size;
             newFile.createTime = CreateTime.ToFileTimeUtc();
@@ -759,14 +739,14 @@ namespace AAPacker
                 newFile.dummy1 = 0x80000000;
 
             // check if we have "unused" space in extraFiles that we can use
-            for (var i = 0; i < extraFiles.Count; i++)
-                if (newFile.size <= extraFiles[i].size)
+            for (var i = 0; i < ExtraFiles.Count; i++)
+                if (newFile.size <= ExtraFiles[i].size)
                 {
                     // Copy the spare file's properties and remove it from extraFiles
-                    newFile.offset = extraFiles[i].offset;
-                    newFile.paddingSize = (int)(extraFiles[i].size - newFile.size); // This should already be aligned
+                    newFile.offset = ExtraFiles[i].offset;
+                    newFile.paddingSize = (int)(ExtraFiles[i].size - newFile.size); // This should already be aligned
                     addedAtTheEnd = false;
-                    extraFiles.Remove(extraFiles[i]);
+                    ExtraFiles.Remove(ExtraFiles[i]);
                     break;
                 }
 
@@ -786,16 +766,16 @@ namespace AAPacker
             }
 
             // Add to files list
-            files.Add(newFile);
+            Files.Add(newFile);
 
-            isDirty = true;
+            IsDirty = true;
 
             // Add File Data
             _gpFileStream.Position = newFile.offset;
             sourceStream.Position = 0;
             sourceStream.CopyTo(_gpFileStream);
 
-            if (addedAtTheEnd) _header.FirstFileInfoOffset = newFile.offset + newFile.size + newFile.paddingSize;
+            if (addedAtTheEnd) Header.FirstFileInfoOffset = newFile.offset + newFile.size + newFile.paddingSize;
 
             UpdateMD5(newFile); // TODO: optimize this to calculate WHILE we are copying the stream
 
@@ -817,8 +797,8 @@ namespace AAPacker
         public bool AddFileFromStream(string filename, Stream sourceStream, DateTime CreateTime, DateTime ModifyTime,
             bool autoSpareSpace, out AAPakFileInfo pfi)
         {
-            pfi = nullAAPakFileInfo;
-            if (readOnly) return false;
+            pfi = NullAAPakFileInfo;
+            if (ReadOnly) return false;
 
             var addAsNew = true;
             // Try to find the existing file
@@ -889,7 +869,7 @@ namespace AAPacker
         /// <param name="newKey"></param>
         public void SetCustomKey(byte[] newKey)
         {
-            _header.SetCustomKey(newKey);
+            Header.SetCustomKey(newKey);
         }
         
         /// <summary>
@@ -897,7 +877,7 @@ namespace AAPacker
         /// </summary>
         public void SetDefaultKey()
         {
-            _header.SetDefaultKey();
+            Header.SetDefaultKey();
         }
     }
 }

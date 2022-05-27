@@ -248,7 +248,7 @@ namespace AAMod.Forms
         private void ReadNewFilesFromRestore()
         {
             RestoreNewFilesList.Clear();
-            var rnfl = restorepak.nullAAPakFileInfo;
+            var rnfl = restorepak.NullAAPakFileInfo;
             if (restorepak.GetFileByName(ModNewFilesFileName, ref rnfl))
             {
                 var rf = restorepak.ExportFileAsStream(rnfl);
@@ -292,7 +292,7 @@ namespace AAMod.Forms
             // TODO: Enabled buttons depending on the state of game_pak and restore_pak compared to the aamod pak
             // Get file list from mod pak
             FilesToMod.Clear();
-            foreach (var fi in modpak.files)
+            foreach (var fi in modpak.Files)
                 if (fi.name.StartsWith(ModFileFolderName))
                 {
                     // Don't include own mod files
@@ -307,7 +307,7 @@ namespace AAMod.Forms
             FilesAddedWithInstall.Clear();
             foreach (var fi in FilesToMod)
             {
-                var gfi = gamepak.nullAAPakFileInfo;
+                var gfi = gamepak.NullAAPakFileInfo;
                 if (gamepak.GetFileByName(fi.name, ref gfi))
                 {
                     if (fi.size != gfi.size || !fi.md5.SequenceEqual(gfi.md5)) FilesToInstall.Add(fi);
@@ -353,12 +353,12 @@ namespace AAMod.Forms
             foreach (var fi in FilesToInstall)
             {
                 // If file exists in gamepak, make a backup
-                var gamefi = gamepak.nullAAPakFileInfo;
+                var gamefi = gamepak.NullAAPakFileInfo;
                 if (gamepak.GetFileByName(fi.name, ref gamefi))
                 {
                     var fileBackupStream = gamepak.ExportFileAsStream(fi.name);
                     fileBackupStream.Position = 0;
-                    var restoreFileInfo = restorepak.nullAAPakFileInfo;
+                    var restoreFileInfo = restorepak.NullAAPakFileInfo;
                     if (!restorepak.AddFileFromStream(fi.name, fileBackupStream,
                             DateTime.FromFileTimeUtc(gamefi.createTime), DateTime.FromFileTimeUtc(gamefi.modifyTime),
                             false,
@@ -367,7 +367,7 @@ namespace AAMod.Forms
 
                 var fileModStream = modpak.ExportFileAsStream(fi.name);
                 fileModStream.Position = 0;
-                var newModFile = gamepak.nullAAPakFileInfo;
+                var newModFile = gamepak.NullAAPakFileInfo;
                 if (!gamepak.AddFileFromStream(fi.name, fileModStream, DateTime.FromFileTimeUtc(fi.createTime),
                         DateTime.FromFileTimeUtc(fi.modifyTime), false, out newModFile))
                     MessageBox.Show("Error modding file " + fi.name);
@@ -413,12 +413,12 @@ namespace AAMod.Forms
             foreach (var fi in FilesToMod)
             {
                 // If file exists in gamepak, make a backup
-                var rfi = restorepak.nullAAPakFileInfo;
+                var rfi = restorepak.NullAAPakFileInfo;
                 if (restorepak.GetFileByName(fi.name, ref rfi))
                 {
                     var fileRestoreStream = restorepak.ExportFileAsStream(fi.name);
                     fileRestoreStream.Position = 0;
-                    var restoreFileInfo = gamepak.nullAAPakFileInfo;
+                    var restoreFileInfo = gamepak.NullAAPakFileInfo;
                     if (!gamepak.AddFileFromStream(fi.name, fileRestoreStream, DateTime.FromFileTimeUtc(rfi.createTime),
                             DateTime.FromFileTimeUtc(rfi.modifyTime), false, out restoreFileInfo))
                         MessageBox.Show("Error restoring file " + fi.name);
@@ -441,7 +441,7 @@ namespace AAMod.Forms
                 {
                     if (RestoreNewFilesList.IndexOf(fn.name) < 0)
                         continue;
-                    var delFileInfo = gamepak.nullAAPakFileInfo;
+                    var delFileInfo = gamepak.NullAAPakFileInfo;
                     if (gamepak.GetFileByName(fn.name, ref delFileInfo))
                     {
                         gamepak.DeleteFile(delFileInfo);

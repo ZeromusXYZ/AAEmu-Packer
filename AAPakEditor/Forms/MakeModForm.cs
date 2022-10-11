@@ -7,6 +7,7 @@ using System.Windows.Forms;
 using AAPakEditor.Properties;
 using Vestris.ResourceLib;
 using AAPacker;
+using AAPakEditor.Forms;
 
 namespace AAPakEditor;
 
@@ -168,7 +169,7 @@ public partial class MakeModForm : Form
         try
         {
             File.Delete(saveFileDlg.FileName);
-            var modpak = new AAPak(saveFileDlg.FileName, false, true);
+            var modPak = new AAPak(saveFileDlg.FileName, false, true);
             Bitmap customIconImage = null;
 
             // First check image we will use (if any)
@@ -298,17 +299,17 @@ public partial class MakeModForm : Form
                     fs.CopyTo(exeStream);
 
                     // Add modified exe to modpak
-                    if (!modpak.AddFileFromStream(SfxInfoFileName, exeStream, DateTime.Now, DateTime.Now, true, out _))
+                    if (!modPak.AddFileFromStream(SfxInfoFileName, exeStream, DateTime.Now, DateTime.Now, true, out _))
                     {
                         MessageBox.Show("Failed to add modified SFX executable");
-                        modpak.ClosePak();
+                        modPak.ClosePak();
                         return;
                     }
                 }
                 catch (Exception x)
                 {
                     MessageBox.Show("Exception editing icon:\n" + x.Message);
-                    modpak.ClosePak();
+                    modPak.ClosePak();
                     return;
                 }
 
@@ -335,19 +336,19 @@ public partial class MakeModForm : Form
                 // This AAModSFX resource is loaded from the RELEASE build of the AAMod project, make sure it's compiled as release first if you made changes to it
                 var sfxStream = new MemoryStream(Resources.AAModSFX);
                 // We will be possibly be editing the icon, so it's a good idea to have some spare space here
-                if (!modpak.AddFileFromStream(SfxInfoFileName, sfxStream, DateTime.Now, DateTime.Now, true, out _))
+                if (!modPak.AddFileFromStream(SfxInfoFileName, sfxStream, DateTime.Now, DateTime.Now, true, out _))
                 {
                     MessageBox.Show("Failed to add SFX executable");
-                    modpak.ClosePak();
+                    modPak.ClosePak();
                     return;
                 }
             }
 
             var modInfoStream = AAPak.StringToStream(tDescription.Text);
-            if (!modpak.AddFileFromStream(ModInfoFileName, modInfoStream, DateTime.Now, DateTime.Now, false, out _))
+            if (!modPak.AddFileFromStream(ModInfoFileName, modInfoStream, DateTime.Now, DateTime.Now, false, out _))
             {
                 MessageBox.Show("Failed to add description");
-                modpak.ClosePak();
+                modPak.ClosePak();
                 return;
             }
 
@@ -355,10 +356,10 @@ public partial class MakeModForm : Form
             {
                 var imgStream = new MemoryStream();
                 customIconImage.Save(imgStream, ImageFormat.Png);
-                if (!modpak.AddFileFromStream(ModPNGImageFileName, imgStream, DateTime.Now, DateTime.Now, false, out _))
+                if (!modPak.AddFileFromStream(ModPNGImageFileName, imgStream, DateTime.Now, DateTime.Now, false, out _))
                 {
                     MessageBox.Show("Failed to add icon image");
-                    modpak.ClosePak();
+                    modPak.ClosePak();
                     return;
                 }
             }
@@ -370,17 +371,17 @@ public partial class MakeModForm : Form
                 if (fi.Name.StartsWith(ModFileFolderName))
                     continue;
                 var ms = mainPak.ExportFileAsStream(fi);
-                if (!modpak.AddFileFromStream(fi.Name, ms, DateTime.FromFileTimeUtc(fi.CreateTime),
+                if (!modPak.AddFileFromStream(fi.Name, ms, DateTime.FromFileTimeUtc(fi.CreateTime),
                         DateTime.FromFileTimeUtc(fi.ModifyTime), false, out _))
                 {
                     MessageBox.Show("Failed to copy \n" + fi.Name + "\nAborting !", "Copy Error", MessageBoxButtons.OK,
                         MessageBoxIcon.Error);
-                    modpak.ClosePak();
+                    modPak.ClosePak();
                     return;
                 }
             }
 
-            modpak.ClosePak();
+            modPak.ClosePak();
 
             MessageBox.Show("AAMod create completed !", "AAMod Create", MessageBoxButtons.OK,
                 MessageBoxIcon.Information);

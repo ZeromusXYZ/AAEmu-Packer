@@ -188,6 +188,8 @@ namespace AAPacker
         /// <returns>Returns true on success</returns>
         public bool LoadRawFAT()
         {
+            Owner?.TriggerProgress(AAPakLoadingProgressType.ReadingFAT, 0, 100);
+
             try
             {
                 // Read all File Table Data into Memory
@@ -209,10 +211,12 @@ namespace AAPacker
                 var fat = new SubStream(Owner.GpFileStream, FirstFileInfoOffset, Owner.GpFileStream.Length - FirstFileInfoOffset);
                 fat.CopyTo(FAT);
 
+                Owner?.TriggerProgress(AAPakLoadingProgressType.ReadingFAT, 100, 100);
                 return true;
             }
             catch
             {
+                Owner?.TriggerProgress(AAPakLoadingProgressType.ReadingFAT, 100, 100);
                 return false;
             }
         }
@@ -223,6 +227,11 @@ namespace AAPacker
         /// <returns>Returns true on success</returns>
         public bool WriteToFAT()
         {
+            if (Owner == null)
+                return false;
+
+            Owner?.TriggerProgress(AAPakLoadingProgressType.WritingFAT, 0, 100);
+            
             if (Owner.PakType == PakFileType.Csv)
                 return false;
 
@@ -239,6 +248,7 @@ namespace AAPacker
             var extrasToGo = Owner.ExtraFiles.Count;
             var fileIndex = 0;
             var extrasIndex = 0;
+            Owner?.TriggerProgress(AAPakLoadingProgressType.WritingFAT, 0, totalFileCount);
             for (var i = 0; i < totalFileCount; i++)
             {
                 ms.Position = 0;
@@ -389,6 +399,9 @@ namespace AAPacker
                 _ = ms.Read(decryptedFileData, 0, bufSize);
                 var rawFileData = EncryptAes(decryptedFileData, Key, true); // encrypt header data
                 FAT.Write(rawFileData, 0, bufSize);
+
+                if ((i % Owner?.OnProgressFATFileInterval) == 0)
+                    Owner?.TriggerProgress(AAPakLoadingProgressType.WritingFAT, i, totalFileCount);
             }
 
             ms.Dispose();
@@ -412,6 +425,7 @@ namespace AAPacker
             // Write encrypted header
             FAT.Write(RawData, 0, 0x20);
 
+            Owner?.TriggerProgress(AAPakLoadingProgressType.WritingFAT, totalFileCount, totalFileCount);
             return true;
         }
 
@@ -420,6 +434,7 @@ namespace AAPacker
         /// </summary>
         public void ReadFileTable()
         {
+            Owner?.TriggerProgress(AAPakLoadingProgressType.ReadingFAT, 0, 100);
             const int bufSize = 0x150; // Marshal.SizeOf(typeof(AAPakFileInfo));
 
             // Check aa.bms QuickBMS file for reference
@@ -435,6 +450,7 @@ namespace AAPacker
             var extraToGo = ExtraFileCount;
             var fileIndexCounter = -1;
             var deletedIndexCounter = -1;
+            Owner?.TriggerProgress(AAPakLoadingProgressType.ReadingFAT, 0, (int)totalFileCount);
             for (uint i = 0; i < totalFileCount; i++)
             {
                 // Read and decrypt a fileInfo block
@@ -615,9 +631,14 @@ namespace AAPacker
                 // Update our "end of file data" location if needed
                 if (pfi.Offset + pfi.Size + pfi.PaddingSize > AddFileOffset)
                     AddFileOffset = pfi.Offset + pfi.Size + pfi.PaddingSize;
+
+                if ((i % Owner?.OnProgressFATFileInterval) == 0)
+                    Owner?.TriggerProgress(AAPakLoadingProgressType.ReadingFAT, (int)i, (int)totalFileCount);
             }
 
             ms.Dispose();
+
+            Owner?.TriggerProgress(AAPakLoadingProgressType.ReadingFAT, (int)totalFileCount, (int)totalFileCount);
         }
 
         /// <summary>

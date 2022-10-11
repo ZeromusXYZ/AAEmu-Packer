@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Windows.Forms;
 using AAPacker;
 using AAPakEditor.Properties;
@@ -233,6 +234,8 @@ public partial class MainForm : Form
     {
         lTypePak.Text = string.Empty;
         Pak ??= new AAPak("");
+        Pak.OnProgress += AAPakNotify;
+
         if (Pak.IsOpen)
         {
             lFileCount.Text = "Closing pak ... ";
@@ -865,18 +868,35 @@ public partial class MainForm : Form
 
     private void MMEditAddFile_Click(object sender, EventArgs e)
     {
-        // open add dialog
+        if (Pak.ReadOnly)
+        {
+            MessageBox.Show("Pak is opened in Read-Only mode, cannot add/replace files.");
+            return;
+        }
+
+        var replaceFileName = string.Empty;
+        if (lbFiles.SelectedIndex >= 0)
+        {
+            replaceFileName = _currentFileViewFolder;
+            if (replaceFileName != "") 
+                replaceFileName += "/";
+            replaceFileName += lbFiles.SelectedItem.ToString();
+        }
+
+        // Open add file dialog
         var addDlg = new AddFileDialog();
         addDlg.Pak = Pak;
+        addDlg.SuggestedFile = replaceFileName;
 
         if (_currentFileViewFolder != "")
-            addDlg.suggestedDir = _currentFileViewFolder + '/';
+            addDlg.SuggestedDir = _currentFileViewFolder + '/';
 
         if (addDlg.ShowDialog(this) == DialogResult.OK)
         {
             var diskFileName = addDlg.eDiskFileName.Text;
-            var pakFileName = addDlg.ePakFileName.Text.ToLower()
-                .Replace("\\", "/"); // You just know people will put this wrong, so preemptive replace
+            var pakFileName = addDlg.ePakFileName.Text.ToLower().Replace("\\", "/"); // You just know people will put this wrong, so preemptive replace
+
+
             addDlg.Dispose();
 
             // virtual directory to the new file
@@ -1004,6 +1024,7 @@ public partial class MainForm : Form
         Pak?.ClosePak();
         // Create and a new pakFile
         Pak = new AAPak(openGamePakDialog.FileName, false, true);
+        Pak.OnProgress += AAPakNotify;
         // TODO: Add Pak-type selector (specialized dialog box)
         Pak.ClosePak();
         // Re-open it in read/write mode
@@ -1193,6 +1214,7 @@ public partial class MainForm : Form
                     Pak.ClosePak();
                 // Create and a new pakfile
                 Pak = new AAPak(arg1, false, true);
+                Pak.OnProgress += AAPakNotify;
                 if (Pak == null || !Pak.IsOpen)
                 {
                     cmdErrors += "Failed to created file: " + arg1 + "\r\n";
@@ -1443,6 +1465,7 @@ public partial class MainForm : Form
         foreach (var key in keyList)
         {
             var pak = new AAPak("");
+            pak.OnProgress += AAPakNotify;
             pak.DebugMode = useDebug;
             pak.SetCustomKey(key);
             if (pak.OpenPak(openGamePakDialog.FileName, true))
@@ -1544,5 +1567,16 @@ public partial class MainForm : Form
     private void Panel1_Paint(object sender, PaintEventArgs e)
     {
         throw new System.NotImplementedException();
+    }
+
+    public void AAPakNotify(AAPak sender, AAPakLoadingProgressType progressType, int step, int maximum)
+    {
+
+        pbGeneric.Minimum = 0;
+        pbGeneric.Maximum = maximum;
+        pbGeneric.Value = step;
+        pbGeneric.Visible = (step != maximum);
+
+        statusBar.Refresh();
     }
 }

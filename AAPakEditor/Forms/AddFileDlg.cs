@@ -8,7 +8,8 @@ namespace AAPakEditor.Forms;
 
 public partial class AddFileDialog : Form
 {
-    public string suggestedDir = "";
+    public string SuggestedDir { get; set; } = string.Empty;
+    public string SuggestedFile { get; set; } = string.Empty;
     public AAPak Pak { get; set; }
 
     public AddFileDialog()
@@ -21,12 +22,16 @@ public partial class AddFileDialog : Form
         if (openFileDlg.ShowDialog() != DialogResult.OK)
             return;
         eDiskFileName.Text = openFileDlg.FileName;
-        ePakFileName.Text = suggestedDir + Path.GetFileName(eDiskFileName.Text).ToLower();
+        ePakFileName.Text = SuggestedDir + Path.GetFileName(eDiskFileName.Text).ToLower();
     }
 
     private void AddFileDialog_Load(object sender, EventArgs e)
     {
-        ePakFileName.Text = suggestedDir;
+        if (SuggestedFile != string.Empty)
+            ePakFileName.Text = SuggestedFile;
+        else
+            ePakFileName.Text = SuggestedDir;
+
         ShowHideAdvanced(false);
         //cbShowAdvanced.Checked = false;
     }
@@ -46,6 +51,6 @@ public partial class AddFileDialog : Form
 
     private void ePakFileName_TextChanged(object sender, EventArgs e)
     {
-        cbReserveSpareSpace.Enabled = Pak?.FileExists(ePakFileName.Text) ?? true;
+        cbReserveSpareSpace.Enabled = !Pak?.FileExists(ePakFileName.Text) ?? true;
     }
 }

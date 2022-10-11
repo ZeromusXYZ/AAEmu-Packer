@@ -78,6 +78,16 @@ namespace AAPacker
         public PakFileType PakType { get; set; } = PakFileType.TypeA;
 
         /// <summary>
+        /// Trigger on progression
+        /// </summary>
+        public event AAPakNotify OnProgress ;
+
+        /// <summary>
+        /// Defines how many files reading from FAT are skipped between OnProgress events
+        /// </summary>
+        public int OnProgressFATFileInterval { get; set; } = 1000;
+
+        /// <summary>
         ///     Creates and/or opens a game_pak file
         /// </summary>
         /// <param name="filePath">Filename of the pak</param>
@@ -137,6 +147,8 @@ namespace AAPacker
         /// <returns>Returns true on success, or false if something failed</returns>
         public bool OpenPak(string filePath, bool openAsReadOnly)
         {
+            TriggerProgress(AAPakLoadingProgressType.OpeningFile, 0, 100);
+
             // Fail if already open
             if (IsOpen)
                 return false;
@@ -145,13 +157,18 @@ namespace AAPacker
             if (!File.Exists(filePath)) return false;
 
             IsVirtual = false;
+            
+            TriggerProgress(AAPakLoadingProgressType.OpeningFile, 25, 100);
+            bool res;
 
             var ext = Path.GetExtension(filePath).ToLower();
             if (ext == ".csv")
             {
                 ReadOnly = true;
                 // Open file as CVS data
-                return OpenVirtualCsvPak(filePath);
+                res = OpenVirtualCsvPak(filePath);
+                TriggerProgress(AAPakLoadingProgressType.OpeningFile, 100, 100);
+                return res;
             }
 
             try
@@ -163,7 +180,7 @@ namespace AAPacker
                 IsDirty = false;
                 IsOpen = true;
                 ReadOnly = openAsReadOnly;
-                return ReadHeader();
+                res = ReadHeader();
             }
             catch (Exception ex)
             {
@@ -171,8 +188,10 @@ namespace AAPacker
                 IsOpen = false;
                 ReadOnly = true;
                 LastError = ex.Message;
-                return false;
+                res = false;
             }
+            TriggerProgress(AAPakLoadingProgressType.OpeningFile, 100, 100);
+            return res;
         }
 
         /// <summary>
@@ -182,10 +201,16 @@ namespace AAPacker
         /// <returns>Returns true on success, or false if something went wrong, or if you still have a pakFile open</returns>
         public bool NewPak(string filePath)
         {
+            TriggerProgress(AAPakLoadingProgressType.OpeningFile, 0, 100);
             // Fail if already open
             if (IsOpen)
                 return false;
+
+            TriggerProgress(AAPakLoadingProgressType.OpeningFile, 25, 100);
+
             IsVirtual = false;
+
+            bool res;
             try
             {
                 // Create new file stream
@@ -195,7 +220,7 @@ namespace AAPacker
                 IsOpen = true;
                 IsDirty = true;
                 SaveHeader(); // Save blank data
-                return ReadHeader(); // read blank data to confirm
+                res = ReadHeader(); // read blank data to confirm
             }
             catch (Exception ex)
             {
@@ -203,8 +228,10 @@ namespace AAPacker
                 IsOpen = false;
                 ReadOnly = true;
                 LastError = ex.Message;
-                return false;
+                res = false;
             }
+            TriggerProgress(AAPakLoadingProgressType.OpeningFile, 100, 100);
+            return res;
         }
 
 
@@ -216,6 +243,7 @@ namespace AAPacker
 
             // Check if it exists
             if (!File.Exists(csvFilePath)) return false;
+
             IsVirtual = true;
             GpFileStream = null; // Not used on virtual pakFiles
             try
@@ -242,6 +270,8 @@ namespace AAPacker
         /// </summary>
         public void ClosePak()
         {
+            TriggerProgress(AAPakLoadingProgressType.ClosingFile, 0, 100);
+
             if (!IsOpen)
                 return;
 
@@ -254,6 +284,8 @@ namespace AAPacker
             IsOpen = false;
             Header.SetDefaultKey();
             LastError = string.Empty;
+
+            TriggerProgress(AAPakLoadingProgressType.ClosingFile, 100, 100);
         }
 
         /// <summary>
@@ -263,13 +295,20 @@ namespace AAPacker
         /// </summary>
         public void SaveHeader()
         {
+            TriggerProgress(AAPakLoadingProgressType.WritingHeader, 0, 100);
+
             Header.WriteToFAT();
+
+            TriggerProgress(AAPakLoadingProgressType.WritingHeader, 50, 100);
+
             GpFileStream.Position = Header.FirstFileInfoOffset;
             Header.FAT.Position = 0;
             Header.FAT.CopyTo(GpFileStream);
             GpFileStream.SetLength(GpFileStream.Position);
 
             IsDirty = false;
+
+            TriggerProgress(AAPakLoadingProgressType.WritingHeader, 100, 100);
         }
 
         /// <summary>
@@ -278,6 +317,8 @@ namespace AAPacker
         /// <returns>Returns true if the read information makes a valid pakFile</returns>
         protected bool ReadHeader()
         {
+            TriggerProgress(AAPakLoadingProgressType.ReadingHeader, 0, 100);
+
             NewestFileDate = DateTime.MinValue;
             Files.Clear();
             ExtraFiles.Clear();
@@ -285,6 +326,8 @@ namespace AAPacker
 
             // Read the last 512 bytes as raw header data
             GpFileStream.Seek(-AAPakFileHeader.Size, SeekOrigin.End);
+
+            TriggerProgress(AAPakLoadingProgressType.ReadingHeader, 10, 100);
 
             // Mark correct location as header Offset location
             var amountRead =
@@ -296,7 +339,11 @@ namespace AAPacker
             if (amountRead < 32)
                 return false;
 
+            TriggerProgress(AAPakLoadingProgressType.ReadingHeader, 25, 100);
+
             Header.DecryptHeaderData();
+
+            TriggerProgress(AAPakLoadingProgressType.ReadingHeader, 50, 100);
 
             if (Header.IsValid)
             {
@@ -309,6 +356,8 @@ namespace AAPacker
             {
                 Header.FAT.SetLength(0);
             }
+
+            TriggerProgress(AAPakLoadingProgressType.ReadingHeader, 100, 100);
 
             return Header.IsValid;
         }
@@ -360,11 +409,13 @@ namespace AAPacker
 
         protected bool ReadCsvData()
         {
+            TriggerProgress(AAPakLoadingProgressType.ReadingFAT, 0, 100);
             Files.Clear();
             ExtraFiles.Clear();
             Folders.Clear();
 
             var lines = File.ReadAllLines(GpFilePath);
+            TriggerProgress(AAPakLoadingProgressType.ReadingFAT, 0, lines.Length);
 
             if (lines.Length >= 1)
             {
@@ -386,6 +437,7 @@ namespace AAPacker
             {
                 Header.IsValid = false;
             }
+            TriggerProgress(AAPakLoadingProgressType.ReadingFAT, 1, lines.Length);
 
             if (!Header.IsValid) return Header.IsValid;
 
@@ -412,6 +464,9 @@ namespace AAPacker
 
                     // TODO: check if this reads correctly
                     Files.Add(fni);
+
+                    if ((i % OnProgressFATFileInterval) == 0)
+                        TriggerProgress(AAPakLoadingProgressType.ReadingFAT, i, lines.Length);
                 }
                 catch (Exception ex)
                 {
@@ -420,6 +475,8 @@ namespace AAPacker
                     return false;
                 }
             }
+
+            TriggerProgress(AAPakLoadingProgressType.ReadingFAT, lines.Length, lines.Length);
 
             return Header.IsValid;
         }
@@ -431,9 +488,12 @@ namespace AAPacker
         /// <param name="sortTheList">Set to false if you don't want the resulting folders list to be sorted (not recommended)</param>
         public void GenerateFolderList(bool sortTheList = true)
         {
+            TriggerProgress(AAPakLoadingProgressType.GeneratingDirectories, 0, Files.Count);
+
             // There is no actual directory info stored in the pak file, so we just generate it based on fileNames
             Folders.Clear();
             if (!IsOpen || !Header.IsValid) return;
+            var c = 0;
             foreach (var pfi in Files)
             {
                 if (pfi.Name == string.Empty)
@@ -444,6 +504,11 @@ namespace AAPacker
                     var n = Path.GetDirectoryName(pfi.Name.ToLower().Replace('/', Path.DirectorySeparatorChar))
                         ?.Replace(Path.DirectorySeparatorChar, '/');
                     var pos = Folders.IndexOf(n);
+
+                    c++;
+                    if ((c % OnProgressFATFileInterval) == 0)
+                        TriggerProgress(AAPakLoadingProgressType.GeneratingDirectories, c, Files.Count);
+
                     if (pos >= 0)
                         continue;
                     Folders.Add(n);
@@ -454,8 +519,13 @@ namespace AAPacker
                 }
             }
 
+            if (Files.Count > 2)
+                TriggerProgress(AAPakLoadingProgressType.GeneratingDirectories, Files.Count - 1, Files.Count);
+            
             if (sortTheList)
                 Folders.Sort();
+
+            TriggerProgress(AAPakLoadingProgressType.GeneratingDirectories, Files.Count, Files.Count);
         }
 
         /// <summary>
@@ -893,6 +963,11 @@ namespace AAPacker
         public void SetDefaultKey()
         {
             Header.SetDefaultKey();
+        }
+
+        public void TriggerProgress(AAPakLoadingProgressType progressType, int step, int maximum)
+        {
+            OnProgress?.Invoke(this, progressType, step, maximum);
         }
     }
 }

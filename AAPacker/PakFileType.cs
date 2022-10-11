@@ -5,7 +5,7 @@
         Custom,
         TypeA,
         TypeB,
-        CSV,
+        Csv,
         TypeF
     }
 }

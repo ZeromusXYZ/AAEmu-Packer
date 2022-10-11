@@ -9,10 +9,10 @@ namespace SubStreamHelper
 
     public class SubStream : Stream
     {
-        private readonly long baseOffset;
-        private readonly Stream baseStream;
-        private readonly long length;
-        private long position;
+        private readonly long _baseOffset;
+        private readonly Stream _baseStream;
+        private readonly long _length;
+        private long _position;
 
         public SubStream(Stream baseStream, long offset, long length)
         {
@@ -20,9 +20,9 @@ namespace SubStreamHelper
             if (!baseStream.CanRead) throw new ArgumentException("can't read base stream");
             if (offset < 0) throw new ArgumentOutOfRangeException("offset");
 
-            this.baseStream = baseStream;
-            baseOffset = offset;
-            this.length = length;
+            this._baseStream = baseStream;
+            _baseOffset = offset;
+            this._length = length;
 
             if (baseStream.CanSeek)
             {
@@ -31,11 +31,11 @@ namespace SubStreamHelper
             else
             {
                 // read it manually...
-                const int BUFFER_SIZE = 512;
-                var buffer = new byte[BUFFER_SIZE];
+                const int bufferSize = 512;
+                var buffer = new byte[bufferSize];
                 while (offset > 0)
                 {
-                    var read = baseStream.Read(buffer, 0, offset < BUFFER_SIZE ? (int)offset : BUFFER_SIZE);
+                    var read = baseStream.Read(buffer, 0, offset < bufferSize ? (int)offset : bufferSize);
                     offset -= read;
                 }
             }
@@ -46,7 +46,7 @@ namespace SubStreamHelper
             get
             {
                 CheckDisposed();
-                return length;
+                return _length;
             }
         }
 
@@ -82,32 +82,29 @@ namespace SubStreamHelper
             get
             {
                 CheckDisposed();
-                return position;
+                return _position;
             }
             set
             {
-                if (position > length)
-                    position = length;
-                else
-                    position = value;
-                baseStream.Position = baseOffset + position;
+                _position = _position > _length ? _length : value;
+                _baseStream.Position = _baseOffset + _position;
             }
         }
 
         public override int Read(byte[] buffer, int offset, int count)
         {
             CheckDisposed();
-            var remaining = length - position;
+            var remaining = _length - _position;
             if (remaining <= 0) return 0;
             if (remaining < count) count = (int)remaining;
-            var read = baseStream.Read(buffer, offset, count);
-            position += read;
+            var read = _baseStream.Read(buffer, offset, count);
+            _position += read;
             return read;
         }
 
         private void CheckDisposed()
         {
-            if (baseStream == null) throw new ObjectDisposedException(GetType().Name);
+            if (_baseStream == null) throw new ObjectDisposedException(GetType().Name);
         }
 
         public override long Seek(long offset, SeekOrigin origin)
@@ -123,7 +120,7 @@ namespace SubStreamHelper
         public override void Flush()
         {
             CheckDisposed();
-            baseStream.Flush();
+            _baseStream.Flush();
         }
 
         protected override void Dispose(bool disposing)

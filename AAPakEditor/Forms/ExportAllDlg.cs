@@ -44,8 +44,8 @@ public partial class ExportAllDlg : Form
             fs.Dispose();
 
             // Update file details
-            File.SetCreationTime(destName, DateTime.FromFileTimeUtc(pfi.createTime));
-            File.SetLastWriteTime(destName, DateTime.FromFileTimeUtc(pfi.modifyTime));
+            File.SetCreationTime(destName, DateTime.FromFileTimeUtc(pfi.CreateTime));
+            File.SetLastWriteTime(destName, DateTime.FromFileTimeUtc(pfi.ModifyTime));
         }
         catch
         {
@@ -67,10 +67,10 @@ public partial class ExportAllDlg : Form
                 return;
 
             if (masterRoot != "")
-                if (pfi.name.Length <= masterRoot.Length || pfi.name.Substring(0, masterRoot.Length) != masterRoot)
+                if (pfi.Name.Length <= masterRoot.Length || pfi.Name.Substring(0, masterRoot.Length) != masterRoot)
                     continue;
 
-            TotalSize += pfi.size;
+            TotalSize += pfi.Size;
             TotalFileCountToExport++;
         }
 
@@ -82,11 +82,11 @@ public partial class ExportAllDlg : Form
                 break;
 
             if (masterRoot != "")
-                if (pfi.name.Length <= masterRoot.Length || pfi.name.Substring(0, masterRoot.Length) != masterRoot)
+                if (pfi.Name.Length <= masterRoot.Length || pfi.Name.Substring(0, masterRoot.Length) != masterRoot)
                     continue;
 
             var destName = TargetDir + Path.DirectorySeparatorChar;
-            var exportedFileName = pfi.name.Substring(masterRoot.Length);
+            var exportedFileName = pfi.Name.Substring(masterRoot.Length);
             destName += exportedFileName.Replace('/', Path.DirectorySeparatorChar);
 
             // Check if target directory exists
@@ -110,7 +110,7 @@ public partial class ExportAllDlg : Form
             // Export the file
             if (ExportFile(pfi, destName))
             {
-                TotalExportedSize += pfi.size;
+                TotalExportedSize += pfi.Size;
                 filesDone++;
 
                 // We don't actually use this progress %, but let's put it in there anyway

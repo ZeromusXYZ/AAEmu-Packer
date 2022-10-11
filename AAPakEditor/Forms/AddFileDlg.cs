@@ -2,12 +2,14 @@
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
+using AAPacker;
 
-namespace AAPakEditor;
+namespace AAPakEditor.Forms;
 
 public partial class AddFileDialog : Form
 {
     public string suggestedDir = "";
+    public AAPak Pak { get; set; }
 
     public AddFileDialog()
     {
@@ -40,5 +42,10 @@ public partial class AddFileDialog : Form
             ClientSize = new Size(ClientSize.Width, gbDummy1.Bottom + 16);
         else
             ClientSize = new Size(ClientSize.Width, cbShowAdvanced.Bottom + 16);
+    }
+
+    private void ePakFileName_TextChanged(object sender, EventArgs e)
+    {
+        cbReserveSpareSpace.Enabled = Pak?.FileExists(ePakFileName.Text) ?? true;
     }
 }

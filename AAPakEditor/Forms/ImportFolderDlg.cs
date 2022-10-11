@@ -51,7 +51,7 @@ public partial class ImportFolderDlg : Form
         {
             // Don't add hidden files, or the pak we are adding, or anything that is called game_pak
             var canAdd = (fi.Attributes & FileAttributes.Hidden) == 0 && !fi.Name.StartsWith(".") &&
-                         path + fi.Name != pak._gpFilePath && fi.Name != "game_pak";
+                         path + fi.Name != pak.GpFilePath && fi.Name != "game_pak";
 
             // if file it larger than 512MB, ask if we really want to add it, it's likely a mistake
             if (canAdd && fi.Length > 0x20000000)

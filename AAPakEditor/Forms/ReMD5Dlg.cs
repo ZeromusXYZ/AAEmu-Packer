@@ -37,7 +37,7 @@ public partial class ReMD5Dlg : Form
             if (bgwRehash.CancellationPending)
                 break;
 
-            if (allFiles || pfi.md5.SequenceEqual(AAPakFileHeader.NullHash))
+            if (allFiles || pfi.Md5.SequenceEqual(AAPakFileHeader.NullHash))
                 toUpdate++;
         }
 
@@ -55,15 +55,15 @@ public partial class ReMD5Dlg : Form
             if (bgwRehash.CancellationPending)
                 break;
 
-            if (allFiles || pfi.md5.SequenceEqual(AAPakFileHeader.NullHash))
+            if (allFiles || pfi.Md5.SequenceEqual(AAPakFileHeader.NullHash))
             {
                 updated++;
-                pak.UpdateMD5(pfi);
+                pak.UpdateMd5(pfi);
 
                 var p = updated * 100 / toUpdate;
                 if (updated < toUpdate && p >= 100)
                     p = 99;
-                lastFile = pfi.name;
+                lastFile = pfi.Name;
                 bgwRehash.ReportProgress(p);
             }
         }

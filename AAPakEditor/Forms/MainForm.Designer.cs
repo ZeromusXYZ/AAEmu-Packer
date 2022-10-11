@@ -1,4 +1,4 @@
-﻿namespace AAPakEditor
+﻿namespace AAPakEditor.Forms
 {
     partial class MainForm
     {
@@ -91,8 +91,9 @@
             this.openKeyListDialog = new System.Windows.Forms.OpenFileDialog();
             this.statusBar = new System.Windows.Forms.StatusStrip();
             this.lFileCount = new System.Windows.Forms.ToolStripStatusLabel();
-            this.lTypePak = new System.Windows.Forms.ToolStripStatusLabel();
             this.lPakExtraInfo = new System.Windows.Forms.ToolStripStatusLabel();
+            this.lTypePak = new System.Windows.Forms.ToolStripStatusLabel();
+            this.MainFormSplitter = new System.Windows.Forms.SplitContainer();
             this.MM.SuspendLayout();
             this.pFileInfo.SuspendLayout();
             this.tcDirectoryViews.SuspendLayout();
@@ -100,6 +101,10 @@
             this.tpFlatDirView.SuspendLayout();
             this.tpExtraFiles.SuspendLayout();
             this.statusBar.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.MainFormSplitter)).BeginInit();
+            this.MainFormSplitter.Panel1.SuspendLayout();
+            this.MainFormSplitter.Panel2.SuspendLayout();
+            this.MainFormSplitter.SuspendLayout();
             this.SuspendLayout();
             // 
             // MM
@@ -401,26 +406,26 @@
             this.lbFolders.FormattingEnabled = true;
             this.lbFolders.Location = new System.Drawing.Point(3, 6);
             this.lbFolders.Name = "lbFolders";
-            this.lbFolders.Size = new System.Drawing.Size(245, 381);
+            this.lbFolders.Size = new System.Drawing.Size(236, 329);
             this.lbFolders.TabIndex = 1;
             this.lbFolders.SelectedIndexChanged += new System.EventHandler(this.lbFolders_SelectedIndexChanged);
             // 
             // lbFiles
             // 
-            this.lbFiles.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.lbFiles.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.lbFiles.FormattingEnabled = true;
-            this.lbFiles.Location = new System.Drawing.Point(277, 53);
+            this.lbFiles.Location = new System.Drawing.Point(6, 28);
             this.lbFiles.Name = "lbFiles";
-            this.lbFiles.Size = new System.Drawing.Size(295, 238);
+            this.lbFiles.Size = new System.Drawing.Size(316, 173);
             this.lbFiles.TabIndex = 4;
             this.lbFiles.SelectedIndexChanged += new System.EventHandler(this.lbFiles_SelectedIndexChanged);
             // 
             // lFiles
             // 
-            this.lFiles.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.lFiles.AutoSize = true;
-            this.lFiles.Location = new System.Drawing.Point(274, 35);
+            this.lFiles.Location = new System.Drawing.Point(5, 6);
             this.lFiles.Name = "lFiles";
             this.lFiles.Size = new System.Drawing.Size(28, 13);
             this.lFiles.TabIndex = 5;
@@ -428,7 +433,8 @@
             // 
             // pFileInfo
             // 
-            this.pFileInfo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.pFileInfo.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.pFileInfo.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.pFileInfo.Controls.Add(this.lfiCreateTime);
             this.pFileInfo.Controls.Add(this.lfiModifyTime);
@@ -440,9 +446,9 @@
             this.pFileInfo.Controls.Add(this.lfiHash);
             this.pFileInfo.Controls.Add(this.lfiSize);
             this.pFileInfo.Controls.Add(this.lfiName);
-            this.pFileInfo.Location = new System.Drawing.Point(277, 301);
+            this.pFileInfo.Location = new System.Drawing.Point(6, 205);
             this.pFileInfo.Name = "pFileInfo";
-            this.pFileInfo.Size = new System.Drawing.Size(295, 150);
+            this.pFileInfo.Size = new System.Drawing.Size(316, 150);
             this.pFileInfo.TabIndex = 6;
             // 
             // lfiCreateTime
@@ -466,7 +472,7 @@
             // lModifiedRaw
             // 
             this.lModifiedRaw.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.lModifiedRaw.Location = new System.Drawing.Point(124, 70);
+            this.lModifiedRaw.Location = new System.Drawing.Point(145, 70);
             this.lModifiedRaw.Name = "lModifiedRaw";
             this.lModifiedRaw.Size = new System.Drawing.Size(166, 13);
             this.lModifiedRaw.TabIndex = 9;
@@ -476,7 +482,7 @@
             // lCreateRaw
             // 
             this.lCreateRaw.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.lCreateRaw.Location = new System.Drawing.Point(124, 54);
+            this.lCreateRaw.Location = new System.Drawing.Point(145, 54);
             this.lCreateRaw.Name = "lCreateRaw";
             this.lCreateRaw.Size = new System.Drawing.Size(166, 13);
             this.lCreateRaw.TabIndex = 8;
@@ -506,9 +512,9 @@
             this.lfiStartOffset.AutoSize = true;
             this.lfiStartOffset.Location = new System.Drawing.Point(3, 93);
             this.lfiStartOffset.Name = "lfiStartOffset";
-            this.lfiStartOffset.Size = new System.Drawing.Size(33, 13);
+            this.lfiStartOffset.Size = new System.Drawing.Size(35, 13);
             this.lfiStartOffset.TabIndex = 4;
-            this.lfiStartOffset.Text = "offset";
+            this.lfiStartOffset.Text = "Offset";
             // 
             // lfiHash
             // 
@@ -524,9 +530,9 @@
             this.lfiSize.AutoSize = true;
             this.lfiSize.Location = new System.Drawing.Point(3, 22);
             this.lfiSize.Name = "lfiSize";
-            this.lfiSize.Size = new System.Drawing.Size(25, 13);
+            this.lfiSize.Size = new System.Drawing.Size(27, 13);
             this.lfiSize.TabIndex = 1;
-            this.lfiSize.Text = "size";
+            this.lfiSize.Text = "Size";
             // 
             // lfiName
             // 
@@ -534,9 +540,9 @@
             this.lfiName.Cursor = System.Windows.Forms.Cursors.Hand;
             this.lfiName.Location = new System.Drawing.Point(3, 0);
             this.lfiName.Name = "lfiName";
-            this.lfiName.Size = new System.Drawing.Size(33, 13);
+            this.lfiName.Size = new System.Drawing.Size(35, 13);
             this.lfiName.TabIndex = 0;
-            this.lfiName.Text = "name";
+            this.lfiName.Text = "Name";
             this.lfiName.Click += new System.EventHandler(this.lfiName_Click);
             // 
             // exportFolderDialog
@@ -557,22 +563,20 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tvFolders.Location = new System.Drawing.Point(6, 6);
             this.tvFolders.Name = "tvFolders";
-            this.tvFolders.Size = new System.Drawing.Size(239, 378);
+            this.tvFolders.Size = new System.Drawing.Size(230, 327);
             this.tvFolders.TabIndex = 7;
             this.tvFolders.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.tvFolders_AfterSelect);
             // 
             // tcDirectoryViews
             // 
-            this.tcDirectoryViews.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.tcDirectoryViews.Controls.Add(this.tpTreeView);
             this.tcDirectoryViews.Controls.Add(this.tpFlatDirView);
             this.tcDirectoryViews.Controls.Add(this.tpExtraFiles);
-            this.tcDirectoryViews.Location = new System.Drawing.Point(12, 35);
+            this.tcDirectoryViews.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tcDirectoryViews.Location = new System.Drawing.Point(0, 0);
             this.tcDirectoryViews.Name = "tcDirectoryViews";
             this.tcDirectoryViews.SelectedIndex = 0;
-            this.tcDirectoryViews.Size = new System.Drawing.Size(259, 416);
+            this.tcDirectoryViews.Size = new System.Drawing.Size(250, 365);
             this.tcDirectoryViews.TabIndex = 8;
             // 
             // tpTreeView
@@ -581,7 +585,7 @@
             this.tpTreeView.Location = new System.Drawing.Point(4, 22);
             this.tpTreeView.Name = "tpTreeView";
             this.tpTreeView.Padding = new System.Windows.Forms.Padding(3);
-            this.tpTreeView.Size = new System.Drawing.Size(251, 390);
+            this.tpTreeView.Size = new System.Drawing.Size(242, 339);
             this.tpTreeView.TabIndex = 0;
             this.tpTreeView.Text = "Tree View";
             this.tpTreeView.UseVisualStyleBackColor = true;
@@ -592,7 +596,7 @@
             this.tpFlatDirView.Location = new System.Drawing.Point(4, 22);
             this.tpFlatDirView.Name = "tpFlatDirView";
             this.tpFlatDirView.Padding = new System.Windows.Forms.Padding(3);
-            this.tpFlatDirView.Size = new System.Drawing.Size(251, 390);
+            this.tpFlatDirView.Size = new System.Drawing.Size(242, 339);
             this.tpFlatDirView.TabIndex = 1;
             this.tpFlatDirView.Text = "Flat Folder View";
             this.tpFlatDirView.UseVisualStyleBackColor = true;
@@ -603,7 +607,7 @@
             this.tpExtraFiles.Location = new System.Drawing.Point(4, 22);
             this.tpExtraFiles.Name = "tpExtraFiles";
             this.tpExtraFiles.Padding = new System.Windows.Forms.Padding(3);
-            this.tpExtraFiles.Size = new System.Drawing.Size(251, 390);
+            this.tpExtraFiles.Size = new System.Drawing.Size(242, 339);
             this.tpExtraFiles.TabIndex = 2;
             this.tpExtraFiles.Text = "Deleted Files";
             this.tpExtraFiles.UseVisualStyleBackColor = true;
@@ -616,7 +620,7 @@
             this.lbExtraFiles.FormattingEnabled = true;
             this.lbExtraFiles.Location = new System.Drawing.Point(3, 5);
             this.lbExtraFiles.Name = "lbExtraFiles";
-            this.lbExtraFiles.Size = new System.Drawing.Size(245, 381);
+            this.lbExtraFiles.Size = new System.Drawing.Size(236, 329);
             this.lbExtraFiles.TabIndex = 2;
             this.lbExtraFiles.SelectedIndexChanged += new System.EventHandler(this.LbExtraFiles_SelectedIndexChanged);
             // 
@@ -634,7 +638,7 @@
             this.lFileCount,
             this.lPakExtraInfo,
             this.lTypePak});
-            this.statusBar.Location = new System.Drawing.Point(0, 454);
+            this.statusBar.Location = new System.Drawing.Point(0, 389);
             this.statusBar.Name = "statusBar";
             this.statusBar.Size = new System.Drawing.Size(584, 22);
             this.statusBar.TabIndex = 9;
@@ -647,6 +651,14 @@
             this.lFileCount.Text = "no files";
             this.lFileCount.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
+            // lPakExtraInfo
+            // 
+            this.lPakExtraInfo.Name = "lPakExtraInfo";
+            this.lPakExtraInfo.Size = new System.Drawing.Size(508, 17);
+            this.lPakExtraInfo.Spring = true;
+            this.lPakExtraInfo.Text = "...";
+            this.lPakExtraInfo.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
             // lTypePak
             // 
             this.lTypePak.Name = "lTypePak";
@@ -654,30 +666,38 @@
             this.lTypePak.Text = "...";
             this.lTypePak.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
-            // lPakExtraInfo
+            // MainFormSplitter
             // 
-            this.lPakExtraInfo.Name = "lPakExtraInfo";
-            this.lPakExtraInfo.Size = new System.Drawing.Size(477, 17);
-            this.lPakExtraInfo.Spring = true;
-            this.lPakExtraInfo.Text = "...";
-            this.lPakExtraInfo.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.MainFormSplitter.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.MainFormSplitter.Location = new System.Drawing.Point(0, 24);
+            this.MainFormSplitter.Name = "MainFormSplitter";
+            // 
+            // MainFormSplitter.Panel1
+            // 
+            this.MainFormSplitter.Panel1.Controls.Add(this.tcDirectoryViews);
+            this.MainFormSplitter.Panel1MinSize = 250;
+            // 
+            // MainFormSplitter.Panel2
+            // 
+            this.MainFormSplitter.Panel2.Controls.Add(this.lFiles);
+            this.MainFormSplitter.Panel2.Controls.Add(this.lbFiles);
+            this.MainFormSplitter.Panel2.Controls.Add(this.pFileInfo);
+            this.MainFormSplitter.Panel2MinSize = 300;
+            this.MainFormSplitter.Size = new System.Drawing.Size(584, 365);
+            this.MainFormSplitter.SplitterDistance = 250;
+            this.MainFormSplitter.TabIndex = 10;
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(584, 476);
+            this.ClientSize = new System.Drawing.Size(584, 411);
+            this.Controls.Add(this.MainFormSplitter);
             this.Controls.Add(this.statusBar);
-            this.Controls.Add(this.tcDirectoryViews);
-            this.Controls.Add(this.pFileInfo);
-            this.Controls.Add(this.lFiles);
-            this.Controls.Add(this.lbFiles);
             this.Controls.Add(this.MM);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.MM;
-            this.MinimumSize = new System.Drawing.Size(500, 350);
             this.Name = "MainForm";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "AAPakEditor";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MainForm_FormClosed);
             this.Load += new System.EventHandler(this.MainForm_Load);
@@ -692,10 +712,17 @@
             this.tpExtraFiles.ResumeLayout(false);
             this.statusBar.ResumeLayout(false);
             this.statusBar.PerformLayout();
+            this.MainFormSplitter.Panel1.ResumeLayout(false);
+            this.MainFormSplitter.Panel2.ResumeLayout(false);
+            this.MainFormSplitter.Panel2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.MainFormSplitter)).EndInit();
+            this.MainFormSplitter.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
         }
+
+        private System.Windows.Forms.SplitContainer MainFormSplitter;
 
         #endregion
 

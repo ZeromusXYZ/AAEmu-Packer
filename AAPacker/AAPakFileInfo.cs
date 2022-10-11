@@ -3,30 +3,68 @@
 namespace AAPacker
 {
     /// <summary>
-    ///     File Details Block
+    /// File Details Block
     /// </summary>
     public class AAPakFileInfo
     {
-        public long createTime;
-        public int deletedIndexNumber = -1;
-        public uint dummy1; // looks like padding, mostly 0 or 0x80000000 observed, possible file flags ?
+        /// <summary>
+        /// Original file creation time
+        /// </summary>
+        public long CreateTime { get; set; }
 
-        public ulong dummy2; // looks like padding to fill out the block, observed 0
+        /// <summary>
+        /// Index of this deleted file
+        /// </summary>
+        public int DeletedIndexNumber { get; set; } = -1;
 
-        // The following are not part of the structure but used by the program
-        public int entryIndexNumber = -1;
-        public byte[] md5; // this should be 16 bytes
-        public long modifyTime;
+        /// <summary>
+        /// Unknown value 1, mostly 0 or 0x80000000 observed, possible file flags ?
+        /// </summary>
+        public uint Dummy1 { get; set; }
 
-        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 0x108)]
-        public string name;
+        /// <summary>
+        /// Unknown value 2, observed to be 0
+        /// </summary>
+        public ulong Dummy2 { get; set; }
 
-        public long offset;
+        /// <summary>
+        /// Index in the normal files list
+        /// </summary>
+        public int EntryIndexNumber { get; set; } = -1;
 
-        public int
-            paddingSize; // number of bytes of free space left until the next blocksize of 512 (or space until next file)
+        /// <summary>
+        /// MD5 Hash byte array (should be 16 bytes)
+        /// </summary>
+        public byte[] Md5 { get; set; }
 
-        public long size;
-        public long sizeDuplicate; // maybe compressed data size ? if used, observed always same as size
+        /// <summary>
+        /// Original file modified time
+        /// </summary>
+        public long ModifyTime { get; set; }
+
+        /// <summary>
+        /// Filename inside of the pakFile
+        /// </summary>
+        public string Name { get; set; }
+
+        /// <summary>
+        /// Offset in bytes of the starting location inside the pakFile
+        /// </summary>
+        public long Offset { get; set; }
+
+        /// <summary>
+        /// Number of bytes of free space left until the next blockSize of 512 (or space until next file)
+        /// </summary>
+        public int PaddingSize { get; set; }
+
+        /// <summary>
+        /// Original fileSize
+        /// </summary>
+        public long Size { get; set; }
+        /// <summary>
+        /// Duplicate of the original fileSize? Possibly file after decompression?
+        /// Always observed as being the same as fileSize
+        /// </summary>
+        public long SizeDuplicate { get; set; }
     }
 }

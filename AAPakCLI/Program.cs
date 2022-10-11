@@ -111,22 +111,22 @@ namespace AAPakCLI
             sl.Add(s);
             foreach (var pfi in pak.Files)
             {
-                var modTime = DateTime.FromFileTimeUtc(pfi.modifyTime);
+                var modTime = DateTime.FromFileTimeUtc(pfi.ModifyTime);
                 if (modTime > newest)
                     newest = modTime;
 
-                s = pfi.name;
-                s += ";" + pfi.size;
-                s += ";" + pfi.offset;
-                s += ";" + BitConverter.ToString(pfi.md5).Replace("-", "").ToUpper();
+                s = pfi.Name;
+                s += ";" + pfi.Size;
+                s += ";" + pfi.Offset;
+                s += ";" + BitConverter.ToString(pfi.Md5).Replace("-", "").ToUpper();
                 s += ";" + AAPak.DateTimeToDateTimeStr(
                     DateTime.FromFileTimeUtc(pfi
-                        .createTime)); // DateTimeToDateTimeStr DateTime.FromFileTimeUtc(pfi.createTime).ToString("yyyy-MM-dd HH:mm:ss");
+                        .CreateTime)); // DateTimeToDateTimeStr DateTime.FromFileTimeUtc(pfi.createTime).ToString("yyyy-MM-dd HH:mm:ss");
                 s += ";" + AAPak.DateTimeToDateTimeStr(modTime); // .ToString("yyyy-MM-dd HH:mm:ss");
-                s += ";" + pfi.sizeDuplicate;
-                s += ";" + pfi.paddingSize;
-                s += ";" + pfi.dummy1;
-                s += ";" + pfi.dummy2;
+                s += ";" + pfi.SizeDuplicate;
+                s += ";" + pfi.PaddingSize;
+                s += ";" + pfi.Dummy1;
+                s += ";" + pfi.Dummy2;
                 sl.Add(s);
             }
 
@@ -322,7 +322,7 @@ namespace AAPakCLI
                                 //foreach(AAPakFileInfo pfi in pak.files)
                             {
                                 var pfi = pak.Files[n];
-                                if (pfi.name.ToLower().StartsWith(delDir))
+                                if (pfi.Name.ToLower().StartsWith(delDir))
                                     if (pak.DeleteFile(pfi))
                                         filesDeleted++;
                             }
@@ -388,7 +388,7 @@ namespace AAPakCLI
                         }
                         else
                         {
-                            Console.WriteLine("Current File: " + pak._gpFilePath);
+                            Console.WriteLine("Current File: " + pak.GpFilePath);
                             Console.WriteLine("Compare to old file: " + arg1);
                             Console.WriteLine("Write changes to: " + arg2);
                             Console.WriteLine("[NYI] This function is not yet implemented");
@@ -437,9 +437,9 @@ namespace AAPakCLI
                 if (pak != null && pak.IsOpen)
                 {
                     if (pak.IsDirty)
-                        Console.WriteLine("[PAK] Saving pak ... {0}", pak._gpFilePath);
+                        Console.WriteLine("[PAK] Saving pak ... {0}", pak.GpFilePath);
                     else
-                        Console.WriteLine("[PAK] Closing pak ... {0}", pak._gpFilePath);
+                        Console.WriteLine("[PAK] Closing pak ... {0}", pak.GpFilePath);
                     pak.ClosePak();
                 }
             }

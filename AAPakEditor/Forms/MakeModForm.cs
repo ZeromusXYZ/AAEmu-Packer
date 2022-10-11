@@ -15,7 +15,7 @@ public partial class MakeModForm : Form
     public static string ModFileFolderName = "aamod/";
 
     public static string
-        SFXInfoFileName = ModFileFolderName + "aamod.exe"; // if present, this needs to be the first file in the pak
+        SfxInfoFileName = ModFileFolderName + "aamod.exe"; // if present, this needs to be the first file in the pak
 
     public static string ModInfoFileName = ModFileFolderName + "aamod.txt";
     public static string ModPNGImageFileName = ModFileFolderName + "aamod.png";
@@ -37,8 +37,8 @@ public partial class MakeModForm : Form
     {
         addFiles.Clear();
         foreach (var fi in mainPak.Files)
-            if (!fi.name.StartsWith(ModFileFolderName))
-                addFiles.Add(fi.name);
+            if (!fi.Name.StartsWith(ModFileFolderName))
+                addFiles.Add(fi.Name);
 
         // Load Description
         if (mainPak.FileExists(ModInfoFileName))
@@ -298,7 +298,7 @@ public partial class MakeModForm : Form
                     fs.CopyTo(exeStream);
 
                     // Add modified exe to modpak
-                    if (!modpak.AddFileFromStream(SFXInfoFileName, exeStream, DateTime.Now, DateTime.Now, true, out _))
+                    if (!modpak.AddFileFromStream(SfxInfoFileName, exeStream, DateTime.Now, DateTime.Now, true, out _))
                     {
                         MessageBox.Show("Failed to add modified SFX executable");
                         modpak.ClosePak();
@@ -335,7 +335,7 @@ public partial class MakeModForm : Form
                 // This AAModSFX resource is loaded from the RELEASE build of the AAMod project, make sure it's compiled as release first if you made changes to it
                 var sfxStream = new MemoryStream(Resources.AAModSFX);
                 // We will be possibly be editing the icon, so it's a good idea to have some spare space here
-                if (!modpak.AddFileFromStream(SFXInfoFileName, sfxStream, DateTime.Now, DateTime.Now, true, out _))
+                if (!modpak.AddFileFromStream(SfxInfoFileName, sfxStream, DateTime.Now, DateTime.Now, true, out _))
                 {
                     MessageBox.Show("Failed to add SFX executable");
                     modpak.ClosePak();
@@ -367,13 +367,13 @@ public partial class MakeModForm : Form
             // Copy all files
             foreach (var fi in mainPak.Files)
             {
-                if (fi.name.StartsWith(ModFileFolderName))
+                if (fi.Name.StartsWith(ModFileFolderName))
                     continue;
                 var ms = mainPak.ExportFileAsStream(fi);
-                if (!modpak.AddFileFromStream(fi.name, ms, DateTime.FromFileTimeUtc(fi.createTime),
-                        DateTime.FromFileTimeUtc(fi.modifyTime), false, out _))
+                if (!modpak.AddFileFromStream(fi.Name, ms, DateTime.FromFileTimeUtc(fi.CreateTime),
+                        DateTime.FromFileTimeUtc(fi.ModifyTime), false, out _))
                 {
-                    MessageBox.Show("Failed to copy \n" + fi.name + "\nAborting !", "Copy Error", MessageBoxButtons.OK,
+                    MessageBox.Show("Failed to copy \n" + fi.Name + "\nAborting !", "Copy Error", MessageBoxButtons.OK,
                         MessageBoxIcon.Error);
                     modpak.ClosePak();
                     return;

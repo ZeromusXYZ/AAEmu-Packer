@@ -209,43 +209,43 @@ public partial class FilePropForm : Form
     {
         if (pfi != null)
         {
-            tName.Text = pfi.name;
-            tSize.Text = pfi.size.ToString();
-            tSizeDuplicate.Text = pfi.sizeDuplicate.ToString();
-            tPaddingSize.Text = pfi.paddingSize.ToString();
+            tName.Text = pfi.Name;
+            tSize.Text = pfi.Size.ToString();
+            tSizeDuplicate.Text = pfi.SizeDuplicate.ToString();
+            tPaddingSize.Text = pfi.PaddingSize.ToString();
 
-            tHash.Text = BitConverter.ToString(pfi.md5).ToUpper().Replace("-", "");
+            tHash.Text = BitConverter.ToString(pfi.Md5).ToUpper().Replace("-", "");
 
             dtCreate.Value = DateTime.UtcNow;
             dtModified.Value = DateTime.UtcNow;
             try
             {
-                dtCreate.Value = DateTime.FromFileTimeUtc(pfi.createTime);
+                dtCreate.Value = DateTime.FromFileTimeUtc(pfi.CreateTime);
             }
             catch
             {
                 dtCreate.Enabled = false;
-                tCreateAsNumber.Text = pfi.createTime.ToString();
+                tCreateAsNumber.Text = pfi.CreateTime.ToString();
             }
 
             try
             {
-                dtModified.Value = DateTime.FromFileTimeUtc(pfi.modifyTime);
+                dtModified.Value = DateTime.FromFileTimeUtc(pfi.ModifyTime);
             }
             catch
             {
                 dtModified.Enabled = false;
-                tModifyAsNumber.Text = pfi.modifyTime.ToString();
+                tModifyAsNumber.Text = pfi.ModifyTime.ToString();
             }
 
-            tOffset.Text = "0x" + pfi.offset.ToString("X");
+            tOffset.Text = "0x" + pfi.Offset.ToString("X");
 
-            tDummy1.Text = "0x" + pfi.dummy1.ToString("X");
-            tDummy2.Text = "0x" + pfi.dummy2.ToString("X");
+            tDummy1.Text = "0x" + pfi.Dummy1.ToString("X");
+            tDummy2.Text = "0x" + pfi.Dummy2.ToString("X");
 
-            if (pfi.entryIndexNumber >= 0)
-                lfiIndex.Text = "index: " + pfi.entryIndexNumber;
-            else if (pfi.deletedIndexNumber >= 0) lfiIndex.Text = "extra-index: " + pfi.deletedIndexNumber;
+            if (pfi.EntryIndexNumber >= 0)
+                lfiIndex.Text = "index: " + pfi.EntryIndexNumber;
+            else if (pfi.DeletedIndexNumber >= 0) lfiIndex.Text = "extra-index: " + pfi.DeletedIndexNumber;
         }
         else
         {
@@ -266,8 +266,8 @@ public partial class FilePropForm : Form
     {
         var res = true;
         var warnings = string.Empty;
-        newInfo.name = tName.Text;
-        if (newInfo.name == string.Empty)
+        newInfo.Name = tName.Text;
+        if (newInfo.Name == string.Empty)
         {
             warnings += "Filename cannot be empty\r\n";
             res = false;
@@ -276,7 +276,7 @@ public partial class FilePropForm : Form
         {
             try
             {
-                if (Path.GetFileName(newInfo.name) == string.Empty)
+                if (Path.GetFileName(newInfo.Name) == string.Empty)
                 {
                     warnings += "Filename might be invalid.\r\n";
                     res = false;
@@ -290,7 +290,7 @@ public partial class FilePropForm : Form
 
         if (TryFieldParse(tSize.Text, out long nsize))
         {
-            newInfo.size = nsize;
+            newInfo.Size = nsize;
         }
         else
         {
@@ -300,7 +300,7 @@ public partial class FilePropForm : Form
 
         if (TryFieldParse(tSizeDuplicate.Text, out long nsizedup))
         {
-            newInfo.sizeDuplicate = nsizedup;
+            newInfo.SizeDuplicate = nsizedup;
         }
         else
         {
@@ -310,7 +310,7 @@ public partial class FilePropForm : Form
 
         if (TryFieldParse(tPaddingSize.Text, out int npadding))
         {
-            newInfo.paddingSize = npadding;
+            newInfo.PaddingSize = npadding;
         }
         else
         {
@@ -340,20 +340,20 @@ public partial class FilePropForm : Form
             }
         }
 
-        newInfo.md5 = nhash;
+        newInfo.Md5 = nhash;
 
         try
         {
             dtCreate.Enabled = string.IsNullOrWhiteSpace(tCreateAsNumber.Text);
             if (dtCreate.Enabled)
             {
-                newInfo.createTime = dtCreate.Value.ToFileTimeUtc();
+                newInfo.CreateTime = dtCreate.Value.ToFileTimeUtc();
             }
             else
             {
                 if (TryFieldParse(tCreateAsNumber.Text, out long nCreateTime))
                 {
-                    newInfo.createTime = nCreateTime;
+                    newInfo.CreateTime = nCreateTime;
                 }
                 else
                 {
@@ -373,13 +373,13 @@ public partial class FilePropForm : Form
             dtModified.Enabled = string.IsNullOrWhiteSpace(tModifyAsNumber.Text);
             if (dtModified.Enabled)
             {
-                newInfo.modifyTime = dtModified.Value.ToFileTimeUtc();
+                newInfo.ModifyTime = dtModified.Value.ToFileTimeUtc();
             }
             else
             {
                 if (TryFieldParse(tModifyAsNumber.Text, out long nModifiedTime))
                 {
-                    newInfo.modifyTime = nModifiedTime;
+                    newInfo.ModifyTime = nModifiedTime;
                 }
                 else
                 {
@@ -396,7 +396,7 @@ public partial class FilePropForm : Form
 
         if (TryFieldParse(tOffset.Text, out long noffset))
         {
-            newInfo.offset = noffset;
+            newInfo.Offset = noffset;
         }
         else
         {
@@ -406,7 +406,7 @@ public partial class FilePropForm : Form
 
         if (TryFieldParse(tDummy1.Text, out long nd1))
         {
-            newInfo.dummy1 = (uint)nd1;
+            newInfo.Dummy1 = (uint)nd1;
         }
         else
         {
@@ -416,7 +416,7 @@ public partial class FilePropForm : Form
 
         if (TryFieldParse(tDummy2.Text, out long nd2))
         {
-            newInfo.dummy2 = (uint)nd2;
+            newInfo.Dummy2 = (uint)nd2;
         }
         else
         {
@@ -433,16 +433,16 @@ public partial class FilePropForm : Form
 
     private bool hasChanged()
     {
-        return pfi.name != newInfo.name ||
-               pfi.size != newInfo.size ||
-               pfi.sizeDuplicate != newInfo.sizeDuplicate ||
-               pfi.paddingSize != newInfo.paddingSize ||
-               pfi.offset != newInfo.offset ||
-               BitConverter.ToString(pfi.md5) != BitConverter.ToString(newInfo.md5) ||
-               pfi.createTime != newInfo.createTime ||
-               pfi.modifyTime != newInfo.modifyTime ||
-               pfi.dummy1 != newInfo.dummy1 ||
-               pfi.dummy2 != newInfo.dummy2;
+        return pfi.Name != newInfo.Name ||
+               pfi.Size != newInfo.Size ||
+               pfi.SizeDuplicate != newInfo.SizeDuplicate ||
+               pfi.PaddingSize != newInfo.PaddingSize ||
+               pfi.Offset != newInfo.Offset ||
+               BitConverter.ToString(pfi.Md5) != BitConverter.ToString(newInfo.Md5) ||
+               pfi.CreateTime != newInfo.CreateTime ||
+               pfi.ModifyTime != newInfo.ModifyTime ||
+               pfi.Dummy1 != newInfo.Dummy1 ||
+               pfi.Dummy2 != newInfo.Dummy2;
     }
 
     private void tFieldsChanged(object sender, EventArgs e)
@@ -453,12 +453,12 @@ public partial class FilePropForm : Form
     private void lCTtoR_Click(object sender, EventArgs e)
     {
         if (string.IsNullOrWhiteSpace(tCreateAsNumber.Text))
-            tCreateAsNumber.Text = newInfo.createTime.ToString();
+            tCreateAsNumber.Text = newInfo.CreateTime.ToString();
     }
 
     private void lDTToR_Click(object sender, EventArgs e)
     {
         if (string.IsNullOrWhiteSpace(tModifyAsNumber.Text))
-            tModifyAsNumber.Text = newInfo.modifyTime.ToString();
+            tModifyAsNumber.Text = newInfo.ModifyTime.ToString();
     }
 }

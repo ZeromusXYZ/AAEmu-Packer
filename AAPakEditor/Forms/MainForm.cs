@@ -6,71 +6,71 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
-using AAPakEditor.Properties;
 using AAPacker;
+using AAPakEditor.Properties;
 
-namespace AAPakEditor;
+namespace AAPakEditor.Forms;
 
 public partial class MainForm : Form
 {
-    private string baseTitle = "";
-    private string currentFileViewFolder = "";
+    private string _baseTitle = "";
+    private string _currentFileViewFolder = "";
 
-    private readonly byte[] customKey = new byte[16]
+    private readonly byte[] _customKey = new byte[16]
         { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
-    private readonly byte[] dbKey = new byte[16]
+    private readonly byte[] _dbKey = new byte[16]
         { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
-    private readonly List<fileListEntry> fileListEntries = new();
-    public AAPak pak;
-    private readonly string urlDiscord = "https://discord.gg/GhVfDtK";
-    private readonly string urlGitHub = "https://github.com/ZeromusXYZ/AAEmu-Packer";
-    private bool useCustomKey;
-    private bool useDBKey;
+    private readonly List<FileListEntry> _fileListEntries = new();
+    public AAPak Pak;
+    private readonly string _urlDiscord = "https://discord.gg/GhVfDtK";
+    private readonly string _urlGitHub = "https://github.com/ZeromusXYZ/AAEmu-Packer";
+    private bool _useCustomKey;
+    private bool _useDbKey;
 
     public MainForm()
     {
         InitializeComponent();
     }
 
-    private void UpdateMM()
+    private void UpdateMm()
     {
-        MMFileSave.Enabled = pak != null && pak.IsOpen && !pak.ReadOnly && pak.IsDirty;
-        MMFileClose.Enabled = pak != null && pak.IsOpen;
+        MMFileSave.Enabled = Pak != null && Pak.IsOpen && !Pak.ReadOnly && Pak.IsDirty;
+        MMFileClose.Enabled = Pak != null && Pak.IsOpen;
 
-        MMEditAddFile.Enabled = pak != null && pak.IsOpen && pak.ReadOnly == false && !pak.IsVirtual;
-        MMEditImportFiles.Enabled = pak != null && pak.IsOpen && pak.ReadOnly == false && !pak.IsVirtual;
-        MMEditDeleteSelected.Enabled = pak != null && pak.IsOpen && pak.ReadOnly == false && lbFiles.SelectedIndex >= 0 && !pak.IsVirtual;
-        MMEditReplace.Enabled = pak != null && pak.IsOpen && !pak.IsVirtual && pak.ReadOnly == false && lbFiles.SelectedIndex >= 0;
-        MMEditFileProp.Enabled = pak != null && pak.IsOpen && !pak.IsVirtual && pak.ReadOnly == false && lbFiles.SelectedIndex >= 0;
-        MMEdit.Visible = pak != null && pak.IsOpen && !pak.IsVirtual && pak.ReadOnly == false;
+        MMEditAddFile.Enabled = Pak != null && Pak.IsOpen && Pak.ReadOnly == false && !Pak.IsVirtual;
+        MMEditImportFiles.Enabled = Pak != null && Pak.IsOpen && Pak.ReadOnly == false && !Pak.IsVirtual;
+        MMEditDeleteSelected.Enabled = Pak != null && Pak.IsOpen && Pak.ReadOnly == false && lbFiles.SelectedIndex >= 0 && !Pak.IsVirtual;
+        MMEditReplace.Enabled = Pak != null && Pak.IsOpen && !Pak.IsVirtual && Pak.ReadOnly == false && lbFiles.SelectedIndex >= 0;
+        MMEditFileProp.Enabled = Pak != null && Pak.IsOpen && !Pak.IsVirtual && Pak.ReadOnly == false && lbFiles.SelectedIndex >= 0;
+        MMEdit.Visible = Pak != null && Pak.IsOpen && !Pak.IsVirtual && Pak.ReadOnly == false;
 
-        MMExportSelectedFile.Enabled = pak != null && pak.IsOpen && !pak.IsVirtual && lbFiles.SelectedIndex >= 0;
-        MMExportSelectedFolder.Enabled = pak != null && pak.IsOpen && !pak.IsVirtual && currentFileViewFolder != "";
-        MMExportAll.Enabled = pak != null && pak.IsOpen && !pak.IsVirtual;
-        MMExportDB.Enabled = pak != null && pak.IsOpen && !pak.IsVirtual && lbFiles.SelectedIndex >= 0 && useDBKey && Path.GetExtension(lbFiles.SelectedItem.ToString()).StartsWith(".sql");
-        MMExportDB.Visible = pak != null && pak.IsOpen && !pak.IsVirtual && useDBKey;
+        MMExportSelectedFile.Enabled = Pak != null && Pak.IsOpen && !Pak.IsVirtual && lbFiles.SelectedIndex >= 0;
+        MMExportSelectedFolder.Enabled = Pak != null && Pak.IsOpen && !Pak.IsVirtual && _currentFileViewFolder != "";
+        MMExportAll.Enabled = Pak != null && Pak.IsOpen && !Pak.IsVirtual;
+        MMExportDB.Enabled = Pak != null && Pak.IsOpen && !Pak.IsVirtual && lbFiles.SelectedIndex >= 0 && _useDbKey && Path.GetExtension(lbFiles.SelectedItem.ToString()).StartsWith(".sql");
+        MMExportDB.Visible = Pak != null && Pak.IsOpen && !Pak.IsVirtual && _useDbKey;
         MMExportS2.Visible = MMExportDB.Visible;
-        MMExport.Visible = pak != null && pak.IsOpen && !pak.IsVirtual;
+        MMExport.Visible = Pak != null && Pak.IsOpen && !Pak.IsVirtual;
 
-        MMExtraMD5.Enabled = pak != null && pak.IsOpen && !pak.IsVirtual && pak.ReadOnly == false &&
+        MMExtraMD5.Enabled = Pak != null && Pak.IsOpen && !Pak.IsVirtual && Pak.ReadOnly == false &&
                              lbFiles.SelectedIndex >= 0;
-        MMExtraExportData.Enabled = pak != null && pak.IsOpen && !pak.IsVirtual;
-        MMExtraMakeMod.Enabled = pak != null && pak.IsOpen && !pak.IsVirtual;
-        MMExtra.Visible = pak != null && pak.IsOpen;
+        MMExtraExportData.Enabled = Pak != null && Pak.IsOpen && !Pak.IsVirtual;
+        MMExtraMakeMod.Enabled = Pak != null && Pak.IsOpen && !Pak.IsVirtual;
+        MMExtra.Visible = Pak != null && Pak.IsOpen;
 
-        if (pak != null && pak.IsOpen)
+        if (Pak != null && Pak.IsOpen)
         {
-            if (pak.IsDirty)
-                Text = baseTitle + @" - *" + pak._gpFilePath;
+            if (Pak.IsDirty)
+                Text = _baseTitle + @" - *" + Pak.GpFilePath;
             else
-                Text = baseTitle + @" - " + pak._gpFilePath;
-            lPakExtraInfo.Text = pak.NewestFileDate.ToString("yyyy-MM-dd HH:mm:ss");
+                Text = _baseTitle + @" - " + Pak.GpFilePath;
+            lPakExtraInfo.Text = Pak.NewestFileDate.ToString("yyyy-MM-dd HH:mm:ss");
         }
         else
         {
-            Text = baseTitle;
+            Text = _baseTitle;
             lPakExtraInfo.Text = @"...";
         }
     }
@@ -95,34 +95,34 @@ public partial class MainForm : Form
             Application.UseWaitCursor = false;
         }
 
-        UpdateMM();
+        UpdateMm();
     }
 
     private void MainForm_Load(object sender, EventArgs e)
     {
-        baseTitle = Text;
-        var AppVer = Assembly.GetExecutingAssembly().GetName().Version;
+        _baseTitle = Text;
+        var appVer = Assembly.GetExecutingAssembly().GetName().Version;
         var v = "Version ";
-        v += AppVer.Major.ToString();
-        v += "." + AppVer.Minor;
-        if (AppVer.Build > 0 || AppVer.MinorRevision > 0)
-            v += "." + AppVer.Build;
-        if (AppVer.MinorRevision > 0)
-            v += "." + AppVer.MinorRevision;
+        v += appVer.Major.ToString();
+        v += "." + appVer.Minor;
+        if (appVer.Build > 0 || appVer.MinorRevision > 0)
+            v += "." + appVer.Build;
+        if (appVer.MinorRevision > 0)
+            v += "." + appVer.MinorRevision;
         MMVersion.Text = v;
-        UpdateMM();
+        UpdateMm();
         ShowFileInfo(null);
     }
 
     private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
     {
-        if (pak != null && pak.IsOpen)
+        if (Pak != null && Pak.IsOpen)
         {
-            pak.ClosePak();
-            pak = null;
+            Pak.ClosePak();
+            Pak = null;
         }
 
-        UpdateMM();
+        UpdateMm();
     }
 
     private void GenerateFolderViews()
@@ -130,7 +130,7 @@ public partial class MainForm : Form
         lFileCount.Text = "Analyzing folder structure ... ";
         //lFileCount.Refresh();
 
-        pak.GenerateFolderList();
+        Pak.GenerateFolderList();
 
         lFileCount.Text = "Loading ... ";
         //lFileCount.Refresh();
@@ -143,22 +143,22 @@ public partial class MainForm : Form
         TreeNode foundNode = null;
         var c = 0;
         lbFolders.Items.Add("<root>");
-        foreach (var s in pak.Folders)
+        foreach (var s in Pak.Folders)
         {
             lbFolders.Items.Add(s);
             c++;
             if (c % 250 == 0)
-                lFileCount.Text = "Loading folders ... " + c + " / " + pak.Folders.Count;
+                lFileCount.Text = "Loading folders ... " + c + " / " + Pak.Folders.Count;
             //lFileCount.Refresh();
             //Thread.Sleep(1);
 
 
             if (s != "")
             {
-                var dirwalk = s.Split('/');
+                var dirWalk = s.Split('/');
                 var dd = "";
                 var lastNode = rootNode;
-                foreach (var ds in dirwalk)
+                foreach (var ds in dirWalk)
                 {
                     if (dd != "")
                         dd += "/";
@@ -184,15 +184,15 @@ public partial class MainForm : Form
         }
 
         rootNode.Expand();
-        lFileCount.Text = pak.Files.Count + " files in " + pak.Folders.Count + " folders";
-        foreach (var pfi in pak.ExtraFiles) lbExtraFiles.Items.Add(pfi.name);
-        UpdateMM();
+        lFileCount.Text = Pak.Files.Count + " files in " + Pak.Folders.Count + " folders";
+        foreach (var pfi in Pak.ExtraFiles) lbExtraFiles.Items.Add(pfi.Name);
+        UpdateMm();
     }
 
     private void LoadPakKeys(string fromDirectory)
     {
-        useDBKey = false;
-        useCustomKey = false;
+        _useDbKey = false;
+        _useCustomKey = false;
         string fn;
 
         // DB key
@@ -206,9 +206,9 @@ public partial class MainForm : Form
                 return;
             }
 
-            fs.Read(dbKey, 0, 16);
+            var amountRead = fs.Read(_dbKey, 0, 16);
             fs.Dispose();
-            useDBKey = true;
+            _useDbKey = amountRead == 16;
         }
 
         // PAK-Header Key
@@ -222,29 +222,29 @@ public partial class MainForm : Form
                 return;
             }
 
-            fs.Read(customKey, 0, 16);
+            var amountRead = fs.Read(_customKey, 0, 16);
             fs.Dispose();
-            useCustomKey = true;
-            pak.SetCustomKey(customKey);
+            _useCustomKey = amountRead == 16;
+            Pak.SetCustomKey(_customKey);
         }
     }
 
     private void LoadPakFile(string filename, bool openAsReadOnly, bool showWriteWarning = true, bool quickLoad = false)
     {
         lTypePak.Text = string.Empty;
-        if (pak == null) pak = new AAPak("");
-        if (pak.IsOpen)
+        Pak ??= new AAPak("");
+        if (Pak.IsOpen)
         {
             lFileCount.Text = "Closing pak ... ";
             //lFileCount.Refresh();
-            pak.ClosePak();
+            Pak.ClosePak();
         }
 
         lFileCount.Text = "Opening Pak ... ";
         //lFileCount.Refresh();
         try
         {
-            LoadPakKeys(Path.GetDirectoryName(filename).TrimEnd(Path.DirectorySeparatorChar) +
+            LoadPakKeys(Path.GetDirectoryName(filename)?.TrimEnd(Path.DirectorySeparatorChar) +
                         Path.DirectorySeparatorChar);
         }
         catch
@@ -252,29 +252,29 @@ public partial class MainForm : Form
             MessageBox.Show("Error loading custom keys");
         }
 
-        var res = pak.OpenPak(filename, openAsReadOnly);
+        var res = Pak.OpenPak(filename, openAsReadOnly);
         if (!res)
         {
-            Text = baseTitle;
+            Text = _baseTitle;
             lFileCount.Text = "no files";
             lbFolders.Items.Clear();
             lbFiles.Items.Clear();
-            UpdateMM();
-            if (useCustomKey)
+            UpdateMm();
+            if (_useCustomKey)
                 MessageBox.Show("Custom  game_pak.key  does not seem valid for " + filename, "OpenPak Key Error");
             else
-                MessageBox.Show("Failed to open " + filename, "OpenPak Error");
+                MessageBox.Show("Failed to open " + filename + "\r\n" + Pak?.LastError, "OpenPak Error");
         }
         else
         {
-            Text = baseTitle + " - " + pak._gpFilePath;
+            Text = _baseTitle + " - " + Pak.GpFilePath;
 
 
             if (!quickLoad)
                 GenerateFolderViews();
 
             // Only show this waring if this is not a new pak file
-            if (openAsReadOnly == false && pak.Files.Count > 0 && showWriteWarning)
+            if (openAsReadOnly == false && Pak.Files.Count > 0 && showWriteWarning)
                 MessageBox.Show("!!! Warning !!!\r\n" +
                                 "You have opened this pak in read/write mode !\r\n" +
                                 "\r\n" +
@@ -292,8 +292,8 @@ public partial class MainForm : Form
                     "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
 
-        if (pak.PakType == PakFileType.Custom)
-            lTypePak.Text = pak.Reader?.ReaderName ?? "Invalid Reader";
+        if (Pak.PakType == PakFileType.Custom)
+            lTypePak.Text = Pak.Reader?.ReaderName ?? "Invalid Reader";
         else
             lTypePak.Text = string.Empty;
     }
@@ -301,39 +301,39 @@ public partial class MainForm : Form
     private void lbFolders_SelectedIndexChanged(object sender, EventArgs e)
     {
         lbFiles.Items.Clear();
-        if (pak == null || !pak.IsOpen)
+        if (Pak == null || !Pak.IsOpen)
             return;
 
-        var d = (sender as ListBox).SelectedItem.ToString();
+        var d = (sender as ListBox)?.SelectedItem.ToString();
         if (d == "<root>")
             d = string.Empty;
         PopulateFilesList(d);
-        UpdateMM();
+        UpdateMm();
     }
 
     private void ShowFileInfo(AAPakFileInfo pfi)
     {
         if (pfi != null)
         {
-            lfiName.Text = pfi.name;
-            lfiSize.Text = "Size: " + pfi.size + " byte(s)";
-            if (pfi.paddingSize > 0)
-                lfiSize.Text += "  + " + pfi.paddingSize + " padding";
+            lfiName.Text = pfi.Name;
+            lfiSize.Text = "Size: " + pfi.Size + " byte(s)";
+            if (pfi.PaddingSize > 0)
+                lfiSize.Text += "  + " + pfi.PaddingSize + " padding";
 
-            if (pfi.sizeDuplicate != pfi.size)
-                lfiSize.Text += "  size mismatch " + pfi.sizeDuplicate + " byte(s)";
+            if (pfi.SizeDuplicate != pfi.Size)
+                lfiSize.Text += "  Size mismatch " + pfi.SizeDuplicate + " byte(s)";
 
-            //var h = BitConverter.ToString(pfi.md5).ToUpper().Replace("-", "");
+            //var h = BitConverter.ToString(pfi.Md5).ToUpper().Replace("-", "");
             //if (h == pak._header.nullHashString)
-            if (pfi.md5.SequenceEqual(AAPakFileHeader.NullHash))
+            if (pfi.Md5.SequenceEqual(AAPakFileHeader.NullHash))
                 lfiHash.Text = "MD5: Invalid or not calculated !";
             else
-                lfiHash.Text = "MD5: " + BitConverter.ToString(pfi.md5).ToUpper().Replace("-", "");
+                lfiHash.Text = "MD5: " + BitConverter.ToString(pfi.Md5).ToUpper().Replace("-", "");
             try
             {
-                lCreateRaw.Text = "(" + pfi.createTime + ")";
-                if (pfi.createTime != 0)
-                    lfiCreateTime.Text = "Created: " + DateTime.FromFileTime(pfi.createTime);
+                lCreateRaw.Text = "(" + pfi.CreateTime + ")";
+                if (pfi.CreateTime != 0)
+                    lfiCreateTime.Text = "Created: " + DateTime.FromFileTime(pfi.CreateTime);
                 else
                     lfiCreateTime.Text = "<Created time not used>";
             }
@@ -344,22 +344,22 @@ public partial class MainForm : Form
 
             try
             {
-                lModifiedRaw.Text = "(" + pfi.modifyTime + ")";
-                if (pfi.modifyTime != 0)
-                    lfiModifyTime.Text = "Modified: " + DateTime.FromFileTime(pfi.modifyTime);
+                lModifiedRaw.Text = "(" + pfi.ModifyTime + ")";
+                if (pfi.ModifyTime != 0)
+                    lfiModifyTime.Text = "Modified: " + DateTime.FromFileTime(pfi.ModifyTime);
                 else
                     lfiModifyTime.Text = "<Modified time not used>";
             }
             catch
             {
-                lfiModifyTime.Text = "ModifiedTime Invalid (" + pfi.modifyTime + ")";
+                lfiModifyTime.Text = "ModifiedTime Invalid (" + pfi.ModifyTime + ")";
             }
 
-            lfiStartOffset.Text = "Start Offset: 0x" + pfi.offset.ToString("X16");
-            lfiExtras.Text = "D1 0x" + pfi.dummy1.ToString("X") + "  D2 0x" + pfi.dummy2.ToString("X");
-            if (pfi.entryIndexNumber >= 0)
-                lfiIndex.Text = "index: " + pfi.entryIndexNumber;
-            else if (pfi.deletedIndexNumber >= 0) lfiIndex.Text = "extra-index: " + pfi.deletedIndexNumber;
+            lfiStartOffset.Text = "Start Offset: 0x" + pfi.Offset.ToString("X16");
+            lfiExtras.Text = "D1 0x" + pfi.Dummy1.ToString("X") + "  D2 0x" + pfi.Dummy2.ToString("X");
+            if (pfi.EntryIndexNumber >= 0)
+                lfiIndex.Text = "index: " + pfi.EntryIndexNumber;
+            else if (pfi.DeletedIndexNumber >= 0) lfiIndex.Text = "extra-index: " + pfi.DeletedIndexNumber;
         }
         else
         {
@@ -378,7 +378,7 @@ public partial class MainForm : Form
 
     private void lbFiles_SelectedIndexChanged(object sender, EventArgs e)
     {
-        if (pak == null || !pak.IsOpen)
+        if (Pak == null || !Pak.IsOpen)
             return;
 
         if (lbFiles.SelectedIndex < 0)
@@ -387,22 +387,22 @@ public partial class MainForm : Form
         Application.UseWaitCursor = true;
         Cursor.Current = Cursors.WaitCursor;
 
-        var d = currentFileViewFolder;
+        var d = _currentFileViewFolder;
         if (d != "") d += "/";
         d += lbFiles.SelectedItem.ToString();
-        ref var pfi = ref pak.NullAAPakFileInfo;
 
         try
         {
-            var fle = lbFiles.SelectedItem as fileListEntry;
-            ShowFileInfo(fle.pfi);
+            if (lbFiles.SelectedItem is FileListEntry fle) 
+                ShowFileInfo(fle.Pfi);
         }
         catch
         {
-            if (pak.GetFileByName(d, ref pfi)) ShowFileInfo(pfi);
+            if (Pak.GetFileByName(d, out var pfi)) 
+                ShowFileInfo(pfi);
         }
 
-        UpdateMM();
+        UpdateMm();
 
         Cursor.Current = Cursors.Default;
         Application.UseWaitCursor = false;
@@ -410,7 +410,7 @@ public partial class MainForm : Form
 
     private void MMExportSelectedFile_Click(object sender, EventArgs e)
     {
-        if (pak == null || !pak.IsOpen)
+        if (Pak == null || !Pak.IsOpen)
             return;
 
         if (lbFiles.SelectedIndex < 0)
@@ -419,18 +419,18 @@ public partial class MainForm : Form
             return;
         }
 
-        var d = currentFileViewFolder;
+        var d = _currentFileViewFolder;
         if (d != "") d += "/";
-        fileListEntry fle = null;
-        try
+        //fileListEntry fle = null;
+
+        if (lbFiles.SelectedItem is FileListEntry fle)
         {
-            fle = lbFiles.SelectedItem as fileListEntry;
             d += fle.DisplayName;
         }
-        catch
+        else
         {
             fle = null;
-            d += lbFiles.SelectedItem.ToString();
+            d += lbFiles.SelectedItem?.ToString();
         }
 
         if (fle == null)
@@ -449,7 +449,7 @@ public partial class MainForm : Form
         }
 
         if (exportFileDialog.ShowDialog() == DialogResult.OK)
-            if (!ExportFile(fle.pfi, exportFileDialog.FileName))
+            if (!ExportFile(fle.Pfi, exportFileDialog.FileName))
                 //  if (!ExportFile(d, exportFileDialog.FileName))
                 MessageBox.Show("Failed to export " + d);
     }
@@ -459,7 +459,7 @@ public partial class MainForm : Form
         try
         {
             // Save file stream
-            var filePakStream = pak.ExportFileAsStream(pfi);
+            var filePakStream = Pak.ExportFileAsStream(pfi);
             var fs = new FileStream(destName, FileMode.Create);
             filePakStream.Position = 0;
 
@@ -469,10 +469,10 @@ public partial class MainForm : Form
             fs.Dispose();
 
             // Update file details
-            if (pfi.createTime != 0)
-                File.SetCreationTime(destName, DateTime.FromFileTimeUtc(pfi.createTime));
-            if (pfi.modifyTime != 0)
-                File.SetLastWriteTime(destName, DateTime.FromFileTimeUtc(pfi.modifyTime));
+            if (pfi.CreateTime != 0)
+                File.SetCreationTime(destName, DateTime.FromFileTimeUtc(pfi.CreateTime));
+            if (pfi.ModifyTime != 0)
+                File.SetLastWriteTime(destName, DateTime.FromFileTimeUtc(pfi.ModifyTime));
         }
         catch
         {
@@ -484,19 +484,18 @@ public partial class MainForm : Form
 
     public bool ExportFile(string sourceName, string destName)
     {
-        ref var pfi = ref pak.NullAAPakFileInfo;
-        if (pak.GetFileByName(sourceName, ref pfi))
+        if (Pak.GetFileByName(sourceName, out var pfi))
             return ExportFile(pfi, destName);
         return false;
     }
 
     private void MMExportAll_Click(object sender, EventArgs e)
     {
-        if (pak == null || !pak.IsOpen)
+        if (Pak == null || !Pak.IsOpen)
             return;
 
         exportFolderDialog.Description = "Select a folder to where to export all files to";
-        exportFolderDialog.SelectedPath = Path.GetDirectoryName(pak._gpFilePath);
+        exportFolderDialog.SelectedPath = Path.GetDirectoryName(Pak.GpFilePath);
         if (exportFolderDialog.ShowDialog() != DialogResult.OK)
             return;
 
@@ -509,7 +508,7 @@ public partial class MainForm : Form
         Cursor.Current = Cursors.WaitCursor;
 
         var export = new ExportAllDlg();
-        export.pak = pak;
+        export.pak = Pak;
         export.TargetDir = exportFolderDialog.SelectedPath;
         export.Text = "Export All Files";
         export.masterRoot = "";
@@ -529,7 +528,7 @@ public partial class MainForm : Form
 
     private void MMEXtraMD5_Click(object sender, EventArgs e)
     {
-        if (pak == null || !pak.IsOpen)
+        if (Pak == null || !Pak.IsOpen)
             return;
 
         if (lbFiles.SelectedIndex < 0)
@@ -538,79 +537,78 @@ public partial class MainForm : Form
             return;
         }
 
-        var d = currentFileViewFolder;
+        var d = _currentFileViewFolder;
         if (d != "") d += "/";
         d += lbFiles.SelectedItem.ToString();
 
-        ref var pfi = ref pak.NullAAPakFileInfo;
-        if (pak.GetFileByName(d, ref pfi))
-            MessageBox.Show("MD5 Hash updated to " + pak.UpdateMD5(pfi));
+        if (Pak.GetFileByName(d, out var pfi))
+            MessageBox.Show("MD5 Hash updated to " + Pak.UpdateMd5(pfi));
         else
             MessageBox.Show("ERROR: No file");
-        UpdateMM();
+        UpdateMm();
     }
 
     private void MMFileSave_Click(object sender, EventArgs e)
     {
-        if (!pak.ReadOnly && pak.IsDirty)
+        if (!Pak.ReadOnly && Pak.IsDirty)
         {
             Application.UseWaitCursor = true;
             Cursor.Current = Cursors.WaitCursor;
-            pak.SaveHeader();
+            Pak.SaveHeader();
             Cursor.Current = Cursors.Default;
             Application.UseWaitCursor = false;
         }
 
-        UpdateMM();
+        UpdateMm();
     }
 
 
     private void MMExtraExportData_Click(object sender, EventArgs e)
     {
-        if (pak == null || !pak.IsOpen)
+        if (Pak == null || !Pak.IsOpen)
             return;
-        CreateCSVFile();
+        CreateCsvFile();
     }
 
-    private void CreateCSVFile(string filename = "")
+    private void CreateCsvFile(string filename = "")
     {
         var newest = new DateTime(1600, 1, 1);
 
         var sl = new List<string>();
         var s = "";
-        s = "name";
-        s += ";size";
-        s += ";offset";
-        s += ";md5";
-        s += ";createTime";
-        s += ";modifyTime";
-        s += ";sizeDuplicate";
-        s += ";paddingSize";
-        s += ";dummy1";
-        s += ";dummy2";
+        s = "Name";
+        s += ";Size";
+        s += ";Offset";
+        s += ";Md5";
+        s += ";CreateTime";
+        s += ";ModifyTime";
+        s += ";SizeDuplicate";
+        s += ";PaddingSize";
+        s += ";Dummy1";
+        s += ";Dummy2";
         sl.Add(s);
-        foreach (var pfi in pak.Files)
+        foreach (var pfi in Pak.Files)
         {
-            var modTime = DateTime.FromFileTimeUtc(pfi.modifyTime);
+            var modTime = DateTime.FromFileTimeUtc(pfi.ModifyTime);
             if (modTime > newest)
                 newest = modTime;
 
-            s = pfi.name;
-            s += ";" + pfi.size;
-            s += ";" + pfi.offset;
-            s += ";" + BitConverter.ToString(pfi.md5).Replace("-", "").ToUpper();
+            s = pfi.Name;
+            s += ";" + pfi.Size;
+            s += ";" + pfi.Offset;
+            s += ";" + BitConverter.ToString(pfi.Md5).Replace("-", "").ToUpper();
             s += ";" + AAPak.DateTimeToDateTimeStr(
-                DateTime.FromFileTimeUtc(pfi.createTime)); // .ToString("yyyy-MM-dd HH:mm:ss");
+                DateTime.FromFileTimeUtc(pfi.CreateTime)); // .ToString("yyyy-MM-dd HH:mm:ss");
             s += ";" + AAPak.DateTimeToDateTimeStr(modTime); // .ToString("yyyy-MM-dd HH:mm:ss");
-            s += ";" + pfi.sizeDuplicate;
-            s += ";" + pfi.paddingSize;
-            s += ";" + pfi.dummy1;
-            s += ";" + pfi.dummy2;
+            s += ";" + pfi.SizeDuplicate;
+            s += ";" + pfi.PaddingSize;
+            s += ";" + pfi.Dummy1;
+            s += ";" + pfi.Dummy2;
             sl.Add(s);
         }
 
         exportFileDialog.FileName =
-            Path.GetFileName(pak._gpFilePath) + "_files_" + newest.ToString("yyyyMMdd") + ".csv";
+            Path.GetFileName(Pak.GpFilePath) + "_files_" + newest.ToString("yyyyMMdd") + ".csv";
         if (filename == string.Empty)
         {
             if (exportFileDialog.ShowDialog() != DialogResult.OK)
@@ -623,23 +621,23 @@ public partial class MainForm : Form
 
     private void MMEditReplace_Click(object sender, EventArgs e)
     {
-        if (pak == null || !pak.IsOpen || lbFiles.SelectedIndex < 0)
+        if (Pak == null || !Pak.IsOpen || lbFiles.SelectedIndex < 0)
             return;
 
-        if (pak.ReadOnly)
+        if (Pak.ReadOnly)
         {
             MessageBox.Show("Pak is opened in Read-Only mode, cannot add/replace files.");
             return;
         }
 
-        var filename = currentFileViewFolder;
+        var filename = _currentFileViewFolder;
         if (filename != "") filename += "/";
         filename += lbFiles.SelectedItem.ToString();
 
-        fileListEntry fle = null;
+        FileListEntry fle = null;
         try
         {
-            fle = lbFiles.SelectedItem as fileListEntry;
+            fle = lbFiles.SelectedItem as FileListEntry;
         }
         catch
         {
@@ -647,7 +645,7 @@ public partial class MainForm : Form
             return;
         }
 
-        var pfi = fle.pfi;
+        var pfi = fle.Pfi;
 
         /*
         ref AAPakFileInfo pfi = ref pak.nullAAPakFileInfo;
@@ -656,13 +654,13 @@ public partial class MainForm : Form
             return;
         */
 
-        var maxSize = pfi.size + pfi.paddingSize;
+        var maxSize = pfi.Size + pfi.PaddingSize;
 
         importFileDialog.FileName = lbFiles.SelectedItem.ToString();
         if (importFileDialog.ShowDialog() != DialogResult.OK)
             return;
 
-        // DateTime createTime = File.GetCreationTime(importFileDialog.FileName);
+        // DateTime CreateTime = File.GetCreationTime(importFileDialog.FileName);
         var modifyTime = File.GetLastWriteTime(importFileDialog.FileName);
 
         try
@@ -671,15 +669,13 @@ public partial class MainForm : Form
             if (fs.Length > maxSize)
             {
                 fs.Dispose();
-                MessageBox.Show(string.Format(
-                    "File is too big!\r\n{0}\r\nCan only be replaced with a file with the \r\nmaximum size of {1} bytes",
-                    filename, maxSize));
+                MessageBox.Show(
+                    $"File is too big!\r\n{filename}\r\nCan only be replaced with a file with the \r\nmaximum Size of {maxSize} bytes");
             }
 
             fs.Position = 0;
-            if (pak.ReplaceFile(ref pfi, fs, modifyTime) == false)
-                MessageBox.Show(string.Format("Failed to replace file !\r\n{0}\r\nPak or File might be damaged !!",
-                    filename));
+            if (Pak.ReplaceFile(ref pfi, fs, modifyTime) == false)
+                MessageBox.Show($"Failed to replace file !\r\n{filename}\r\nPak or File might be damaged !!");
             fs.Dispose();
         }
         catch (Exception ex)
@@ -687,57 +683,57 @@ public partial class MainForm : Form
             MessageBox.Show("ERROR: " + ex.Message);
         }
 
-        UpdateMM();
+        UpdateMm();
     }
 
     private void PrepareFileListView()
     {
-        fileListEntries.Clear();
+        _fileListEntries.Clear();
         lbFiles.Items.Clear();
     }
 
     private void AddFileListEntry(AAPakFileInfo pfi, string displayName, bool isDeletedList)
     {
-        var fle = new fileListEntry();
+        var fle = new FileListEntry();
         fle.DisplayName = displayName;
-        fle.pfi = pfi;
-        fle.isDeletedFile = isDeletedList;
-        fileListEntries.Add(fle);
+        fle.Pfi = pfi;
+        fle.IsDeletedFile = isDeletedList;
+        _fileListEntries.Add(fle);
     }
 
     private void FinalizeFileListView()
     {
         lbFiles.Items.Clear();
-        fileListEntries.Sort();
-        foreach (var fle in fileListEntries)
+        _fileListEntries.Sort();
+        foreach (var fle in _fileListEntries)
             lbFiles.Items.Add(fle);
     }
 
     private void PopulateFilesList(string withdir)
     {
-        currentFileViewFolder = withdir;
+        _currentFileViewFolder = withdir;
 
         PrepareFileListView();
         //lbFiles.Items.Clear();
         Application.UseWaitCursor = true;
         Cursor.Current = Cursors.WaitCursor;
 
-        var list = pak.GetFilesInDirectory(currentFileViewFolder);
-        if (currentFileViewFolder == "")
+        var list = Pak.GetFilesInDirectory(_currentFileViewFolder);
+        if (_currentFileViewFolder == "")
             lFiles.Text = list.Count + " files in <root>";
         else
-            lFiles.Text = list.Count + " files in \"" + currentFileViewFolder + "\"";
+            lFiles.Text = list.Count + " files in \"" + _currentFileViewFolder + "\"";
         //List<string> sl = new List<string>();
         foreach (var pfi in list)
         {
             var f = string.Empty;
             try
             {
-                f = Path.GetFileName(pfi.name);
+                f = Path.GetFileName(pfi.Name);
             }
             catch
             {
-                f = "__invalid_name_" + pfi.entryIndexNumber + "__";
+                f = "__invalid_name_" + pfi.EntryIndexNumber + "__";
             }
 
             AddFileListEntry(pfi, f, false);
@@ -751,12 +747,12 @@ public partial class MainForm : Form
         //lbFiles.Items.AddRange(sl.ToArray());
         Cursor.Current = Cursors.Default;
         Application.UseWaitCursor = false;
-        UpdateMM();
+        UpdateMm();
     }
 
     private void tvFolders_AfterSelect(object sender, TreeViewEventArgs e)
     {
-        if (pak == null || !pak.IsOpen)
+        if (Pak == null || !Pak.IsOpen)
             return;
 
 
@@ -765,16 +761,16 @@ public partial class MainForm : Form
 
         PopulateFilesList(e.Node.Name);
         e.Node.Expand();
-        UpdateMM();
+        UpdateMm();
     }
 
     private void MMExtraDebugTest_Click(object sender, EventArgs e)
     {
-        if (pak == null || !pak.IsOpen)
+        if (Pak == null || !Pak.IsOpen)
             return;
 
 
-        var d = currentFileViewFolder;
+        var d = _currentFileViewFolder;
         if (d != "") d += "/";
         d += lbFiles.SelectedItem.ToString();
         exportFileDialog.FileName = Path.GetFileName(d.Replace('/', Path.DirectorySeparatorChar));
@@ -782,7 +778,7 @@ public partial class MainForm : Form
         if (exportFileDialog.ShowDialog() != DialogResult.OK)
             return;
 
-        var pfraw = pak.ExportFileAsStream(d);
+        var pfraw = Pak.ExportFileAsStream(d);
 
         var fs = new FileStream(exportFileDialog.FileName, FileMode.Create);
 
@@ -798,7 +794,7 @@ public partial class MainForm : Form
         var fsraw = new MemoryStream();
         try
         {
-            if (AAPakFileHeader.EncryptStreamAes(pf, fsraw, dbKey, false, true))
+            if (AAPakFileHeader.EncryptStreamAes(pf, fsraw, _dbKey, false, true))
             {
                 fsraw.Position = 16;
                 fsraw.CopyTo(fs);
@@ -815,17 +811,15 @@ public partial class MainForm : Form
         }
 
         fs.Dispose();
-        // ms.Dispose();
-
-        UpdateMM();
+        UpdateMm();
     }
 
     private void MMEditDeleteSelected_Click(object sender, EventArgs e)
     {
-        if (pak == null || !pak.IsOpen || lbFiles.SelectedIndex < 0)
+        if (Pak == null || !Pak.IsOpen || lbFiles.SelectedIndex < 0)
             return;
 
-        if (pak.ReadOnly)
+        if (Pak.ReadOnly)
         {
             MessageBox.Show("Pak is opened in Read-Only mode, cannot delete files.");
             return;
@@ -837,11 +831,16 @@ public partial class MainForm : Form
             return;
         }
 
-        var filename = currentFileViewFolder;
+        var filename = _currentFileViewFolder;
         if (filename != "") filename += "/";
         filename += lbFiles.SelectedItem.ToString();
 
-        var fle = lbFiles.SelectedItem as fileListEntry;
+        if (!(lbFiles.SelectedItem is FileListEntry fle))
+        {
+            MessageBox.Show($"Invalid file entry for\r\n" + filename, "Delete", MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
+            return;
+        }
 
         /*
         ref AAPakFileInfo pfi = ref pak.nullAAPakFileInfo;
@@ -853,58 +852,60 @@ public partial class MainForm : Form
                 MessageBoxButtons.YesNo) != DialogResult.Yes)
             return;
 
-        if (pak.DeleteFile(fle.pfi)) MessageBox.Show("Reference to " + filename + " has been removed from the pak.");
+        if (Pak.DeleteFile(fle.Pfi)) MessageBox.Show("Reference to " + filename + " has been removed from the pak.");
 
         if (lbFiles.Items.Count <= 1)
             // If this was the last file listed in the directory listing, we will need to re-populate the folder views to update this change
             GenerateFolderViews();
         lbFiles.Items.Clear();
-        PopulateFilesList(currentFileViewFolder);
+        PopulateFilesList(_currentFileViewFolder);
 
-        UpdateMM();
+        UpdateMm();
     }
 
     private void MMEditAddFile_Click(object sender, EventArgs e)
     {
         // open add dialog
         var addDlg = new AddFileDialog();
-        if (currentFileViewFolder != "")
-            addDlg.suggestedDir = currentFileViewFolder + '/';
+        addDlg.Pak = Pak;
+
+        if (_currentFileViewFolder != "")
+            addDlg.suggestedDir = _currentFileViewFolder + '/';
+
         if (addDlg.ShowDialog(this) == DialogResult.OK)
         {
-            var diskfn = addDlg.eDiskFileName.Text;
-            var pakfn = addDlg.ePakFileName.Text.ToLower()
-                .Replace("\\", "/"); // You just know people will put this wrong, so pre-emptive replace
+            var diskFileName = addDlg.eDiskFileName.Text;
+            var pakFileName = addDlg.ePakFileName.Text.ToLower()
+                .Replace("\\", "/"); // You just know people will put this wrong, so preemptive replace
             addDlg.Dispose();
 
-            // virual directory to the new file
-            var newpakfilepath = string.Empty;
+            // virtual directory to the new file
+            string newPakFilePath;
             try
             {
-                newpakfilepath = Path.GetDirectoryName(pakfn.Replace("/", "\\")).Replace("\\", "/");
+                newPakFilePath = Path.GetDirectoryName(pakFileName.Replace("/", "\\"))?.Replace("\\", "/") ?? string.Empty;
             }
             catch
             {
-                newpakfilepath = string.Empty;
+                newPakFilePath = string.Empty;
             }
 
-            if (File.Exists(diskfn))
+            if (File.Exists(diskFileName))
             {
-                var sourceIsDBFile = Path.GetExtension(diskfn).ToLower() == ".sqlite3";
+                var sourceIsDbFile = Path.GetExtension(diskFileName).ToLower() == ".sqlite3";
 
                 var doEncrypt = false;
-                if (sourceIsDBFile && useDBKey)
+                if (sourceIsDbFile && _useDbKey)
                     if (MessageBox.Show(
                             "Import of DB detected, do you want to encrypt before importing using the provided key ?",
                             "Import as DB", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                         doEncrypt = true;
 
 
-                var cTime = File.GetCreationTime(diskfn);
-                var mTime = File.GetLastWriteTime(diskfn);
-                var pfi = pak.NullAAPakFileInfo;
+                var cTime = File.GetCreationTime(diskFileName);
+                var mTime = File.GetLastWriteTime(diskFileName);
                 Stream fs;
-                var fStream = new FileStream(diskfn, FileMode.Open, FileAccess.Read);
+                var fStream = new FileStream(diskFileName, FileMode.Open, FileAccess.Read);
                 var mStream = new MemoryStream();
 
                 if (doEncrypt)
@@ -917,11 +918,10 @@ public partial class MainForm : Form
                         if (rest > 4096)
                             rest = 4096;
                         */
-                        var buf = new byte[rest];
-                        var decBuf = new byte[rest];
-                        fStream.Read(buf, 0, rest);
-                        decBuf = AAPakFileHeader.EncryptAes(buf, dbKey, true);
-                        mStream.Write(decBuf, 0, decBuf.Length);
+                        var readBuffer = new byte[rest];
+                        var readAmount = fStream.Read(readBuffer, 0, rest);
+                        var decryptedBuffer = AAPakFileHeader.EncryptAes(readBuffer, _dbKey, true);
+                        mStream.Write(decryptedBuffer, 0, decryptedBuffer.Length);
                     }
 
                     fStream.Dispose();
@@ -934,29 +934,29 @@ public partial class MainForm : Form
                     fs = fStream;
                 }
 
-                var res = pak.AddFileFromStream(pakfn, fs, cTime, mTime, true, out pfi);
+                var res = Pak.AddFileFromStream(pakFileName, fs, cTime, mTime, true, out var pfi);
                 fs.Dispose();
                 if (res)
                 {
-                    MessageBox.Show("File:\r\n" + diskfn + "\r\n\r\nadded as:\r\n" + pfi.name);
+                    MessageBox.Show("File:\r\n" + diskFileName + "\r\n\r\nadded as:\r\n" + pfi.Name);
 
-                    if (pak.Folders.IndexOf(newpakfilepath) < 0)
+                    if (Pak.Folders.IndexOf(newPakFilePath) < 0)
                         // We added to a new folder
                         GenerateFolderViews();
 
-                    lbFolders.SelectedIndex = lbFolders.Items.IndexOf(newpakfilepath);
-                    tvFolders.SelectedNode = tvFolders.Nodes.Find(newpakfilepath, true)[0];
+                    lbFolders.SelectedIndex = lbFolders.Items.IndexOf(newPakFilePath);
+                    tvFolders.SelectedNode = tvFolders.Nodes.Find(newPakFilePath, true)[0];
 
-                    PopulateFilesList(newpakfilepath);
+                    PopulateFilesList(newPakFilePath);
                 }
                 else
                 {
-                    MessageBox.Show("Failed to add file: " + diskfn);
+                    MessageBox.Show("Failed to add file: " + diskFileName);
                 }
             }
             else
             {
-                MessageBox.Show("File not found: " + diskfn);
+                MessageBox.Show("File not found: " + diskFileName);
             }
         }
         else
@@ -964,8 +964,8 @@ public partial class MainForm : Form
             addDlg.Dispose();
         }
 
-        PopulateFilesList(currentFileViewFolder);
-        UpdateMM();
+        PopulateFilesList(_currentFileViewFolder);
+        UpdateMm();
     }
 
     private void MMFileClose_Click(object sender, EventArgs e)
@@ -978,11 +978,11 @@ public partial class MainForm : Form
         lFiles.Text = "";
         lFileCount.Text = "Closing pak";
         //lFileCount.Refresh();
-        pak.ClosePak();
+        Pak.ClosePak();
         lFileCount.Text = "Pak Closed";
         Cursor.Current = Cursors.Default;
         Application.UseWaitCursor = false;
-        UpdateMM();
+        UpdateMm();
         ShowFileInfo(null);
     }
 
@@ -1001,31 +1001,31 @@ public partial class MainForm : Form
 
         Application.UseWaitCursor = true;
         Cursor.Current = Cursors.WaitCursor;
-        if (pak != null) pak.ClosePak();
-        // Create and a new pakfile
-        pak = new AAPak(openGamePakDialog.FileName, false, true);
+        Pak?.ClosePak();
+        // Create and a new pakFile
+        Pak = new AAPak(openGamePakDialog.FileName, false, true);
         // TODO: Add Pak-type selector (specialized dialog box)
-        pak.ClosePak();
+        Pak.ClosePak();
         // Re-open it in read/write mode
         LoadPakFile(openGamePakDialog.FileName, false);
 
         Cursor.Current = Cursors.Default;
         Application.UseWaitCursor = false;
-        UpdateMM();
+        UpdateMm();
     }
 
     private void MMExportSelectedFolder_Click(object sender, EventArgs e)
     {
-        if (pak == null || !pak.IsOpen)
+        if (Pak == null || !Pak.IsOpen)
             return;
 
-        exportFolderDialog.Description = "Select a folder to where to export \r\n" + currentFileViewFolder;
-        exportFolderDialog.SelectedPath = Path.GetDirectoryName(pak._gpFilePath);
+        exportFolderDialog.Description = "Select a folder to where to export \r\n" + _currentFileViewFolder;
+        exportFolderDialog.SelectedPath = Path.GetDirectoryName(Pak.GpFilePath);
         if (exportFolderDialog.ShowDialog() != DialogResult.OK)
             return;
 
         if (MessageBox.Show(
-                "Are you sure you want to export \"" + currentFileViewFolder +
+                "Are you sure you want to export \"" + _currentFileViewFolder +
                 "\" and all of it's sub-folders ?\r\nAll files in destination will be overwritten !", "Export Folder",
                 MessageBoxButtons.YesNo) != DialogResult.Yes)
             return;
@@ -1034,10 +1034,10 @@ public partial class MainForm : Form
         Cursor.Current = Cursors.WaitCursor;
 
         var export = new ExportAllDlg();
-        export.pak = pak;
+        export.pak = Pak;
         export.TargetDir = exportFolderDialog.SelectedPath;
-        export.masterRoot = currentFileViewFolder + "/";
-        export.Text = "Export " + currentFileViewFolder;
+        export.masterRoot = _currentFileViewFolder + "/";
+        export.Text = "Export " + _currentFileViewFolder;
 
         try
         {
@@ -1050,22 +1050,22 @@ public partial class MainForm : Form
 
         Cursor.Current = Cursors.Default;
         Application.UseWaitCursor = false;
-        UpdateMM();
+        UpdateMm();
     }
 
     private void MMEditImportFiles_Click(object sender, EventArgs e)
     {
         using (var importFolder = new ImportFolderDlg())
         {
-            importFolder.ePakFolder.Text = currentFileViewFolder;
-            importFolder.eDiskFolder.Text = Path.GetDirectoryName(pak._gpFilePath);
-            importFolder.pak = pak;
+            importFolder.ePakFolder.Text = _currentFileViewFolder;
+            importFolder.eDiskFolder.Text = Path.GetDirectoryName(Pak.GpFilePath);
+            importFolder.pak = Pak;
             try
             {
                 if (importFolder.ShowDialog() == DialogResult.OK)
                 {
                     GenerateFolderViews();
-                    PopulateFilesList(currentFileViewFolder);
+                    PopulateFilesList(_currentFileViewFolder);
                 }
             }
             catch (Exception x)
@@ -1078,20 +1078,20 @@ public partial class MainForm : Form
             }
         }
 
-        UpdateMM();
+        UpdateMm();
     }
 
     private void MMVersionSourceCode_Click(object sender, EventArgs e)
     {
-        Process.Start(urlGitHub);
+        Process.Start(_urlGitHub);
     }
 
     private void MMExportDB_Click(object sender, EventArgs e)
     {
-        if (pak == null || !pak.IsOpen)
+        if (Pak == null || !Pak.IsOpen)
             return;
 
-        var d = currentFileViewFolder;
+        var d = _currentFileViewFolder;
         if (d != "") d += "/";
         d += lbFiles.SelectedItem.ToString();
         exportFileDialog.FileName = Path.GetFileName(d.Replace('/', Path.DirectorySeparatorChar));
@@ -1099,13 +1099,13 @@ public partial class MainForm : Form
         if (exportFileDialog.ShowDialog() != DialogResult.OK)
             return;
 
-        var pf = pak.ExportFileAsStream(d);
+        var pf = Pak.ExportFileAsStream(d);
 
         var fs = new FileStream(exportFileDialog.FileName, FileMode.Create);
         try
         {
             AAPakFileHeader.LastAesError = string.Empty;
-            if (AAPakFileHeader.EncryptStreamAes(pf, fs, dbKey, false))
+            if (AAPakFileHeader.EncryptStreamAes(pf, fs, _dbKey, false))
                 MessageBox.Show("ExportDB: Done");
             else
                 MessageBox.Show("Decryption failed:\r\n" + AAPakFileHeader.LastAesError, "Error");
@@ -1116,13 +1116,12 @@ public partial class MainForm : Form
         }
 
         fs.Dispose();
-        // ms.Dispose();
-        UpdateMM();
+        UpdateMm();
     }
 
     private void VisitDiscordToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        Process.Start(urlDiscord);
+        Process.Start(_urlDiscord);
     }
 
     private void MMExtraMakeMod_Click(object sender, EventArgs e)
@@ -1132,13 +1131,13 @@ public partial class MainForm : Form
         // Adding a executable as first file, and renaming that pak to .exe, would effectively create a executeable with the rest of the
         // Pak's data attached to it. If you also mark that executeable with a special tag that the executable knows to ignore, you can effectively
         // make a "self-extracting pak file" in the same way that the old Self Extractiong Zip files work, except, that this time, the executeable
-        // is INSIDE it's own pak and not just in front of it, so you don't even need to account for the offset where the data starts.
+        // is INSIDE it's own pak and not just in front of it, so you don't even need to account for the Offset where the data starts.
         // Pretty sure this was originally made by design, neat ^_^
 
-        using (var MakeModDlg = new MakeModForm())
+        using (var makeModDlg = new MakeModForm())
         {
-            MakeModDlg.mainPak = pak;
-            MakeModDlg.ShowDialog();
+            makeModDlg.mainPak = Pak;
+            makeModDlg.ShowDialog();
         }
     }
 
@@ -1151,14 +1150,14 @@ public partial class MainForm : Form
 
     private void LbExtraFiles_SelectedIndexChanged(object sender, EventArgs e)
     {
-        if (pak == null || !pak.IsOpen)
+        if (Pak == null || !Pak.IsOpen)
             return;
 
         lbFiles.Items.Clear();
         lFiles.Text = "";
-        var d = (sender as ListBox).SelectedIndex;
-        if (d >= 0 && d < pak.ExtraFiles.Count) ShowFileInfo(pak.ExtraFiles[d]);
-        UpdateMM();
+        var d = (sender as ListBox)?.SelectedIndex ?? -1;
+        if (d >= 0 && d < Pak.ExtraFiles.Count) ShowFileInfo(Pak.ExtraFiles[d]);
+        UpdateMm();
     }
 
     private bool HandleCommandLine()
@@ -1182,35 +1181,34 @@ public partial class MainForm : Form
             if (arg == "-o" || arg == "+o")
             {
                 i++; // take one arg
-                if (pak != null)
-                    pak.ClosePak();
+                Pak?.ClosePak();
                 LoadPakFile(arg1, false, false, true);
-                if (pak == null || !pak.IsOpen) cmdErrors += "Failed to open for r/w: " + arg1 + "\r\n";
+                if (Pak == null || !Pak.IsOpen) cmdErrors += "Failed to open for r/w: " + arg1 + "\r\n";
             }
             else if (arg == "+c")
             {
                 i++; // take one arg
 
-                if (pak != null)
-                    pak.ClosePak();
+                if (Pak != null)
+                    Pak.ClosePak();
                 // Create and a new pakfile
-                pak = new AAPak(arg1, false, true);
-                if (pak == null || !pak.IsOpen)
+                Pak = new AAPak(arg1, false, true);
+                if (Pak == null || !Pak.IsOpen)
                 {
                     cmdErrors += "Failed to created file: " + arg1 + "\r\n";
                     continue;
                 }
 
-                pak.ClosePak();
+                Pak.ClosePak();
                 // Re-open it in read/write mode
                 LoadPakFile(arg1, false, false, true);
 
-                if (pak == null || !pak.IsOpen) cmdErrors += "Failed to re-open created file: " + arg1 + "\r\n";
+                if (Pak == null || !Pak.IsOpen) cmdErrors += "Failed to re-open created file: " + arg1 + "\r\n";
             }
             else if (arg == "+sfx")
             {
                 i++;
-                if (pak == null || !pak.IsOpen || pak.ReadOnly)
+                if (Pak == null || !Pak.IsOpen || Pak.ReadOnly)
                 {
                     cmdErrors +=
                         "Pak file needs to be opened in read/write mode to be able to add a mod installer !\r\n";
@@ -1220,23 +1218,23 @@ public partial class MainForm : Form
                     // add MODSFX
                     var sfxStream = new MemoryStream(Resources.AAModSFX);
                     // We will be possibly be editing the icon, so it's a good idea to have some spare space here
-                    if (!pak.AddFileFromStream(MakeModForm.SFXInfoFileName, sfxStream, DateTime.Now, DateTime.Now, true,
+                    if (!Pak.AddFileFromStream(MakeModForm.SfxInfoFileName, sfxStream, DateTime.Now, DateTime.Now, true,
                             out _)) cmdErrors += "Failed to add SFX executable\r\n";
 
                     if (File.Exists(arg1))
                     {
-                        if (!pak.AddFileFromFile(arg1, MakeModForm.ModInfoFileName, false))
+                        if (!Pak.AddFileFromFile(arg1, MakeModForm.ModInfoFileName, false))
                             cmdErrors += "Failed to add SFX description file: \r\n" + arg1;
                     }
                     else
                     {
-                        // Consider the provided arg as a name
+                        // Consider the provided arg as a Name
                         var modDescStream = new MemoryStream();
                         var descBytes = Encoding.UTF8.GetBytes(arg1);
                         modDescStream.Write(descBytes, 0, descBytes.Length);
                         modDescStream.Position = 0;
 
-                        if (!pak.AddFileFromStream(MakeModForm.ModInfoFileName, modDescStream, DateTime.Now,
+                        if (!Pak.AddFileFromStream(MakeModForm.ModInfoFileName, modDescStream, DateTime.Now,
                                 DateTime.Now, false, out _))
                             cmdErrors += "Failed to add SFX description text: \r\n" + arg1;
                     }
@@ -1245,78 +1243,76 @@ public partial class MainForm : Form
             else if (arg == "+f")
             {
                 i += 2; // take two args
-                if (pak == null || !pak.IsOpen || pak.ReadOnly)
+                if (Pak == null || !Pak.IsOpen || Pak.ReadOnly)
                 {
                     cmdErrors += "Pak file needs to be opened in read/write mode to be able to add a file !\r\n";
                 }
                 else
                 {
-                    if (!pak.AddFileFromFile(arg1, arg2, false))
+                    if (!Pak.AddFileFromFile(arg1, arg2, false))
                         cmdErrors += "Failed to add file:\r\n" + arg1 + "\r\n=>" + arg2 + "\r\n";
                 }
             }
             else if (arg == "-f")
             {
                 i++; // take one arg
-                if (pak == null || !pak.IsOpen || pak.ReadOnly)
+                if (Pak == null || !Pak.IsOpen || Pak.ReadOnly)
                 {
                     cmdErrors += "Pak file needs to be opened in read/write mode to be able to delete a file !\r\n";
                 }
                 else
                 {
-                    if (!pak.DeleteFile(arg1))
+                    if (!Pak.DeleteFile(arg1))
                         // Technically, this could never fail as it only can return false if it's in read-only
                         cmdErrors += "Failed to delete file:\r\n" + arg1;
                 }
             }
             else if (arg == "-s" || arg == "+s")
             {
-                if (pak == null || !pak.IsOpen || pak.ReadOnly)
+                if (Pak == null || !Pak.IsOpen || Pak.ReadOnly)
                     cmdErrors += "Pak file needs to be opened in read/write mode to be able save it !\r\n";
                 else
-                    pak.SaveHeader();
+                    Pak.SaveHeader();
             }
             else if (arg == "+d")
             {
                 i += 2; // take two args
-                if (pak == null || !pak.IsOpen || pak.ReadOnly)
+                if (Pak == null || !Pak.IsOpen || Pak.ReadOnly)
                     cmdErrors += "Pak file needs to be opened in read/write mode to be able to add a file !\r\n";
                 else
-                    using (var importFolder = new ImportFolderDlg())
+                {
+                    using var importFolder = new ImportFolderDlg();
+                    
+                    importFolder.pak = Pak;
+                    importFolder.InitAutoRun(arg1, arg2);
+                    try
                     {
-                        importFolder.pak = pak;
-                        importFolder.InitAutoRun(arg1, arg2);
-                        try
-                        {
-                            if (importFolder.ShowDialog() != DialogResult.OK)
-                                cmdErrors += "Possible errors while adding directory\r\n" + arg1 + "\r\n=>\r\n" + arg2;
-                        }
-                        catch (Exception x)
-                        {
-                            cmdErrors += "EXCEPTION: " + x.Message + " \r\nPossible file corruption !";
-                        }
+                        if (importFolder.ShowDialog() != DialogResult.OK)
+                            cmdErrors += "Possible errors while adding directory\r\n" + arg1 + "\r\n=>\r\n" + arg2;
                     }
+                    catch (Exception x)
+                    {
+                        cmdErrors += "EXCEPTION: " + x.Message + " \r\nPossible file corruption !";
+                    }
+                }
             }
             else if (arg == "-d")
             {
                 i += 1; // take one arg
-                if (pak == null || !pak.IsOpen || pak.ReadOnly)
+                if (Pak == null || !Pak.IsOpen || Pak.ReadOnly)
                     cmdErrors += "Pak file needs to be opened in read/write mode to be able to delete a file !\r\n";
                 else
                     // Delete the files
                     try
                     {
-                        var filesDeleted = 0;
                         var delDir = arg1.ToLower();
                         if (delDir.Last() != '/')
                             delDir += '/';
-                        for (var n = pak.Files.Count - 1; n >= 0; n--)
-                            //foreach(AAPakFileInfo pfi in pak.files)
+                        for (var n = Pak.Files.Count - 1; n >= 0; n--)
                         {
-                            var pfi = pak.Files[n];
-                            if (pfi.name.ToLower().StartsWith(delDir))
-                                if (pak.DeleteFile(pfi))
-                                    filesDeleted++;
+                            var pfi = Pak.Files[n];
+                            if (pfi.Name.ToLower().StartsWith(delDir))
+                                Pak.DeleteFile(pfi);
                         }
                     }
                     catch (Exception x)
@@ -1326,10 +1322,10 @@ public partial class MainForm : Form
             }
             else if (arg == "-x" || arg == "+x")
             {
-                if (pak == null || !pak.IsOpen)
+                if (Pak == null || !Pak.IsOpen)
                     cmdErrors += "Pak file needs to be opened before you can close it !\r\n";
                 else
-                    pak.ClosePak();
+                    Pak.ClosePak();
                 if (arg == "+x")
                     closeWhenDone = true;
             }
@@ -1341,10 +1337,10 @@ public partial class MainForm : Form
             else if (arg == "-csv" || arg == "+csv")
             {
                 i++; // take one arg
-                if (pak == null || !pak.IsOpen)
+                if (Pak == null || !Pak.IsOpen)
                     cmdErrors += "Pak file needs to be opened to be able generate a CSV file !\r\n";
                 else
-                    CreateCSVFile(arg1);
+                    CreateCsvFile(arg1);
             }
             else if (arg == "-h" || arg == "--h" || arg == "--help" || arg == "-help" || arg == "-?" || arg == "--?" ||
                      arg == "/?" || arg == "/help")
@@ -1356,10 +1352,10 @@ public partial class MainForm : Form
             else if (File.Exists(arg))
             {
                 // Open file in read-only mode if nothing is specified and it's a valid filename
-                if (pak != null)
-                    pak.ClosePak();
+                if (Pak != null)
+                    Pak.ClosePak();
                 LoadPakFile(arg, true, true, true);
-                if (pak == null || !pak.IsOpen) cmdErrors += "Failed to open: " + arg + "\r\n";
+                if (Pak == null || !Pak.IsOpen) cmdErrors += "Failed to open: " + arg + "\r\n";
             }
             else
             {
@@ -1370,7 +1366,7 @@ public partial class MainForm : Form
         if (cmdErrors != string.Empty)
             MessageBox.Show(cmdErrors, "Command-Line Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
 
-        if (pak != null && pak.IsOpen) GenerateFolderViews();
+        if (Pak != null && Pak.IsOpen) GenerateFolderViews();
 
         Application.UseWaitCursor = false;
         Cursor.Current = Cursors.Default;
@@ -1380,15 +1376,16 @@ public partial class MainForm : Form
     private void lfiName_Click(object sender, EventArgs e)
     {
         // copy to clipboard
-        Clipboard.SetText((sender as Label).Text);
+        if ((sender is Label label) && (label.Text != null))
+            Clipboard.SetText(label.Text);
     }
 
     private void manualEditFileMD5ToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        if (pak == null || !pak.IsOpen)
+        if (Pak == null || !Pak.IsOpen)
             return;
 
-        if (pak.ReadOnly)
+        if (Pak.ReadOnly)
             return;
 
         if (lbFiles.SelectedIndex < 0)
@@ -1397,36 +1394,35 @@ public partial class MainForm : Form
             return;
         }
 
-        var d = currentFileViewFolder;
+        var d = _currentFileViewFolder;
         if (d != "") d += "/";
         d += lbFiles.SelectedItem.ToString();
 
-        ref var pfi = ref pak.NullAAPakFileInfo;
-        if (pak.GetFileByName(d, ref pfi))
+        if (Pak.GetFileByName(d, out var pfi))
             using (var fp = new FilePropForm())
             {
                 fp.pfi = pfi;
                 fp.ResetFileInfo();
                 if (fp.ShowDialog() == DialogResult.OK)
                 {
-                    pfi.name = fp.newInfo.name;
-                    pfi.size = fp.newInfo.size;
-                    pfi.sizeDuplicate = fp.newInfo.sizeDuplicate;
-                    pfi.paddingSize = fp.newInfo.paddingSize;
-                    fp.newInfo.md5.CopyTo(pfi.md5, 0);
-                    pfi.createTime = fp.newInfo.createTime;
-                    pfi.modifyTime = fp.newInfo.modifyTime;
-                    pfi.offset = fp.newInfo.offset;
-                    pfi.dummy1 = fp.newInfo.dummy1;
-                    pfi.dummy2 = fp.newInfo.dummy2;
-                    pak.IsDirty = true;
+                    pfi.Name = fp.newInfo.Name;
+                    pfi.Size = fp.newInfo.Size;
+                    pfi.SizeDuplicate = fp.newInfo.SizeDuplicate;
+                    pfi.PaddingSize = fp.newInfo.PaddingSize;
+                    fp.newInfo.Md5.CopyTo(pfi.Md5, 0);
+                    pfi.CreateTime = fp.newInfo.CreateTime;
+                    pfi.ModifyTime = fp.newInfo.ModifyTime;
+                    pfi.Offset = fp.newInfo.Offset;
+                    pfi.Dummy1 = fp.newInfo.Dummy1;
+                    pfi.Dummy2 = fp.newInfo.Dummy2;
+                    Pak.IsDirty = true;
                     ShowFileInfo(pfi);
                 }
             }
         else
             MessageBox.Show("ERROR: No file");
 
-        UpdateMM();
+        UpdateMm();
     }
 
     private void MMExtraTryOpenUsingKeyList_Click(object sender, EventArgs e)
@@ -1456,7 +1452,7 @@ public partial class MainForm : Form
                         "\r\n\r\nDo you want to save this key at the game_pak location ?", "Valid key found",
                         MessageBoxButtons.YesNo) == DialogResult.Yes)
                 {
-                    var keyfile = Path.ChangeExtension(pak._gpFilePath, ".key");
+                    var keyfile = Path.ChangeExtension(pak.GpFilePath, ".key");
                     File.WriteAllBytes(keyfile, key);
                     MessageBox.Show("Saved key as " + keyfile);
                 }
@@ -1479,7 +1475,7 @@ public partial class MainForm : Form
 
     private void MMExtraMD5All_Click(object sender, EventArgs e)
     {
-        if (pak == null || !pak.IsOpen)
+        if (Pak == null || !Pak.IsOpen)
             return;
 
         var res = MessageBox.Show(
@@ -1493,7 +1489,7 @@ public partial class MainForm : Form
 
         using (var rehashDlg = new ReMD5Dlg())
         {
-            rehashDlg.pak = pak;
+            rehashDlg.pak = Pak;
             rehashDlg.allFiles = res == DialogResult.Yes;
             rehashDlg.ShowDialog();
         }
@@ -1503,47 +1499,50 @@ public partial class MainForm : Form
     {
     }
 
-    public class fileListEntry : object, IEquatable<fileListEntry>, IComparable<fileListEntry>
+    public class FileListEntry : object, IEquatable<FileListEntry>, IComparable<FileListEntry>
     {
         public string DisplayName;
-        public bool isDeletedFile;
-        public AAPakFileInfo pfi;
+        public bool IsDeletedFile;
+        public AAPakFileInfo Pfi;
 
-        public int CompareTo(fileListEntry comparePart)
+        public int CompareTo(FileListEntry comparePart)
         {
             // A null value means that this object is greater.
             if (comparePart == null)
                 return 1;
 
-            return pfi.name.CompareTo(comparePart.pfi.name);
+            return string.Compare(Pfi.Name, comparePart.Pfi.Name, StringComparison.InvariantCulture);
         }
 
-        public bool Equals(fileListEntry other)
+        public bool Equals(FileListEntry other)
         {
-            if (other == null) return false;
-            return pfi.name.Equals(other.pfi.name);
+            return other != null && Pfi.Name.Equals(other.Pfi.Name);
         }
 
         public override string ToString()
         {
             if (DisplayName != string.Empty)
                 return DisplayName;
-            if (pfi != null)
-                return pfi.name;
+            if (Pfi != null)
+                return Pfi.Name;
             return "<noname>";
         }
 
         public override bool Equals(object obj)
         {
             if (obj == null) return false;
-            var objAsPart = obj as fileListEntry;
-            if (objAsPart == null) return false;
-            return Equals(objAsPart);
+            var objAsPart = obj as FileListEntry;
+            return objAsPart != null && Equals(objAsPart);
         }
 
         public override int GetHashCode()
         {
             return base.GetHashCode();
         }
+    }
+
+    private void Panel1_Paint(object sender, PaintEventArgs e)
+    {
+        throw new System.NotImplementedException();
     }
 }

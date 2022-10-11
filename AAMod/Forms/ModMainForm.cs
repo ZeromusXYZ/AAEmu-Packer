@@ -248,10 +248,9 @@ namespace AAMod.Forms
         private void ReadNewFilesFromRestore()
         {
             RestoreNewFilesList.Clear();
-            var rnfl = restorepak.NullAAPakFileInfo;
-            if (restorepak.GetFileByName(ModNewFilesFileName, ref rnfl))
+            if (restorepak.GetFileByName(ModNewFilesFileName, out var rnFileInfo))
             {
-                var rf = restorepak.ExportFileAsStream(rnfl);
+                var rf = restorepak.ExportFileAsStream(rnFileInfo);
                 var s = AAPak.StreamToString(rf);
                 RestoreNewFilesList.AddRange(s.Split('\n').ToArray());
             }
@@ -293,7 +292,7 @@ namespace AAMod.Forms
             // Get file list from mod pak
             FilesToMod.Clear();
             foreach (var fi in modpak.Files)
-                if (fi.name.StartsWith(ModFileFolderName))
+                if (fi.Name.StartsWith(ModFileFolderName))
                 {
                     // Don't include own mod files
                 }
@@ -307,10 +306,9 @@ namespace AAMod.Forms
             FilesAddedWithInstall.Clear();
             foreach (var fi in FilesToMod)
             {
-                var gfi = gamepak.NullAAPakFileInfo;
-                if (gamepak.GetFileByName(fi.name, ref gfi))
+                if (gamepak.GetFileByName(fi.Name, out var gfi))
                 {
-                    if (fi.size != gfi.size || !fi.md5.SequenceEqual(gfi.md5)) FilesToInstall.Add(fi);
+                    if (fi.Size != gfi.Size || !fi.Md5.SequenceEqual(gfi.Md5)) FilesToInstall.Add(fi);
                 }
                 else
                 {
@@ -321,7 +319,7 @@ namespace AAMod.Forms
 
             FilesToUnInstall.Clear();
             foreach (var fi in FilesToMod)
-                if (restorepak.FileExists(fi.name))
+                if (restorepak.FileExists(fi.Name))
                     FilesToUnInstall.Add(fi);
 
             if (FilesToInstall.Count > 0)
@@ -352,25 +350,24 @@ namespace AAMod.Forms
             lInstallInfo.Text = "Creating restore files";
             foreach (var fi in FilesToInstall)
             {
-                // If file exists in gamepak, make a backup
-                var gamefi = gamepak.NullAAPakFileInfo;
-                if (gamepak.GetFileByName(fi.name, ref gamefi))
+                // If file exists in game_pak, make a backup
+                if (gamepak.GetFileByName(fi.Name, out var gamefi))
                 {
-                    var fileBackupStream = gamepak.ExportFileAsStream(fi.name);
+                    var fileBackupStream = gamepak.ExportFileAsStream(fi.Name);
                     fileBackupStream.Position = 0;
                     var restoreFileInfo = restorepak.NullAAPakFileInfo;
-                    if (!restorepak.AddFileFromStream(fi.name, fileBackupStream,
-                            DateTime.FromFileTimeUtc(gamefi.createTime), DateTime.FromFileTimeUtc(gamefi.modifyTime),
+                    if (!restorepak.AddFileFromStream(fi.Name, fileBackupStream,
+                            DateTime.FromFileTimeUtc(gamefi.CreateTime), DateTime.FromFileTimeUtc(gamefi.ModifyTime),
                             false,
-                            out restoreFileInfo)) MessageBox.Show("Error making backup of " + fi.name);
+                            out restoreFileInfo)) MessageBox.Show("Error making backup of " + fi.Name);
                 }
 
-                var fileModStream = modpak.ExportFileAsStream(fi.name);
+                var fileModStream = modpak.ExportFileAsStream(fi.Name);
                 fileModStream.Position = 0;
                 var newModFile = gamepak.NullAAPakFileInfo;
-                if (!gamepak.AddFileFromStream(fi.name, fileModStream, DateTime.FromFileTimeUtc(fi.createTime),
-                        DateTime.FromFileTimeUtc(fi.modifyTime), false, out newModFile))
-                    MessageBox.Show("Error modding file " + fi.name);
+                if (!gamepak.AddFileFromStream(fi.Name, fileModStream, DateTime.FromFileTimeUtc(fi.CreateTime),
+                        DateTime.FromFileTimeUtc(fi.ModifyTime), false, out newModFile))
+                    MessageBox.Show("Error modding file " + fi.Name);
 
                 pb.PerformStep();
                 pb.Refresh();
@@ -386,8 +383,8 @@ namespace AAMod.Forms
             ReadNewFilesFromRestore();
             // Add newly added files to the newfiles.txt
             foreach (var fi in FilesAddedWithInstall)
-                if (RestoreNewFilesList.IndexOf(fi.name) < 0)
-                    RestoreNewFilesList.Add(fi.name);
+                if (RestoreNewFilesList.IndexOf(fi.Name) < 0)
+                    RestoreNewFilesList.Add(fi.Name);
             WriteNewFilesForRestore();
             restorepak.SaveHeader();
             pb.Value = pb.Maximum;
@@ -413,17 +410,16 @@ namespace AAMod.Forms
             foreach (var fi in FilesToMod)
             {
                 // If file exists in gamepak, make a backup
-                var rfi = restorepak.NullAAPakFileInfo;
-                if (restorepak.GetFileByName(fi.name, ref rfi))
+                if (restorepak.GetFileByName(fi.Name, out var rFileInfo))
                 {
-                    var fileRestoreStream = restorepak.ExportFileAsStream(fi.name);
+                    var fileRestoreStream = restorepak.ExportFileAsStream(fi.Name);
                     fileRestoreStream.Position = 0;
                     var restoreFileInfo = gamepak.NullAAPakFileInfo;
-                    if (!gamepak.AddFileFromStream(fi.name, fileRestoreStream, DateTime.FromFileTimeUtc(rfi.createTime),
-                            DateTime.FromFileTimeUtc(rfi.modifyTime), false, out restoreFileInfo))
-                        MessageBox.Show("Error restoring file " + fi.name);
+                    if (!gamepak.AddFileFromStream(fi.Name, fileRestoreStream, DateTime.FromFileTimeUtc(rFileInfo.CreateTime),
+                            DateTime.FromFileTimeUtc(rFileInfo.ModifyTime), false, out restoreFileInfo))
+                        MessageBox.Show("Error restoring file " + fi.Name);
                     else
-                        restorepak.DeleteFile(rfi);
+                        restorepak.DeleteFile(rFileInfo);
                 }
 
                 pb.PerformStep();
@@ -439,13 +435,12 @@ namespace AAMod.Forms
 
                 foreach (var fn in FilesToMod)
                 {
-                    if (RestoreNewFilesList.IndexOf(fn.name) < 0)
+                    if (RestoreNewFilesList.IndexOf(fn.Name) < 0)
                         continue;
-                    var delFileInfo = gamepak.NullAAPakFileInfo;
-                    if (gamepak.GetFileByName(fn.name, ref delFileInfo))
+                    if (gamepak.GetFileByName(fn.Name, out var delFileInfo))
                     {
                         gamepak.DeleteFile(delFileInfo);
-                        RestoreNewFilesList.Remove(fn.name);
+                        RestoreNewFilesList.Remove(fn.Name);
                     }
                 }
 

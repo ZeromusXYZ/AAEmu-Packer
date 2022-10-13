@@ -4,6 +4,9 @@ using System.IO;
 using System.Linq;
 using AAPakCLI.Properties;
 using AAPacker;
+using System.Globalization;
+using AAPakEditor.Helpers;
+using Newtonsoft.Json;
 
 namespace AAPakCLI
 {
@@ -133,6 +136,49 @@ namespace AAPakCLI
             File.WriteAllLines(filename, sl);
         }
 
+        private static void LoadCustomReaders(string userFolder)
+        {
+            AAPak.ReaderPool.Clear();
+
+            var jsonSettings = new JsonSerializerSettings
+            {
+                Culture = CultureInfo.InvariantCulture,
+                Formatting = Formatting.Indented,
+            };
+            jsonSettings.Converters.Add(new ByteArrayHexConverter());
+
+            var readerSettingsFileName = Path.Combine(userFolder, "readers.json");
+            try
+            {
+                if (File.Exists(readerSettingsFileName))
+                {
+                    var data = JsonConvert.DeserializeObject<List<AAPakFileFormatReader>>(File.ReadAllText(readerSettingsFileName), jsonSettings);
+                    if (data?.Count > 0)
+                        foreach (var r in data)
+                            AAPak.ReaderPool.Add(r);
+                }
+            }
+            catch
+            {
+                // Ignore
+            }
+
+            // Add only default in case of errors
+            if (AAPak.ReaderPool.Count <= 0)
+            {
+                AAPak.ReaderPool.Add(new AAPakFileFormatReader(true));
+                // Write default file to user's settings
+                try
+                {
+                    Directory.CreateDirectory(userFolder);
+                    File.WriteAllText(readerSettingsFileName, JsonConvert.SerializeObject(AAPak.ReaderPool, jsonSettings));
+                }
+                catch
+                {
+                    // Ignore
+                }
+            }
+        }
 
         private static bool HandleCommandLine()
         {
@@ -425,6 +471,8 @@ namespace AAPakCLI
         {
             try
             {
+                LoadCustomReaders(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "AAPakEditor"));
+
                 HandleCommandLine();
             }
             catch (Exception x)

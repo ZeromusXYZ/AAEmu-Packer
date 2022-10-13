@@ -103,6 +103,50 @@ public partial class MainForm : Form
         UpdateMm();
     }
 
+    private void LoadCustomReaders(string userFolder)
+    {
+        AAPak.ReaderPool.Clear(); 
+        
+        var jsonSettings = new JsonSerializerSettings
+        {
+            Culture = CultureInfo.InvariantCulture,
+            Formatting = Formatting.Indented,
+        };
+        jsonSettings.Converters.Add(new ByteArrayHexConverter());
+
+        var readerSettingsFileName = Path.Combine(userFolder, "readers.json");
+        try
+        {
+            if (File.Exists(readerSettingsFileName))
+            {
+                var data = JsonConvert.DeserializeObject<List<AAPakFileFormatReader>>(File.ReadAllText(readerSettingsFileName), jsonSettings);
+                if (data?.Count > 0)
+                    foreach (var r in data)
+                        AAPak.ReaderPool.Add(r);
+            }
+        }
+        catch
+        {
+            // Ignore
+        }
+
+        // Add only default in case of errors
+        if (AAPak.ReaderPool.Count <= 0)
+        {
+            AAPak.ReaderPool.Add(new AAPakFileFormatReader(true));
+            // Write default file to user's settings
+            try
+            {
+                Directory.CreateDirectory(userFolder);
+                File.WriteAllText(readerSettingsFileName, JsonConvert.SerializeObject(AAPak.ReaderPool, jsonSettings));
+            }
+            catch
+            {
+                // Ignore
+            }
+        }
+    }
+
     private void MainForm_Load(object sender, EventArgs e)
     {
         _baseTitle = Text;
@@ -184,46 +228,7 @@ public partial class MainForm : Form
 
         */
 
-        var jsonSettings = new JsonSerializerSettings
-        {
-            Culture = CultureInfo.InvariantCulture,
-            Formatting = Formatting.Indented,
-        };
-        jsonSettings.Converters.Add(new ByteArrayHexConverter());
-
-        var readerSettingsFileName = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-            "AAPakEditor",
-            "readers.json");
-        try
-        {
-            if (File.Exists(readerSettingsFileName))
-            {
-                var data = JsonConvert.DeserializeObject<List<AAPakFileFormatReader>>(File.ReadAllText(readerSettingsFileName), jsonSettings);
-                if (data?.Count > 0)
-                    foreach (var r in data)
-                        AAPak.ReaderPool.Add(r);
-            }
-        }
-        catch
-        {
-            // Ignore
-        }
-
-        // Add only default in case of errors
-        if (AAPak.ReaderPool.Count <= 0)
-        {
-            AAPak.ReaderPool.Add(new AAPakFileFormatReader(true));
-            // Write default file to user's settings
-            try
-            {
-                Directory.CreateDirectory(Path.GetDirectoryName(readerSettingsFileName));
-                File.WriteAllText(readerSettingsFileName, JsonConvert.SerializeObject(AAPak.ReaderPool, jsonSettings));
-            }
-            catch
-            {
-                // Ignore
-            }
-        }
+        LoadCustomReaders(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "AAPakEditor"));
 
         UpdateMm();
         ShowFileInfo(null);
@@ -1362,17 +1367,39 @@ public partial class MainForm : Form
     {
         // Basically, what we'll make here, is just a simple pak file, but the first file added is going to be our modding tool's executable
         // Because of the way that XL's pak file format works, it's not encrypting or compressing the files.
-        // Adding a executable as first file, and renaming that pak to .exe, would effectively create a executeable with the rest of the
-        // Pak's data attached to it. If you also mark that executeable with a special tag that the executable knows to ignore, you can effectively
-        // make a "self-extracting pak file" in the same way that the old Self Extractiong Zip files work, except, that this time, the executeable
+        // Adding a executable as first file, and renaming that pak to .exe, would effectively create a executable with the rest of the
+        // Pak's data attached to it. If you also mark that executable with a special tag that the executable knows to ignore, you can effectively
+        // make a "self-extracting pak file" in the same way that the old Self Extracting Zip files work, except, that this time, the executable
         // is INSIDE it's own pak and not just in front of it, so you don't even need to account for the Offset where the data starts.
         // Pretty sure this was originally made by design, neat ^_^
 
-        using (var makeModDlg = new MakeModForm())
+        if ((Pak == null) || (Pak.IsOpen == false) || (Pak.IsVirtual == true))
         {
-            makeModDlg.mainPak = Pak;
-            makeModDlg.ShowDialog();
+            MessageBox.Show("You must have a pak file open to be able to create a Mod or Patch", "Create Mod or Patch",
+                MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return;
         }
+
+        // Warn user if not using a default pak type
+        if (!((Pak.PakType == PakFileType.Classic) || (Pak.Reader?.IsDefault == true)))
+        {
+            if (MessageBox.Show(
+                    "Your currently opened a pak file that is not in the default format!\r\n" +
+                    "\r\n" +
+                    "If you want to make a SFX Mod Installer, then take note that it only supports the default format.\r\n" +
+                    "Using a custom reader is not possible with this installer.\r\n" +
+                    "The resulting mod might not work on it's intended target pak file!\r\n" +
+                    "If you are only making a manual patch file, this should not be a issue.\r\n" +
+                    "\r\n" +
+                    "Are you sure you want to continue?",
+                    "Create Mod or Patch",
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
+                return;
+        }
+
+        using var makeModDlg = new MakeModForm();
+        makeModDlg.mainPak = Pak;
+        makeModDlg.ShowDialog();
     }
 
     private void MainForm_Shown(object sender, EventArgs e)

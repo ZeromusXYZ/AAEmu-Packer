@@ -7,6 +7,9 @@ using System.Windows.Forms;
 using AAMod.Properties;
 using AAPacker;
 
+// NOTE: For AAMod we actually directly link the related AAPak files into the project as to be able
+// to create a standalone .exe. As a side effect, custom readers from json are not supported.
+
 namespace AAMod.Forms
 {
     public partial class ModMainForm : Form

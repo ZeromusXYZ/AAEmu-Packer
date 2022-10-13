@@ -1,4 +1,6 @@
-﻿namespace AAPacker
+﻿using System.Collections.Generic;
+
+namespace AAPacker
 {
     public enum AAPakFileHeaderElement
     {
@@ -31,6 +33,7 @@
             if (initializeWithDefaults)
             {
                 ReaderName = "Default";
+                IsDefault = true;
                 HeaderEncryptionKey = XlGamesKey;
                 HeaderBytes = new byte[] { 0x57, 0x49, 0x42, 0x4F };
                 ReadOrder = new()
@@ -73,6 +76,11 @@
         /// Name of this reader
         /// </summary>
         public string ReaderName { get; set; } = "None";
+
+        /// <summary>
+        /// Marks if this Reader has been created with initializeWithDefaults enabled
+        /// </summary>
+        public bool IsDefault { get; private set; }
 
         /// <summary>
         /// Encryption Key to use for header data

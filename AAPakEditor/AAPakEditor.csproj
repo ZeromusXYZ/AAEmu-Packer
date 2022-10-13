@@ -213,10 +213,6 @@
     <None Include="res\mod_example.png" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\AAMod\AAMod.csproj">
-      <Project>{7fa9dde6-4799-4269-9c2d-f5adf66f10ac}</Project>
-      <Name>AAMod</Name>
-    </ProjectReference>
     <ProjectReference Include="..\AAPacker\AAPacker.csproj">
       <Project>{66655932-62c0-44f6-a0b9-788e386751df}</Project>
       <Name>AAPacker</Name>

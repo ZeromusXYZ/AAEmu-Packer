@@ -2,10 +2,8 @@
 {
     public enum PakFileType
     {
-        Custom,
-        TypeA,
-        TypeB,
+        Reader,
+        Classic,
         Csv,
-        TypeF
     }
 }

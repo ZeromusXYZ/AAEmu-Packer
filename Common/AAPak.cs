@@ -14,6 +14,8 @@ namespace AAPacker
         /// </summary>
         public AAPakFileFormatReader Reader { get; set; }
 
+        public static List<AAPakFileFormatReader> ReaderPool { get; set; } = new() { new AAPakFileFormatReader(true) };
+
         /// <summary>
         ///     Points to this pakFile's header
         /// </summary>
@@ -75,17 +77,22 @@ namespace AAPacker
         /// <summary>
         ///     Which pak style is being used
         /// </summary>
-        public PakFileType PakType { get; set; } = PakFileType.TypeA;
+        public PakFileType PakType { get; set; } = PakFileType.Classic;
 
         /// <summary>
-        /// Trigger on progression
+        /// Flag to enabled automatic MD5 recalculations when adding or replacing a file. Enabled by default.
+        /// </summary>
+        public bool AutoUpdateMd5WhenAdding { get; set; } = true;
+
+        /// <summary>
+        /// Trigger Event for OnProgress
         /// </summary>
         public event AAPakNotify OnProgress ;
 
         /// <summary>
         /// Defines how many files reading from FAT are skipped between OnProgress events
         /// </summary>
-        public int OnProgressFATFileInterval { get; set; } = 1000;
+        public int OnProgressFATFileInterval { get; set; } = 10000;
 
         /// <summary>
         ///     Creates and/or opens a game_pak file
@@ -98,7 +105,7 @@ namespace AAPacker
         /// </param>
         public AAPak(string filePath, bool openAsReadOnly = true, bool createAsNewPak = false)
         {
-            Reader = new AAPakFileFormatReader();
+            // Reader = new AAPakFileFormatReader(true);
             Header = new AAPakFileHeader(this);
             if (filePath != "")
             {
@@ -347,7 +354,7 @@ namespace AAPacker
 
             if (Header.IsValid)
             {
-                // Only allow editing for TypeA
+                // Only allow editing for Classic
                 // if (PakType != PakFileType.PakTypeA) readOnly = true;
                 Header.LoadRawFAT();
                 Header.ReadFileTable();
@@ -721,12 +728,16 @@ namespace AAPacker
             pfi.SizeDuplicate = pfi.Size;
             // Calculate new Padding Size
             pfi.PaddingSize = (int)(endPosition - pfi.Size - pfi.Offset);
+
             // Recalculate the MD5 hash
-            UpdateMd5(pfi); // TODO: optimize this to calculate WHILE we are copying the stream
+            // TODO: optimize this to calculate WHILE we are copying the stream
+            if (AutoUpdateMd5WhenAdding)
+                UpdateMd5(pfi);
+
             pfi.ModifyTime = modifyTime.ToFileTimeUtc();
 
-            if (PakType == PakFileType.TypeB)
-                pfi.Dummy1 = 0x80000000;
+            pfi.Dummy1 = Reader?.DefaultDummy1 ?? 0;
+            pfi.Dummy2 = Reader?.DefaultDummy2 ?? 0;
 
             // Mark File Table as dirty
             IsDirty = true;
@@ -762,8 +773,8 @@ namespace AAPacker
                 eFile.SizeDuplicate = eFile.Size;
                 eFile.PaddingSize = 0;
                 eFile.Md5 = new byte[16];
-                if (PakType == PakFileType.TypeB)
-                    eFile.Dummy1 = 0x80000000;
+                eFile.Dummy1 = Reader?.DefaultDummy1 ?? 0;
+                eFile.Dummy2 = Reader?.DefaultDummy2 ?? 0;
 
                 ExtraFiles.Add(eFile);
 
@@ -821,8 +832,8 @@ namespace AAPacker
             newFile.ModifyTime = modifyTime.ToFileTimeUtc();
             newFile.PaddingSize = 0;
             newFile.Md5 = new byte[16];
-            if (PakType == PakFileType.TypeB)
-                newFile.Dummy1 = 0x80000000;
+            newFile.Dummy1 = Reader?.DefaultDummy1 ?? 0;
+            newFile.Dummy2 = Reader?.DefaultDummy2 ?? 0;
 
             // check if we have "unused" space in extraFiles that we can use
             for (var i = 0; i < ExtraFiles.Count; i++)
@@ -861,9 +872,12 @@ namespace AAPacker
             sourceStream.Position = 0;
             sourceStream.CopyTo(GpFileStream);
 
-            if (addedAtTheEnd) Header.FirstFileInfoOffset = newFile.Offset + newFile.Size + newFile.PaddingSize;
+            if (addedAtTheEnd) 
+                Header.FirstFileInfoOffset = newFile.Offset + newFile.Size + newFile.PaddingSize;
 
-            UpdateMd5(newFile); // TODO: optimize this to calculate WHILE we are copying the stream
+            // TODO: optimize this to calculate WHILE we are copying the stream
+            if (AutoUpdateMd5WhenAdding)
+                UpdateMd5(newFile);
 
             // Set output
             pfi = newFile;

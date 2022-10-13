@@ -62,12 +62,12 @@
             this.rbMD5Recalculate = new System.Windows.Forms.RadioButton();
             this.cbMD5KeepExisting = new System.Windows.Forms.CheckBox();
             this.gbDummy1 = new System.Windows.Forms.GroupBox();
-            this.textBox2 = new System.Windows.Forms.TextBox();
+            this.tDummy1 = new System.Windows.Forms.TextBox();
             this.rbDummy1Specified = new System.Windows.Forms.RadioButton();
             this.rbDummy1Default = new System.Windows.Forms.RadioButton();
             this.cbDummy1KeepExisting = new System.Windows.Forms.CheckBox();
             this.gbDummy2 = new System.Windows.Forms.GroupBox();
-            this.textBox3 = new System.Windows.Forms.TextBox();
+            this.tDummy2 = new System.Windows.Forms.TextBox();
             this.rbDummy2Specified = new System.Windows.Forms.RadioButton();
             this.rbDummy2Default = new System.Windows.Forms.RadioButton();
             this.cbDummy2KeepExisting = new System.Windows.Forms.CheckBox();
@@ -181,6 +181,7 @@
             this.tCreateAsNumber.Size = new System.Drawing.Size(180, 20);
             this.tCreateAsNumber.TabIndex = 26;
             this.tCreateAsNumber.Text = "0x0";
+            this.tCreateAsNumber.TextChanged += new System.EventHandler(this.tCreateAsNumber_TextChanged);
             // 
             // rbCreateTimeSpecifiedValue
             // 
@@ -291,6 +292,7 @@
             this.tModifyAsNumber.Size = new System.Drawing.Size(180, 20);
             this.tModifyAsNumber.TabIndex = 26;
             this.tModifyAsNumber.Text = "0x0";
+            this.tModifyAsNumber.TextChanged += new System.EventHandler(this.tModifyAsNumber_TextChanged);
             // 
             // rbModifyTimeSpecifiedValue
             // 
@@ -392,6 +394,7 @@
             this.tHash.Name = "tHash";
             this.tHash.Size = new System.Drawing.Size(393, 20);
             this.tHash.TabIndex = 11;
+            this.tHash.TextChanged += new System.EventHandler(this.tHash_TextChanged);
             // 
             // rbMD5Specified
             // 
@@ -427,7 +430,7 @@
             // 
             // gbDummy1
             // 
-            this.gbDummy1.Controls.Add(this.textBox2);
+            this.gbDummy1.Controls.Add(this.tDummy1);
             this.gbDummy1.Controls.Add(this.rbDummy1Specified);
             this.gbDummy1.Controls.Add(this.rbDummy1Default);
             this.gbDummy1.Controls.Add(this.cbDummy1KeepExisting);
@@ -438,12 +441,13 @@
             this.gbDummy1.TabStop = false;
             this.gbDummy1.Text = "Dummy1";
             // 
-            // textBox2
+            // tDummy1
             // 
-            this.textBox2.Location = new System.Drawing.Point(109, 65);
-            this.textBox2.Name = "textBox2";
-            this.textBox2.Size = new System.Drawing.Size(180, 20);
-            this.textBox2.TabIndex = 11;
+            this.tDummy1.Location = new System.Drawing.Point(109, 65);
+            this.tDummy1.Name = "tDummy1";
+            this.tDummy1.Size = new System.Drawing.Size(180, 20);
+            this.tDummy1.TabIndex = 11;
+            this.tDummy1.TextChanged += new System.EventHandler(this.tDummy1_TextChanged);
             // 
             // rbDummy1Specified
             // 
@@ -482,7 +486,7 @@
             // gbDummy2
             // 
             this.gbDummy2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.gbDummy2.Controls.Add(this.textBox3);
+            this.gbDummy2.Controls.Add(this.tDummy2);
             this.gbDummy2.Controls.Add(this.rbDummy2Specified);
             this.gbDummy2.Controls.Add(this.rbDummy2Default);
             this.gbDummy2.Controls.Add(this.cbDummy2KeepExisting);
@@ -493,12 +497,13 @@
             this.gbDummy2.TabStop = false;
             this.gbDummy2.Text = "Dummy2";
             // 
-            // textBox3
+            // tDummy2
             // 
-            this.textBox3.Location = new System.Drawing.Point(109, 65);
-            this.textBox3.Name = "textBox3";
-            this.textBox3.Size = new System.Drawing.Size(180, 20);
-            this.textBox3.TabIndex = 11;
+            this.tDummy2.Location = new System.Drawing.Point(109, 65);
+            this.tDummy2.Name = "tDummy2";
+            this.tDummy2.Size = new System.Drawing.Size(180, 20);
+            this.tDummy2.TabIndex = 11;
+            this.tDummy2.TextChanged += new System.EventHandler(this.tDummy2_TextChanged);
             // 
             // rbDummy2Specified
             // 
@@ -619,42 +624,42 @@
         private System.Windows.Forms.Button btnCancel;
         private System.Windows.Forms.OpenFileDialog openFileDlg;
         private System.Windows.Forms.GroupBox gbCreateTime;
-        private System.Windows.Forms.RadioButton rbCreateTimePakCreateTime;
-        private System.Windows.Forms.CheckBox cbCreateTimeKeepExisting;
-        private System.Windows.Forms.RadioButton rbCreateTimeSourceModifiedTime;
-        private System.Windows.Forms.RadioButton rbCreateTimeSourceCreateTime;
-        private System.Windows.Forms.RadioButton rbCreateTimeSpecifiedValue;
-        private System.Windows.Forms.RadioButton rbCreateTimeSpecifiedTime;
-        private System.Windows.Forms.DateTimePicker dtCreateTime;
-        private System.Windows.Forms.TextBox tCreateAsNumber;
-        private System.Windows.Forms.RadioButton rbCreateTimeUtcNow;
         private System.Windows.Forms.GroupBox gbModifyTime;
-        private System.Windows.Forms.TextBox tModifyAsNumber;
-        private System.Windows.Forms.RadioButton rbModifyTimeSpecifiedValue;
-        private System.Windows.Forms.RadioButton rbModifyTimeSpecifiedTime;
-        private System.Windows.Forms.DateTimePicker dtModifyTime;
-        private System.Windows.Forms.RadioButton rbModifyTimeUtcNow;
-        private System.Windows.Forms.RadioButton rbModifyTimePakCreateTime;
-        private System.Windows.Forms.CheckBox cbModifyTimeKeepExisting;
-        private System.Windows.Forms.RadioButton rbModifyTimeSourceModifiedTime;
-        private System.Windows.Forms.RadioButton rbModifyTimeSourceCreateTime;
         private System.Windows.Forms.GroupBox gbMD5;
-        private System.Windows.Forms.RadioButton rbMD5Specified;
-        private System.Windows.Forms.RadioButton rbMD5Recalculate;
-        private System.Windows.Forms.CheckBox cbMD5KeepExisting;
-        private System.Windows.Forms.TextBox tHash;
         private System.Windows.Forms.GroupBox gbDummy1;
-        private System.Windows.Forms.TextBox textBox2;
-        private System.Windows.Forms.RadioButton rbDummy1Specified;
-        private System.Windows.Forms.RadioButton rbDummy1Default;
-        private System.Windows.Forms.CheckBox cbDummy1KeepExisting;
         private System.Windows.Forms.GroupBox gbDummy2;
-        private System.Windows.Forms.TextBox textBox3;
-        private System.Windows.Forms.RadioButton rbDummy2Specified;
-        private System.Windows.Forms.RadioButton rbDummy2Default;
-        private System.Windows.Forms.CheckBox cbDummy2KeepExisting;
         private System.Windows.Forms.CheckBox cbShowAdvanced;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.CheckBox cbReserveSpareSpace;
+        public System.Windows.Forms.RadioButton rbCreateTimePakCreateTime;
+        public System.Windows.Forms.CheckBox cbCreateTimeKeepExisting;
+        public System.Windows.Forms.RadioButton rbCreateTimeSourceModifiedTime;
+        public System.Windows.Forms.RadioButton rbCreateTimeSourceCreateTime;
+        public System.Windows.Forms.RadioButton rbCreateTimeSpecifiedValue;
+        public System.Windows.Forms.RadioButton rbCreateTimeSpecifiedTime;
+        public System.Windows.Forms.DateTimePicker dtCreateTime;
+        public System.Windows.Forms.TextBox tCreateAsNumber;
+        public System.Windows.Forms.RadioButton rbCreateTimeUtcNow;
+        public System.Windows.Forms.TextBox tModifyAsNumber;
+        public System.Windows.Forms.RadioButton rbModifyTimeSpecifiedValue;
+        public System.Windows.Forms.RadioButton rbModifyTimeSpecifiedTime;
+        public System.Windows.Forms.DateTimePicker dtModifyTime;
+        public System.Windows.Forms.RadioButton rbModifyTimeUtcNow;
+        public System.Windows.Forms.RadioButton rbModifyTimePakCreateTime;
+        public System.Windows.Forms.CheckBox cbModifyTimeKeepExisting;
+        public System.Windows.Forms.RadioButton rbModifyTimeSourceModifiedTime;
+        public System.Windows.Forms.RadioButton rbModifyTimeSourceCreateTime;
+        public System.Windows.Forms.RadioButton rbMD5Specified;
+        public System.Windows.Forms.RadioButton rbMD5Recalculate;
+        public System.Windows.Forms.CheckBox cbMD5KeepExisting;
+        public System.Windows.Forms.TextBox tHash;
+        public System.Windows.Forms.TextBox tDummy1;
+        public System.Windows.Forms.RadioButton rbDummy1Specified;
+        public System.Windows.Forms.RadioButton rbDummy1Default;
+        public System.Windows.Forms.CheckBox cbDummy1KeepExisting;
+        public System.Windows.Forms.TextBox tDummy2;
+        public System.Windows.Forms.RadioButton rbDummy2Specified;
+        public System.Windows.Forms.RadioButton rbDummy2Default;
+        public System.Windows.Forms.CheckBox cbDummy2KeepExisting;
+        public System.Windows.Forms.CheckBox cbReserveSpareSpace;
     }
 }

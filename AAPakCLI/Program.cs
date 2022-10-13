@@ -38,12 +38,12 @@ namespace AAPakCLI
             if (!res)
             {
                 if (useCustomKey)
-                    Console.WriteLine("[ERROR] Custom  game_pak.key  does not seem valid for {0}", filename);
+                    Console.WriteLine("[ERROR] Reader  game_pak.key  does not seem valid for {0}", filename);
                 else
                     Console.WriteLine("[ERROR] Failed to open {0}", filename);
             }
 
-            if (pak.PakType != PakFileType.TypeA) Console.WriteLine("[PAK] PakFileType = {0}", pak.PakType.ToString());
+            if (pak.PakType != PakFileType.Classic) Console.WriteLine("[PAK] PakFileType = {0}", pak.PakType.ToString());
 
             if (pak.Files.Count <= 0 && pak.ExtraFiles.Count <= 0)
             {

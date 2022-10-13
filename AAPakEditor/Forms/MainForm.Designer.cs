@@ -90,11 +90,11 @@
             this.lbExtraFiles = new System.Windows.Forms.ListBox();
             this.openKeyListDialog = new System.Windows.Forms.OpenFileDialog();
             this.statusBar = new System.Windows.Forms.StatusStrip();
+            this.pbGeneric = new System.Windows.Forms.ToolStripProgressBar();
             this.lFileCount = new System.Windows.Forms.ToolStripStatusLabel();
             this.lPakExtraInfo = new System.Windows.Forms.ToolStripStatusLabel();
             this.lTypePak = new System.Windows.Forms.ToolStripStatusLabel();
             this.MainFormSplitter = new System.Windows.Forms.SplitContainer();
-            this.pbGeneric = new System.Windows.Forms.ToolStripProgressBar();
             this.MM.SuspendLayout();
             this.pFileInfo.SuspendLayout();
             this.tcDirectoryViews.SuspendLayout();
@@ -121,7 +121,6 @@
             this.MM.Size = new System.Drawing.Size(584, 24);
             this.MM.TabIndex = 0;
             this.MM.Text = "menuStrip1";
-            this.MM.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.MM_ItemClicked);
             // 
             // MMFile
             // 
@@ -646,6 +645,12 @@
             this.statusBar.TabIndex = 9;
             this.statusBar.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.statusBar_ItemClicked);
             // 
+            // pbGeneric
+            // 
+            this.pbGeneric.Name = "pbGeneric";
+            this.pbGeneric.Size = new System.Drawing.Size(125, 16);
+            this.pbGeneric.Visible = false;
+            // 
             // lFileCount
             // 
             this.lFileCount.Name = "lFileCount";
@@ -656,7 +661,7 @@
             // lPakExtraInfo
             // 
             this.lPakExtraInfo.Name = "lPakExtraInfo";
-            this.lPakExtraInfo.Size = new System.Drawing.Size(350, 17);
+            this.lPakExtraInfo.Size = new System.Drawing.Size(508, 17);
             this.lPakExtraInfo.Spring = true;
             this.lPakExtraInfo.Text = "...";
             this.lPakExtraInfo.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -688,12 +693,6 @@
             this.MainFormSplitter.Size = new System.Drawing.Size(584, 365);
             this.MainFormSplitter.SplitterDistance = 250;
             this.MainFormSplitter.TabIndex = 10;
-            // 
-            // pbGeneric
-            // 
-            this.pbGeneric.Name = "pbGeneric";
-            this.pbGeneric.Size = new System.Drawing.Size(125, 16);
-            this.pbGeneric.Visible = false;
             // 
             // MainForm
             // 

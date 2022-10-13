@@ -1,14 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
+using Newtonsoft.Json;
 using AAPacker;
 using AAPakEditor.Properties;
+using AAPakEditor.Helpers;
+using System.Runtime.Remoting.Contexts;
 
 namespace AAPakEditor.Forms;
 
@@ -111,6 +115,116 @@ public partial class MainForm : Form
         if (appVer.MinorRevision > 0)
             v += "." + appVer.MinorRevision;
         MMVersion.Text = v;
+
+        // Initialize Pak Readers
+        AAPak.ReaderPool.Clear();
+        /*
+        AAPak.ReaderPool.Add(new AAPakFileFormatReader() {  }); // default
+        
+        // AAFree
+        var aaFree = new AAPakFileFormatReader();
+        aaFree.ReaderName = "AAFree";
+        aaFree.HeaderBytes = new byte[] { 0x5A, 0x45, 0x52, 0x4F }; // Z E R O
+        aaFree.HeaderEncryptionKey = new byte[] { 0x67, 0xDF, 0x7A, 0xAE, 0xFA, 0x28, 0x1A, 0x34, 0x6A, 0x64, 0x91, 0xB9, 0xA5, 0X33, 0x3C, 0x8F };
+        aaFree.ReadOrder = new List<AAPakFileHeaderElement>()
+        {
+            AAPakFileHeaderElement.Header,
+            AAPakFileHeaderElement.NullByte,
+            AAPakFileHeaderElement.NullByte,
+            AAPakFileHeaderElement.NullByte,
+            AAPakFileHeaderElement.NullByte,
+            AAPakFileHeaderElement.FilesCount,
+            AAPakFileHeaderElement.ExtraFilesCount,
+        };
+        aaFree.FileInfoReadOrder = new List<AAPakFileInfoElement>()
+        {
+            AAPakFileInfoElement.Dummy2,
+            AAPakFileInfoElement.FileName,
+            AAPakFileInfoElement.Offset,
+            AAPakFileInfoElement.Size,
+            AAPakFileInfoElement.SizeDuplicate,
+            AAPakFileInfoElement.PaddingSize,
+            AAPakFileInfoElement.Md5,
+            AAPakFileInfoElement.Dummy1,
+            AAPakFileInfoElement.CreateTime,
+            AAPakFileInfoElement.ModifyTime,
+        };
+        AAPak.ReaderPool.Add(aaFree);
+
+
+        var rage = new AAPakFileFormatReader();
+        rage.ReaderName = "ArcheRage";
+        rage.HeaderBytes = new byte[] { 0x49, 0x44, 0x45, 0x4A }; // I D E J
+        rage.HeaderEncryptionKey = new byte[] { 0x6F, 0xF6, 0x6A, 0xB5, 0x11, 0xC0, 0x42, 0x69, 0xEA, 0x96, 0x97, 0x9D, 0x51, 0X82, 0x98, 0x14 };
+        rage.ReadOrder = new List<AAPakFileHeaderElement>()
+        {
+            AAPakFileHeaderElement.ExtraFilesCount,
+            AAPakFileHeaderElement.NullByte,
+            AAPakFileHeaderElement.NullByte,
+            AAPakFileHeaderElement.NullByte,
+            AAPakFileHeaderElement.NullByte,
+            AAPakFileHeaderElement.Header,
+            AAPakFileHeaderElement.FilesCount,
+        };
+        rage.InvertFileCounter = true;
+        rage.FileInfoReadOrder = new List<AAPakFileInfoElement>()
+        {
+            AAPakFileInfoElement.PaddingSize,
+            AAPakFileInfoElement.Md5,
+            AAPakFileInfoElement.Dummy1,
+            AAPakFileInfoElement.Size,
+            AAPakFileInfoElement.FileName,
+            AAPakFileInfoElement.SizeDuplicate,
+            AAPakFileInfoElement.Offset,
+            AAPakFileInfoElement.ModifyTime,
+            AAPakFileInfoElement.CreateTime,
+            AAPakFileInfoElement.Dummy2,
+        };
+        AAPak.ReaderPool.Add(rage);
+
+        */
+
+        var jsonSettings = new JsonSerializerSettings
+        {
+            Culture = CultureInfo.InvariantCulture,
+            Formatting = Formatting.Indented,
+        };
+        jsonSettings.Converters.Add(new ByteArrayHexConverter());
+
+        var readerSettingsFileName = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            "AAPakEditor",
+            "readers.json");
+        try
+        {
+            if (File.Exists(readerSettingsFileName))
+            {
+                var data = JsonConvert.DeserializeObject<List<AAPakFileFormatReader>>(File.ReadAllText(readerSettingsFileName), jsonSettings);
+                if (data?.Count > 0)
+                    foreach (var r in data)
+                        AAPak.ReaderPool.Add(r);
+            }
+        }
+        catch
+        {
+            // Ignore
+        }
+
+        // Add only default in case of errors
+        if (AAPak.ReaderPool.Count <= 0)
+        {
+            AAPak.ReaderPool.Add(new AAPakFileFormatReader(true));
+            // Write default file to user's settings
+            try
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(readerSettingsFileName));
+                File.WriteAllText(readerSettingsFileName, JsonConvert.SerializeObject(AAPak.ReaderPool, jsonSettings));
+            }
+            catch
+            {
+                // Ignore
+            }
+        }
+
         UpdateMm();
         ShowFileInfo(null);
     }
@@ -264,7 +378,7 @@ public partial class MainForm : Form
             lbFiles.Items.Clear();
             UpdateMm();
             if (_useCustomKey)
-                MessageBox.Show("Custom  game_pak.key  does not seem valid for " + filename, "OpenPak Key Error");
+                MessageBox.Show("Reader  game_pak.key  does not seem valid for " + filename, "OpenPak Key Error");
             else
                 MessageBox.Show("Failed to open " + filename + "\r\n" + Pak?.LastError, "OpenPak Error");
         }
@@ -295,10 +409,10 @@ public partial class MainForm : Form
                     "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
 
-        if (Pak.PakType == PakFileType.Custom)
+        if (Pak.PakType == PakFileType.Reader)
             lTypePak.Text = Pak.Reader?.ReaderName ?? "Invalid Reader";
         else
-            lTypePak.Text = string.Empty;
+            lTypePak.Text = Pak.PakType.ToString();
     }
 
     private void lbFolders_SelectedIndexChanged(object sender, EventArgs e)
@@ -868,6 +982,12 @@ public partial class MainForm : Form
 
     private void MMEditAddFile_Click(object sender, EventArgs e)
     {
+        if (Pak == null)
+        {
+            MessageBox.Show("No Pak assigned.");
+            return;
+        }
+
         if (Pak.ReadOnly)
         {
             MessageBox.Show("Pak is opened in Read-Only mode, cannot add/replace files.");
@@ -884,7 +1004,7 @@ public partial class MainForm : Form
         }
 
         // Open add file dialog
-        var addDlg = new AddFileDialog();
+        using var addDlg = new AddFileDialog();
         addDlg.Pak = Pak;
         addDlg.SuggestedFile = replaceFileName;
 
@@ -896,8 +1016,16 @@ public partial class MainForm : Form
             var diskFileName = addDlg.eDiskFileName.Text;
             var pakFileName = addDlg.ePakFileName.Text.ToLower().Replace("\\", "/"); // You just know people will put this wrong, so preemptive replace
 
+            var isReplacing = Pak.FileExists(pakFileName);
+            Pak.GetFileByName(pakFileName, out var oldPakFileInfo);
+            // We need to copy the pfi values here, as they can possibly be overriden in case a on-location replace happens
+            var oldPakFileInfoCreateTime = oldPakFileInfo.CreateTime;
+            var oldPakFileInfoModifyTime = oldPakFileInfo.ModifyTime;
+            var oldPakFileInfoMd5 = oldPakFileInfo.Md5;
+            var oldPakFileInfoDummy1 = oldPakFileInfo.Dummy1;
+            var oldPakFileInfoDummy2 = oldPakFileInfo.Dummy2;
 
-            addDlg.Dispose();
+            // addDlg.Dispose();
 
             // virtual directory to the new file
             string newPakFilePath;
@@ -922,8 +1050,9 @@ public partial class MainForm : Form
                         doEncrypt = true;
 
 
-                var cTime = File.GetCreationTime(diskFileName);
-                var mTime = File.GetLastWriteTime(diskFileName);
+                var cTime = File.GetCreationTimeUtc(diskFileName);
+                var mTime = File.GetLastWriteTimeUtc(diskFileName);
+
                 Stream fs;
                 var fStream = new FileStream(diskFileName, FileMode.Open, FileAccess.Read);
                 var mStream = new MemoryStream();
@@ -954,10 +1083,98 @@ public partial class MainForm : Form
                     fs = fStream;
                 }
 
-                var res = Pak.AddFileFromStream(pakFileName, fs, cTime, mTime, true, out var pfi);
+                // Skip MD5 calculations if we are keeping the old value when replacing, or if we are specifying one
+                var oldMd5ReCalc = Pak.AutoUpdateMd5WhenAdding;
+                if ((isReplacing && addDlg.cbMD5KeepExisting.Checked) || (addDlg.rbMD5Specified.Checked))
+                    Pak.AutoUpdateMd5WhenAdding = false;
+                else
+                    Pak.AutoUpdateMd5WhenAdding = true;
+
+                var res = Pak.AddFileFromStream(pakFileName, fs, cTime, mTime, addDlg.cbReserveSpareSpace.Checked, out var pfi);
                 fs.Dispose();
+
+                // Reset the flag
+                Pak.AutoUpdateMd5WhenAdding = oldMd5ReCalc;
+                
                 if (res)
                 {
+                    // Update values as needed
+                    
+                    // Create time
+                    if (isReplacing && addDlg.cbCreateTimeKeepExisting.Checked)
+                    {
+                        pfi.CreateTime = oldPakFileInfoCreateTime;
+                    }
+                    else
+                    {
+                        //if (addDlg.rbCreateTimeSourceCreateTime.Checked)
+                        //    pfi.CreateTime = File.GetCreationTimeUtc(diskFileName).ToFileTime();
+                        if (addDlg.rbCreateTimeSourceModifiedTime.Checked)
+                            pfi.CreateTime = File.GetLastWriteTimeUtc(diskFileName).ToFileTime();
+                        if (addDlg.rbCreateTimePakCreateTime.Checked)
+                            pfi.CreateTime = File.GetCreationTimeUtc(Pak.GpFilePath).ToFileTime();
+                        if (addDlg.rbCreateTimeUtcNow.Checked)
+                            pfi.CreateTime = DateTime.UtcNow.ToFileTime();
+                        if (addDlg.rbCreateTimeSpecifiedTime.Checked)
+                            pfi.CreateTime = addDlg.dtCreateTime.Value.ToFileTime();
+                        if (addDlg.rbCreateTimeSpecifiedValue.Checked)
+                            pfi.CreateTime = addDlg.CreateTimeAsNumber;
+                    }
+
+                    // Modify Time
+                    if (isReplacing && addDlg.cbModifyTimeKeepExisting.Checked)
+                    {
+                        pfi.ModifyTime = oldPakFileInfoModifyTime;
+                    }
+                    else
+                    {
+                        if (addDlg.rbCreateTimeSourceCreateTime.Checked)
+                            pfi.CreateTime = File.GetCreationTimeUtc(diskFileName).ToFileTime();
+                        //if (addDlg.rbModifyTimeSourceModifiedTime.Checked)
+                        //    pfi.ModifyTime = File.GetLastWriteTimeUtc(diskFileName).ToFileTime();
+                        if (addDlg.rbModifyTimePakCreateTime.Checked)
+                            pfi.ModifyTime = File.GetCreationTimeUtc(Pak.GpFilePath).ToFileTime();
+                        if (addDlg.rbModifyTimeUtcNow.Checked)
+                            pfi.ModifyTime = DateTime.UtcNow.ToFileTime();
+                        if (addDlg.rbModifyTimeSpecifiedTime.Checked)
+                            pfi.ModifyTime = addDlg.dtModifyTime.Value.ToFileTime();
+                        if (addDlg.rbModifyTimeSpecifiedValue.Checked)
+                            pfi.ModifyTime = addDlg.ModifyTimeAsNumber;
+                    }
+
+                    // MD5
+                    if (isReplacing && addDlg.cbMD5KeepExisting.Checked)
+                    {
+                        pfi.Md5 = oldPakFileInfoMd5;
+                    }
+                    else 
+                    if (addDlg.rbMD5Specified.Checked)
+                    {
+                        pfi.Md5 = addDlg.Md5Value;
+                    }
+
+                    // Dummy 1
+                    if (isReplacing && addDlg.cbDummy1KeepExisting.Checked)
+                    {
+                        pfi.Dummy1 = oldPakFileInfoDummy1;
+                    }
+                    else
+                    if (addDlg.rbDummy1Specified.Checked)
+                    {
+                        pfi.Dummy1 = addDlg.Dummy1AsNumber;
+                    }
+
+                    // Dummy 2
+                    if (isReplacing && addDlg.cbDummy2KeepExisting.Checked)
+                    {
+                        pfi.Dummy2 = oldPakFileInfoDummy2;
+                    }
+                    else
+                    if (addDlg.rbDummy2Specified.Checked)
+                    {
+                        pfi.Dummy2 = addDlg.Dummy2AsNumber;
+                    }
+
                     MessageBox.Show("File:\r\n" + diskFileName + "\r\n\r\nadded as:\r\n" + pfi.Name);
 
                     if (Pak.Folders.IndexOf(newPakFilePath) < 0)
@@ -978,10 +1195,6 @@ public partial class MainForm : Form
             {
                 MessageBox.Show("File not found: " + diskFileName);
             }
-        }
-        else
-        {
-            addDlg.Dispose();
         }
 
         PopulateFilesList(_currentFileViewFolder);
@@ -1487,15 +1700,6 @@ public partial class MainForm : Form
         MessageBox.Show("No match found using " + keyList.Count + " keys !");
     }
 
-    private void MMFileS2_Click(object sender, EventArgs e)
-    {
-        MMFileTryOpenUsingKeyList.Visible = true;
-    }
-
-    private void MM_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
-    {
-    }
-
     private void MMExtraMD5All_Click(object sender, EventArgs e)
     {
         if (Pak == null || !Pak.IsOpen)
@@ -1510,12 +1714,10 @@ public partial class MainForm : Form
         if (res == DialogResult.Cancel)
             return;
 
-        using (var rehashDlg = new ReMD5Dlg())
-        {
-            rehashDlg.pak = Pak;
-            rehashDlg.allFiles = res == DialogResult.Yes;
-            rehashDlg.ShowDialog();
-        }
+        using var rehashDlg = new ReMD5Dlg();
+        rehashDlg.pak = Pak;
+        rehashDlg.allFiles = (res == DialogResult.Yes);
+        rehashDlg.ShowDialog();
     }
 
     private void statusBar_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
@@ -1578,5 +1780,11 @@ public partial class MainForm : Form
         pbGeneric.Visible = (step != maximum);
 
         statusBar.Refresh();
+    }
+
+    private void MMFileS2_Click(object sender, EventArgs e)
+    {
+        if (Control.ModifierKeys.HasFlag(Keys.Shift))
+            MMFileTryOpenUsingKeyList.Visible = true;
     }
 }

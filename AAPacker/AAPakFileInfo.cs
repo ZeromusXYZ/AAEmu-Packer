@@ -23,7 +23,7 @@ namespace AAPacker
         public uint Dummy1 { get; set; }
 
         /// <summary>
-        /// Unknown value 2, observed to be 0
+        /// Unknown value 2, observed to be 0, seems to be unused
         /// </summary>
         public ulong Dummy2 { get; set; }
 

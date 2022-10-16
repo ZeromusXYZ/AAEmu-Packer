@@ -1696,13 +1696,15 @@ public partial class MainForm : Form
 
     public void AAPakNotify(AAPak sender, AAPakLoadingProgressType progressType, int step, int maximum)
     {
+        Invoke((MethodInvoker)delegate {
+            // Running on the UI thread
+            pbGeneric.Minimum = 0;
+            pbGeneric.Maximum = maximum;
+            pbGeneric.Value = step;
+            pbGeneric.Visible = (step != maximum);
 
-        pbGeneric.Minimum = 0;
-        pbGeneric.Maximum = maximum;
-        pbGeneric.Value = step;
-        pbGeneric.Visible = (step != maximum);
-
-        statusBar.Refresh();
+            statusBar.Refresh();
+        });
     }
 
     private void MMFileS2_Click(object sender, EventArgs e)

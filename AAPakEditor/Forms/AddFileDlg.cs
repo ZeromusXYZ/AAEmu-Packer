@@ -152,9 +152,9 @@ public partial class AddFileDialog : Form
     private void ShowHideAdvanced(bool showing)
     {
         if (showing)
-            ClientSize = new Size(ClientSize.Width, gbDummy1.Bottom + 16);
-        else
             ClientSize = new Size(ClientSize.Width, btnSetDefaults.Bottom + 16);
+        else
+            ClientSize = new Size(ClientSize.Width, cbShowAdvanced.Bottom + 16);
     }
 
     private void ePakFileName_TextChanged(object sender, EventArgs e)

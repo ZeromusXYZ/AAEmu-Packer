@@ -440,5 +440,17 @@ namespace AAPakEditor.Properties {
                 this["OpenDefaultReadOnly"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string LastImportFolder {
+            get {
+                return ((string)(this["LastImportFolder"]));
+            }
+            set {
+                this["LastImportFolder"] = value;
+            }
+        }
     }
 }

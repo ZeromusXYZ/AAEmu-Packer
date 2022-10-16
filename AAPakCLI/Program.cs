@@ -471,7 +471,7 @@ namespace AAPakCLI
         {
             try
             {
-                LoadCustomReaders(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "AAPakEditor"));
+                LoadCustomReaders(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "ZeromusXYZ", "AAPakEditor"));
 
                 HandleCommandLine();
             }

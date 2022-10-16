@@ -99,6 +99,9 @@
             this.lPakExtraInfo = new System.Windows.Forms.ToolStripStatusLabel();
             this.lTypePak = new System.Windows.Forms.ToolStripStatusLabel();
             this.MainFormSplitter = new System.Windows.Forms.SplitContainer();
+            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
+            this.MMToolsConvertMenu = new System.Windows.Forms.ToolStripMenuItem();
+            this.MMToolsConvertPak = new System.Windows.Forms.ToolStripMenuItem();
             this.MM.SuspendLayout();
             this.pFileInfo.SuspendLayout();
             this.tcDirectoryViews.SuspendLayout();
@@ -335,7 +338,9 @@
             this.MMToolsApplyPatch,
             this.MMToolsS2,
             this.MMToolsMD5,
-            this.MMToolsMD5All});
+            this.MMToolsMD5All,
+            this.toolStripMenuItem1,
+            this.MMToolsConvertMenu});
             this.MMTools.Name = "MMTools";
             this.MMTools.Size = new System.Drawing.Size(46, 20);
             this.MMTools.Text = "&Tools";
@@ -728,6 +733,28 @@
             this.MainFormSplitter.SplitterDistance = 250;
             this.MainFormSplitter.TabIndex = 10;
             // 
+            // toolStripMenuItem1
+            // 
+            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(231, 6);
+            // 
+            // MMToolsConvertMenu
+            // 
+            this.MMToolsConvertMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.MMToolsConvertPak});
+            this.MMToolsConvertMenu.Name = "MMToolsConvertMenu";
+            this.MMToolsConvertMenu.Size = new System.Drawing.Size(234, 22);
+            this.MMToolsConvertMenu.Text = "Convert Pak Type";
+            this.MMToolsConvertMenu.DropDownOpening += new System.EventHandler(this.MMToolsConvertMenu_DropDownOpening);
+            // 
+            // MMToolsConvertPak
+            // 
+            this.MMToolsConvertPak.Name = "MMToolsConvertPak";
+            this.MMToolsConvertPak.Size = new System.Drawing.Size(180, 22);
+            this.MMToolsConvertPak.Tag = "1";
+            this.MMToolsConvertPak.Text = "Classic";
+            this.MMToolsConvertPak.Click += new System.EventHandler(this.MMToolsConvertPak_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -836,6 +863,9 @@
         private System.Windows.Forms.ToolStripMenuItem MMToolsCreatePatch;
         private System.Windows.Forms.ToolStripMenuItem MMToolsApplyPatch;
         private System.Windows.Forms.ToolStripSeparator MMToolsS2;
+        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem MMToolsConvertMenu;
+        private System.Windows.Forms.ToolStripMenuItem MMToolsConvertPak;
     }
 }
 

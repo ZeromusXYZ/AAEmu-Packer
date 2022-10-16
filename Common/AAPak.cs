@@ -293,6 +293,8 @@ namespace AAPacker
             GpFileStream = null;
             GpFilePath = null;
             IsOpen = false;
+            PakType = PakFileType.Classic;
+            Reader = null;
             Header.SetDefaultKey();
             LastError = string.Empty;
 

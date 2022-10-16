@@ -66,6 +66,7 @@ public partial class MainForm : Form
         MMToolsApplyPatch.Enabled = Pak?.IsOpen == true && !Pak.IsVirtual && Pak.ReadOnly == false;
         MMToolsMD5.Enabled = Pak?.IsOpen == true && !Pak.IsVirtual && Pak.ReadOnly == false && lbFiles.SelectedIndex >= 0;
         MMToolsMD5All.Enabled = Pak?.IsOpen == true && !Pak.IsVirtual && Pak.ReadOnly == false;
+        MMToolsConvertMenu.Enabled = Pak?.IsOpen == true && !Pak.IsVirtual && !Pak.ReadOnly;
         MMTools.Visible = Pak?.IsOpen == true;
 
         if (Pak?.IsOpen == true)
@@ -75,12 +76,19 @@ public partial class MainForm : Form
             else
                 Text = _baseTitle + @" - " + Pak.GpFilePath;
             lPakExtraInfo.Text = Pak.NewestFileDate.ToString("yyyy-MM-dd HH:mm:ss");
+
+            if (Pak.PakType == PakFileType.Reader)
+                lTypePak.Text = Pak.Reader?.ReaderName ?? "Invalid Reader";
+            else
+                lTypePak.Text = Pak.PakType.ToString();
         }
         else
         {
             Text = _baseTitle;
             lPakExtraInfo.Text = @"...";
+            lTypePak.Text = "";
         }
+
     }
 
 
@@ -183,73 +191,8 @@ public partial class MainForm : Form
 
         // Initialize Pak Readers
         AAPak.ReaderPool.Clear();
-        /*
-        AAPak.ReaderPool.Add(new AAPakFileFormatReader() {  }); // default
-        
-        // AAFree
-        var aaFree = new AAPakFileFormatReader();
-        aaFree.ReaderName = "AAFree";
-        aaFree.HeaderBytes = new byte[] { 0x5A, 0x45, 0x52, 0x4F }; // Z E R O
-        aaFree.HeaderEncryptionKey = new byte[] { 0x67, 0xDF, 0x7A, 0xAE, 0xFA, 0x28, 0x1A, 0x34, 0x6A, 0x64, 0x91, 0xB9, 0xA5, 0X33, 0x3C, 0x8F };
-        aaFree.ReadOrder = new List<AAPakFileHeaderElement>()
-        {
-            AAPakFileHeaderElement.Header,
-            AAPakFileHeaderElement.NullByte,
-            AAPakFileHeaderElement.NullByte,
-            AAPakFileHeaderElement.NullByte,
-            AAPakFileHeaderElement.NullByte,
-            AAPakFileHeaderElement.FilesCount,
-            AAPakFileHeaderElement.ExtraFilesCount,
-        };
-        aaFree.FileInfoReadOrder = new List<AAPakFileInfoElement>()
-        {
-            AAPakFileInfoElement.Dummy2,
-            AAPakFileInfoElement.FileName,
-            AAPakFileInfoElement.Offset,
-            AAPakFileInfoElement.Size,
-            AAPakFileInfoElement.SizeDuplicate,
-            AAPakFileInfoElement.PaddingSize,
-            AAPakFileInfoElement.Md5,
-            AAPakFileInfoElement.Dummy1,
-            AAPakFileInfoElement.CreateTime,
-            AAPakFileInfoElement.ModifyTime,
-        };
-        AAPak.ReaderPool.Add(aaFree);
 
-
-        var rage = new AAPakFileFormatReader();
-        rage.ReaderName = "ArcheRage";
-        rage.HeaderBytes = new byte[] { 0x49, 0x44, 0x45, 0x4A }; // I D E J
-        rage.HeaderEncryptionKey = new byte[] { 0x6F, 0xF6, 0x6A, 0xB5, 0x11, 0xC0, 0x42, 0x69, 0xEA, 0x96, 0x97, 0x9D, 0x51, 0X82, 0x98, 0x14 };
-        rage.ReadOrder = new List<AAPakFileHeaderElement>()
-        {
-            AAPakFileHeaderElement.ExtraFilesCount,
-            AAPakFileHeaderElement.NullByte,
-            AAPakFileHeaderElement.NullByte,
-            AAPakFileHeaderElement.NullByte,
-            AAPakFileHeaderElement.NullByte,
-            AAPakFileHeaderElement.Header,
-            AAPakFileHeaderElement.FilesCount,
-        };
-        rage.InvertFileCounter = true;
-        rage.FileInfoReadOrder = new List<AAPakFileInfoElement>()
-        {
-            AAPakFileInfoElement.PaddingSize,
-            AAPakFileInfoElement.Md5,
-            AAPakFileInfoElement.Dummy1,
-            AAPakFileInfoElement.Size,
-            AAPakFileInfoElement.FileName,
-            AAPakFileInfoElement.SizeDuplicate,
-            AAPakFileInfoElement.Offset,
-            AAPakFileInfoElement.ModifyTime,
-            AAPakFileInfoElement.CreateTime,
-            AAPakFileInfoElement.Dummy2,
-        };
-        AAPak.ReaderPool.Add(rage);
-
-        */
-
-        LoadCustomReaders(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "AAPakEditor"));
+        LoadCustomReaders(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "ZeromusXYZ", "AAPakEditor"));
 
         UpdateMm();
         ShowFileInfo(null);
@@ -428,10 +371,7 @@ public partial class MainForm : Form
             }
         }
 
-        if (Pak.PakType == PakFileType.Reader)
-            lTypePak.Text = Pak.Reader?.ReaderName ?? "Invalid Reader";
-        else
-            lTypePak.Text = Pak.PakType.ToString();
+        UpdateMm();
     }
 
     private void lbFolders_SelectedIndexChanged(object sender, EventArgs e)
@@ -1781,5 +1721,67 @@ public partial class MainForm : Form
     private void MMVersionGetLatest_Click(object sender, EventArgs e)
     {
         Process.Start(_urlGitHubLatestRelease);
+    }
+
+    private void MMToolsConvertPak_Click(object sender, EventArgs e)
+    {
+        // Warning way too many if's coming
+        if ((Pak?.IsOpen == true) && (Pak.ReadOnly == false))
+        {
+            var newType = Pak.PakType;
+            var newReader = Pak.Reader;
+
+            // Convert it
+            if (sender is ToolStripMenuItem toolStripMenuItem)
+            {
+                if (toolStripMenuItem.Tag is AAPakFileFormatReader ffr)
+                {
+                    newType = PakFileType.Reader;
+                    newReader = ffr;
+                }
+                else
+                if (toolStripMenuItem.Tag is string val)
+                {
+                    if (val == "1")
+                    {
+                        newType = PakFileType.Classic;
+                        newReader = null;
+                    }
+                }
+            }
+
+            if ((newType != Pak.PakType) || (newReader != Pak.Reader))
+            {
+                Pak.PakType = newType;
+                Pak.Reader = newReader;
+                if (newType == PakFileType.Reader)
+                    Pak.SetCustomKey(newReader.HeaderEncryptionKey);
+                else
+                    Pak.SetDefaultKey();
+                Pak.IsDirty = true;
+                UpdateMm();
+            }
+        }
+    }
+
+    private void MMToolsConvertMenu_DropDownOpening(object sender, EventArgs e)
+    {
+        MMToolsConvertMenu.DropDownItems.Clear();
+        var classicItem = new ToolStripMenuItem();
+        classicItem.Text = "Classic";
+        classicItem.Tag = "1";
+        classicItem.Checked = (Pak?.PakType == PakFileType.Classic);
+        classicItem.Click += MMToolsConvertPak_Click;
+        MMToolsConvertMenu.DropDownItems.Add(classicItem);
+
+        foreach (var aaPakFileFormatReader in AAPak.ReaderPool)
+        {
+            var newItem = new ToolStripMenuItem();
+            newItem.Text = aaPakFileFormatReader.ReaderName;
+            newItem.Tag = aaPakFileFormatReader;
+            newItem.Checked = ((Pak?.PakType == PakFileType.Reader) && (Pak?.Reader == aaPakFileFormatReader));
+            newItem.Click += MMToolsConvertPak_Click;
+            MMToolsConvertMenu.DropDownItems.Add(newItem);
+        }
     }
 }

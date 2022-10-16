@@ -112,7 +112,7 @@ namespace AAPacker
         }
 
         /// <summary>
-        ///     Reverts back to the original encryption key, this function is also automatically called when closing a file
+        ///     Reverts back to the original XL encryption key, this function is also automatically called after closing a file
         /// </summary>
         protected internal void SetDefaultKey()
         {

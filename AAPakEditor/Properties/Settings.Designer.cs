@@ -12,7 +12,7 @@ namespace AAPakEditor.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "15.9.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.3.0.0")]
     internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
         
         private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
@@ -20,6 +20,424 @@ namespace AAPakEditor.Properties {
         public static Settings Default {
             get {
                 return defaultInstance;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool AddFileReserveSpace {
+            get {
+                return ((bool)(this["AddFileReserveSpace"]));
+            }
+            set {
+                this["AddFileReserveSpace"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool AddCreateTimeKeepExisting {
+            get {
+                return ((bool)(this["AddCreateTimeKeepExisting"]));
+            }
+            set {
+                this["AddCreateTimeKeepExisting"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool AddCreateTimeSourceCreateTime {
+            get {
+                return ((bool)(this["AddCreateTimeSourceCreateTime"]));
+            }
+            set {
+                this["AddCreateTimeSourceCreateTime"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool AddCreateTimeSourceModifiedTime {
+            get {
+                return ((bool)(this["AddCreateTimeSourceModifiedTime"]));
+            }
+            set {
+                this["AddCreateTimeSourceModifiedTime"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool AddCreateTimeSpecifiedTime {
+            get {
+                return ((bool)(this["AddCreateTimeSpecifiedTime"]));
+            }
+            set {
+                this["AddCreateTimeSpecifiedTime"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool AddCreateTimeSpecifiedValue {
+            get {
+                return ((bool)(this["AddCreateTimeSpecifiedValue"]));
+            }
+            set {
+                this["AddCreateTimeSpecifiedValue"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool AddCreateTimePakCreateTime {
+            get {
+                return ((bool)(this["AddCreateTimePakCreateTime"]));
+            }
+            set {
+                this["AddCreateTimePakCreateTime"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool AddCreateTimeUtcNow {
+            get {
+                return ((bool)(this["AddCreateTimeUtcNow"]));
+            }
+            set {
+                this["AddCreateTimeUtcNow"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        public global::System.DateTime AddCreateTime {
+            get {
+                return ((global::System.DateTime)(this["AddCreateTime"]));
+            }
+            set {
+                this["AddCreateTime"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string AddCreateAsNumber {
+            get {
+                return ((string)(this["AddCreateAsNumber"]));
+            }
+            set {
+                this["AddCreateAsNumber"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool AddModifyTimeKeepExisting {
+            get {
+                return ((bool)(this["AddModifyTimeKeepExisting"]));
+            }
+            set {
+                this["AddModifyTimeKeepExisting"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool AddModifyTimeSourceCreateTime {
+            get {
+                return ((bool)(this["AddModifyTimeSourceCreateTime"]));
+            }
+            set {
+                this["AddModifyTimeSourceCreateTime"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool AddModifyTimeSourceModifiedTime {
+            get {
+                return ((bool)(this["AddModifyTimeSourceModifiedTime"]));
+            }
+            set {
+                this["AddModifyTimeSourceModifiedTime"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool AddModifyTimeSpecifiedTime {
+            get {
+                return ((bool)(this["AddModifyTimeSpecifiedTime"]));
+            }
+            set {
+                this["AddModifyTimeSpecifiedTime"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool AddModifyTimeSpecifiedValue {
+            get {
+                return ((bool)(this["AddModifyTimeSpecifiedValue"]));
+            }
+            set {
+                this["AddModifyTimeSpecifiedValue"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool AddModifyTimePakCreateTime {
+            get {
+                return ((bool)(this["AddModifyTimePakCreateTime"]));
+            }
+            set {
+                this["AddModifyTimePakCreateTime"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool AddModifyTimeUtcNow {
+            get {
+                return ((bool)(this["AddModifyTimeUtcNow"]));
+            }
+            set {
+                this["AddModifyTimeUtcNow"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        public global::System.DateTime AddModifyTime {
+            get {
+                return ((global::System.DateTime)(this["AddModifyTime"]));
+            }
+            set {
+                this["AddModifyTime"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string AddModifyAsNumber {
+            get {
+                return ((string)(this["AddModifyAsNumber"]));
+            }
+            set {
+                this["AddModifyAsNumber"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool AddMD5KeepExisting {
+            get {
+                return ((bool)(this["AddMD5KeepExisting"]));
+            }
+            set {
+                this["AddMD5KeepExisting"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool AddMD5Recalculate {
+            get {
+                return ((bool)(this["AddMD5Recalculate"]));
+            }
+            set {
+                this["AddMD5Recalculate"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool AddMD5Specified {
+            get {
+                return ((bool)(this["AddMD5Specified"]));
+            }
+            set {
+                this["AddMD5Specified"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string AddHash {
+            get {
+                return ((string)(this["AddHash"]));
+            }
+            set {
+                this["AddHash"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool AddDummy1KeepExisting {
+            get {
+                return ((bool)(this["AddDummy1KeepExisting"]));
+            }
+            set {
+                this["AddDummy1KeepExisting"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool AddDummy1Default {
+            get {
+                return ((bool)(this["AddDummy1Default"]));
+            }
+            set {
+                this["AddDummy1Default"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool AddDummy1Specified {
+            get {
+                return ((bool)(this["AddDummy1Specified"]));
+            }
+            set {
+                this["AddDummy1Specified"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string AddDummy1 {
+            get {
+                return ((string)(this["AddDummy1"]));
+            }
+            set {
+                this["AddDummy1"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool AddDummy2KeepExisting {
+            get {
+                return ((bool)(this["AddDummy2KeepExisting"]));
+            }
+            set {
+                this["AddDummy2KeepExisting"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool AddDummy2Default {
+            get {
+                return ((bool)(this["AddDummy2Default"]));
+            }
+            set {
+                this["AddDummy2Default"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool AddDummy2Specified {
+            get {
+                return ((bool)(this["AddDummy2Specified"]));
+            }
+            set {
+                this["AddDummy2Specified"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string AddDummy2 {
+            get {
+                return ((string)(this["AddDummy2"]));
+            }
+            set {
+                this["AddDummy2"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool AddShowAdvanced {
+            get {
+                return ((bool)(this["AddShowAdvanced"]));
+            }
+            set {
+                this["AddShowAdvanced"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool IsUpdated {
+            get {
+                return ((bool)(this["IsUpdated"]));
+            }
+            set {
+                this["IsUpdated"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool SkipEditWarning {
+            get {
+                return ((bool)(this["SkipEditWarning"]));
+            }
+            set {
+                this["SkipEditWarning"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool OpenDefaultReadOnly {
+            get {
+                return ((bool)(this["OpenDefaultReadOnly"]));
+            }
+            set {
+                this["OpenDefaultReadOnly"] = value;
             }
         }
     }

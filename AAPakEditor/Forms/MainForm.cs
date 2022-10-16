@@ -31,6 +31,7 @@ public partial class MainForm : Form
     public AAPak Pak;
     private readonly string _urlDiscord = "https://discord.gg/GhVfDtK";
     private readonly string _urlGitHub = "https://github.com/ZeromusXYZ/AAEmu-Packer";
+    private readonly string _urlGitHubLatestRelease = "https://github.com/ZeromusXYZ/AAEmu-Packer/releases/latest";
     private bool _useCustomKey;
     private bool _useDbKey;
 
@@ -41,31 +42,33 @@ public partial class MainForm : Form
 
     private void UpdateMm()
     {
-        MMFileSave.Enabled = Pak != null && Pak.IsOpen && !Pak.ReadOnly && Pak.IsDirty;
-        MMFileClose.Enabled = Pak != null && Pak.IsOpen;
+        MMFileSave.Enabled = Pak?.IsOpen == true && Pak.ReadOnly == false && Pak.IsDirty;
+        MMFileClose.Enabled = Pak?.IsOpen == true;
 
-        MMEditAddFile.Enabled = Pak != null && Pak.IsOpen && Pak.ReadOnly == false && !Pak.IsVirtual;
-        MMEditImportFiles.Enabled = Pak != null && Pak.IsOpen && Pak.ReadOnly == false && !Pak.IsVirtual;
-        MMEditDeleteSelected.Enabled = Pak != null && Pak.IsOpen && Pak.ReadOnly == false && lbFiles.SelectedIndex >= 0 && !Pak.IsVirtual;
-        MMEditReplace.Enabled = Pak != null && Pak.IsOpen && !Pak.IsVirtual && Pak.ReadOnly == false && lbFiles.SelectedIndex >= 0;
-        MMEditFileProp.Enabled = Pak != null && Pak.IsOpen && !Pak.IsVirtual && Pak.ReadOnly == false && lbFiles.SelectedIndex >= 0;
-        MMEdit.Visible = Pak != null && Pak.IsOpen && !Pak.IsVirtual && Pak.ReadOnly == false;
+        MMEditAddFile.Enabled = Pak is { IsOpen: true, ReadOnly: false } && !Pak.IsVirtual;
+        MMEditImportFiles.Enabled = Pak?.IsOpen == true && Pak.ReadOnly == false && !Pak.IsVirtual;
+        MMEditDeleteSelected.Enabled = Pak?.IsOpen == true && Pak.ReadOnly == false && lbFiles.SelectedIndex >= 0 && !Pak.IsVirtual;
+        MMEditReplace.Enabled = Pak?.IsOpen == true && !Pak.IsVirtual && Pak.ReadOnly == false && lbFiles.SelectedIndex >= 0;
+        MMEditFileProp.Enabled = Pak?.IsOpen == true && !Pak.IsVirtual && Pak.ReadOnly == false && lbFiles.SelectedIndex >= 0;
+        MMEdit.Visible = Pak?.IsOpen == true && !Pak.IsVirtual && Pak.ReadOnly == false;
 
-        MMExportSelectedFile.Enabled = Pak != null && Pak.IsOpen && !Pak.IsVirtual && lbFiles.SelectedIndex >= 0;
-        MMExportSelectedFolder.Enabled = Pak != null && Pak.IsOpen && !Pak.IsVirtual && _currentFileViewFolder != "";
-        MMExportAll.Enabled = Pak != null && Pak.IsOpen && !Pak.IsVirtual;
-        MMExportDB.Enabled = Pak != null && Pak.IsOpen && !Pak.IsVirtual && lbFiles.SelectedIndex >= 0 && _useDbKey && Path.GetExtension(lbFiles.SelectedItem.ToString()).StartsWith(".sql");
-        MMExportDB.Visible = Pak != null && Pak.IsOpen && !Pak.IsVirtual && _useDbKey;
+        MMExportSelectedFile.Enabled = Pak?.IsOpen == true && !Pak.IsVirtual && lbFiles.SelectedIndex >= 0;
+        MMExportSelectedFolder.Enabled = Pak?.IsOpen == true && !Pak.IsVirtual && _currentFileViewFolder != "";
+        MMExportAll.Enabled = Pak?.IsOpen == true && !Pak.IsVirtual;
+        MMExportDB.Enabled = Pak?.IsOpen == true && !Pak.IsVirtual && lbFiles.SelectedIndex >= 0 && _useDbKey && Path.GetExtension(lbFiles.SelectedItem.ToString()).StartsWith(".sql");
+        MMExportDB.Visible = Pak?.IsOpen == true && !Pak.IsVirtual && _useDbKey;
         MMExportS2.Visible = MMExportDB.Visible;
-        MMExport.Visible = Pak != null && Pak.IsOpen && !Pak.IsVirtual;
+        MMExport.Visible = Pak?.IsOpen == true && !Pak.IsVirtual;
+        MMExportAsCsv.Enabled = Pak?.IsOpen == true && !Pak.IsVirtual;
 
-        MMExtraMD5.Enabled = Pak != null && Pak.IsOpen && !Pak.IsVirtual && Pak.ReadOnly == false &&
-                             lbFiles.SelectedIndex >= 0;
-        MMExtraExportData.Enabled = Pak != null && Pak.IsOpen && !Pak.IsVirtual;
-        MMExtraMakeMod.Enabled = Pak != null && Pak.IsOpen && !Pak.IsVirtual;
-        MMExtra.Visible = Pak != null && Pak.IsOpen;
+        MMToolsMakeMod.Enabled = Pak?.IsOpen == true && !Pak.IsVirtual;
+        MMToolsCreatePatch.Enabled = Pak?.IsOpen == true && !Pak.IsVirtual;
+        MMToolsApplyPatch.Enabled = Pak?.IsOpen == true && !Pak.IsVirtual && Pak.ReadOnly == false;
+        MMToolsMD5.Enabled = Pak?.IsOpen == true && !Pak.IsVirtual && Pak.ReadOnly == false && lbFiles.SelectedIndex >= 0;
+        MMToolsMD5All.Enabled = Pak?.IsOpen == true && !Pak.IsVirtual && Pak.ReadOnly == false;
+        MMTools.Visible = Pak?.IsOpen == true;
 
-        if (Pak != null && Pak.IsOpen)
+        if (Pak?.IsOpen == true)
         {
             if (Pak.IsDirty)
                 Text = _baseTitle + @" - *" + Pak.GpFilePath;
@@ -90,9 +93,17 @@ public partial class MainForm : Form
     {
         openGamePakDialog.CheckFileExists = false;
         openGamePakDialog.ShowReadOnly = true;
-        openGamePakDialog.Title = "Open EXISTING Pak file";
+        openGamePakDialog.ReadOnlyChecked = Properties.Settings.Default.OpenDefaultReadOnly;
+        openGamePakDialog.Title = "Open existing Pak file";
+
+        var overrideWarning = Control.ModifierKeys.HasFlag(Keys.Shift);
         if (openGamePakDialog.ShowDialog() == DialogResult.OK)
         {
+            if (overrideWarning)
+            {
+                Properties.Settings.Default.SkipEditWarning = false;
+                Properties.Settings.Default.Save();
+            }
             Application.UseWaitCursor = true;
             Cursor.Current = Cursors.WaitCursor;
             LoadPakFile(openGamePakDialog.FileName, openGamePakDialog.ReadOnlyChecked);
@@ -149,6 +160,16 @@ public partial class MainForm : Form
 
     private void MainForm_Load(object sender, EventArgs e)
     {
+        // Update settings if needed
+        if (!Properties.Settings.Default.IsUpdated)
+        {
+            Properties.Settings.Default.Upgrade();
+            Properties.Settings.Default.Save();
+            Properties.Settings.Default.Reload();
+            Properties.Settings.Default.IsUpdated = true;
+            Properties.Settings.Default.Save();
+        }
+
         _baseTitle = Text;
         var appVer = Assembly.GetExecutingAssembly().GetName().Version;
         var v = "Version ";
@@ -396,22 +417,15 @@ public partial class MainForm : Form
                 GenerateFolderViews();
 
             // Only show this waring if this is not a new pak file
-            if (openAsReadOnly == false && Pak.Files.Count > 0 && showWriteWarning)
-                MessageBox.Show("!!! Warning !!!\r\n" +
-                                "You have opened this pak in read/write mode !\r\n" +
-                                "\r\n" +
-                                "This program comes with absolutly NO warranty.\r\n" +
-                                "It is possible that this program will inreversably damage your game files while editing.\r\n" +
-                                "Please be sure that you have a backup available of the pak file you are editing.\r\n" +
-                                "That being said, I did my best as to avoid possible damage (other than odered by the user) caused by malfunctions.\r\n" +
-                                "\r\n" +
-                                "Also, I am in no way responsible for possible damage to the game or the account you will be playing as.\r\n" +
-                                "There are systems in place on the live servers to check the validity of the game files. \r\n" +
-                                "Please consider that chaning files as you can potentially get your account banned !\r\n" +
-                                "\r\n" +
-                                "Enjoy, and edit responsibly.\r\n" +
-                                "~ ZeromusXYZ",
-                    "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            if ((openAsReadOnly == false) && (Pak.Files.Count > 0) && showWriteWarning && (Properties.Settings.Default.SkipEditWarning == false))
+            {
+                // Reset cursor to look nicer here
+                Cursor.Current = Cursors.Default;
+                Application.UseWaitCursor = false;
+
+                using var warningDlg = new EditWarningDialog();
+                warningDlg.ShowDialog();
+            }
         }
 
         if (Pak.PakType == PakFileType.Reader)
@@ -684,14 +698,6 @@ public partial class MainForm : Form
         UpdateMm();
     }
 
-
-    private void MMExtraExportData_Click(object sender, EventArgs e)
-    {
-        if (Pak == null || !Pak.IsOpen)
-            return;
-        CreateCsvFile();
-    }
-
     private void CreateCsvFile(string filename = "")
     {
         var newest = new DateTime(1600, 1, 1);
@@ -883,56 +889,6 @@ public partial class MainForm : Form
 
         PopulateFilesList(e.Node.Name);
         e.Node.Expand();
-        UpdateMm();
-    }
-
-    private void MMExtraDebugTest_Click(object sender, EventArgs e)
-    {
-        if (Pak == null || !Pak.IsOpen)
-            return;
-
-
-        var d = _currentFileViewFolder;
-        if (d != "") d += "/";
-        d += lbFiles.SelectedItem.ToString();
-        exportFileDialog.FileName = Path.GetFileName(d.Replace('/', Path.DirectorySeparatorChar));
-
-        if (exportFileDialog.ShowDialog() != DialogResult.OK)
-            return;
-
-        var pfraw = Pak.ExportFileAsStream(d);
-
-        var fs = new FileStream(exportFileDialog.FileName, FileMode.Create);
-
-        var pf = new MemoryStream();
-        pfraw.CopyTo(pf);
-
-        // Padding
-        while (pf.Length % 16 != 0)
-            pf.WriteByte(0);
-
-        pf.Position = 0;
-
-        var fsraw = new MemoryStream();
-        try
-        {
-            if (AAPakFileHeader.EncryptStreamAes(pf, fsraw, _dbKey, false, true))
-            {
-                fsraw.Position = 16;
-                fsraw.CopyTo(fs);
-                MessageBox.Show("ExportDB: Done", "Export DB");
-            }
-            else
-            {
-                MessageBox.Show("Decryption failed:\r\n" + AAPakFileHeader.LastAesError, "Error");
-            }
-        }
-        catch (Exception x)
-        {
-            MessageBox.Show("Exception: " + x.Message);
-        }
-
-        fs.Dispose();
         UpdateMm();
     }
 
@@ -1813,5 +1769,17 @@ public partial class MainForm : Form
     {
         if (Control.ModifierKeys.HasFlag(Keys.Shift))
             MMFileTryOpenUsingKeyList.Visible = true;
+    }
+
+    private void MMExportAsCsv_Click(object sender, EventArgs e)
+    {
+        if (Pak == null || !Pak.IsOpen)
+            return;
+        CreateCsvFile();
+    }
+
+    private void MMVersionGetLatest_Click(object sender, EventArgs e)
+    {
+        Process.Start(_urlGitHubLatestRelease);
     }
 }

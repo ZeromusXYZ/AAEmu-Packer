@@ -100,6 +100,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Forms\EditWarningDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\EditWarningDialog.Designer.cs">
+      <DependentUpon>EditWarningDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\FilePropForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -145,6 +151,9 @@
     <Compile Include="Forms\ReMD5Dlg.Designer.cs">
       <DependentUpon>ReMD5Dlg.cs</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="Forms\EditWarningDialog.resx">
+      <DependentUpon>EditWarningDialog.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Forms\FilePropForm.resx">
       <DependentUpon>FilePropForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -208,6 +217,8 @@
   <ItemGroup>
     <Content Include="aapakeditor_icon.ico" />
     <Content Include="charge_package.ico" />
+    <None Include="Resources\warning.png" />
+    <None Include="Resources\warning_icon.bmp" />
     <None Include="Resources\cmdhelp.txt" />
     <None Include="Resources\AAMod.exe" />
     <None Include="res\mod_example.png" />

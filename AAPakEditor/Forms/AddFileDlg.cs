@@ -38,9 +38,111 @@ public partial class AddFileDialog : Form
         else
             ePakFileName.Text = SuggestedDir;
 
+        RevertSettings();
+
         ShowHideAdvanced(false);
-        //cbShowAdvanced.Checked = false;
     }
+
+    private void RevertSettings()
+    {
+        cbShowAdvanced.Checked = Properties.Settings.Default.AddShowAdvanced;
+
+        cbCreateTimeKeepExisting.Checked = Properties.Settings.Default.AddCreateTimeKeepExisting;
+        rbCreateTimeSourceCreateTime.Checked = Properties.Settings.Default.AddCreateTimeSourceCreateTime;
+        rbCreateTimeSourceModifiedTime.Checked = Properties.Settings.Default.AddCreateTimeSourceModifiedTime;
+        rbCreateTimePakCreateTime.Checked = Properties.Settings.Default.AddCreateTimePakCreateTime;
+        rbCreateTimeUtcNow.Checked = Properties.Settings.Default.AddCreateTimeUtcNow;
+        rbCreateTimeSpecifiedTime.Checked = Properties.Settings.Default.AddCreateTimeSpecifiedTime;
+        try
+        {
+            dtCreateTime.Value = Properties.Settings.Default.AddCreateTime;
+        }
+        catch
+        {
+            dtCreateTime.Value = DateTime.UtcNow;
+        }
+        rbCreateTimeSpecifiedValue.Checked = Properties.Settings.Default.AddCreateTimeSpecifiedValue;
+        tCreateAsNumber.Text = Properties.Settings.Default.AddCreateAsNumber;
+
+        tModifyAsNumber.Text = Properties.Settings.Default.AddModifyAsNumber;
+        rbModifyTimeSpecifiedValue.Checked = Properties.Settings.Default.AddModifyTimeSpecifiedValue;
+        rbModifyTimeSpecifiedTime.Checked = Properties.Settings.Default.AddModifyTimeSpecifiedTime;
+        try
+        {
+            dtModifyTime.Value = Properties.Settings.Default.AddModifyTime;
+        }
+        catch
+        {
+            dtModifyTime.Value = DateTime.UtcNow;
+        }
+        rbModifyTimeUtcNow.Checked = Properties.Settings.Default.AddModifyTimeUtcNow;
+        rbModifyTimePakCreateTime.Checked = Properties.Settings.Default.AddModifyTimePakCreateTime;
+        cbModifyTimeKeepExisting.Checked = Properties.Settings.Default.AddModifyTimeKeepExisting;
+        rbModifyTimeSourceModifiedTime.Checked = Properties.Settings.Default.AddModifyTimeSourceModifiedTime;
+        rbModifyTimeSourceCreateTime.Checked = Properties.Settings.Default.AddModifyTimeSourceCreateTime;
+
+        rbMD5Specified.Checked = Properties.Settings.Default.AddMD5Specified;
+        rbMD5Recalculate.Checked = Properties.Settings.Default.AddMD5Recalculate;
+        cbMD5KeepExisting.Checked = Properties.Settings.Default.AddMD5KeepExisting;
+        tHash.Text = Properties.Settings.Default.AddHash;
+
+        tDummy1.Text = Properties.Settings.Default.AddDummy1;
+        rbDummy1Specified.Checked = Properties.Settings.Default.AddDummy1Specified;
+        rbDummy1Default.Checked = Properties.Settings.Default.AddDummy1Default;
+        cbDummy1KeepExisting.Checked = Properties.Settings.Default.AddDummy1KeepExisting;
+
+        tDummy2.Text = Properties.Settings.Default.AddDummy2;
+        rbDummy2Specified.Checked = Properties.Settings.Default.AddDummy2Specified;
+        rbDummy2Default.Checked = Properties.Settings.Default.AddDummy2Default;
+        cbDummy2KeepExisting.Checked = Properties.Settings.Default.AddDummy2KeepExisting;
+
+        cbReserveSpareSpace.Checked = Properties.Settings.Default.AddFileReserveSpace;
+    }
+
+    private void SaveSettings()
+    {
+        Properties.Settings.Default.AddShowAdvanced = cbShowAdvanced.Checked;
+
+        Properties.Settings.Default.AddCreateTimeKeepExisting = cbCreateTimeKeepExisting.Checked;
+        Properties.Settings.Default.AddCreateTimeSourceCreateTime = rbCreateTimeSourceCreateTime.Checked;
+        Properties.Settings.Default.AddCreateTimeSourceModifiedTime = rbCreateTimeSourceModifiedTime.Checked;
+        Properties.Settings.Default.AddCreateTimePakCreateTime = rbCreateTimePakCreateTime.Checked;
+        Properties.Settings.Default.AddCreateTimeUtcNow = rbCreateTimeUtcNow.Checked;
+        Properties.Settings.Default.AddCreateTimeSpecifiedTime = rbCreateTimeSpecifiedTime.Checked;
+        Properties.Settings.Default.AddCreateTime = dtCreateTime.Value;
+        Properties.Settings.Default.AddCreateTimeSpecifiedValue = rbCreateTimeSpecifiedValue.Checked;
+        Properties.Settings.Default.AddCreateAsNumber = tCreateAsNumber.Text;
+
+        Properties.Settings.Default.AddModifyAsNumber = tModifyAsNumber.Text;
+        Properties.Settings.Default.AddModifyTimeSpecifiedValue = rbModifyTimeSpecifiedValue.Checked;
+        Properties.Settings.Default.AddModifyTimeSpecifiedTime = rbModifyTimeSpecifiedTime.Checked;
+        Properties.Settings.Default.AddModifyTime = dtModifyTime.Value;
+        Properties.Settings.Default.AddModifyTimeUtcNow = rbModifyTimeUtcNow.Checked;
+        Properties.Settings.Default.AddModifyTimePakCreateTime = rbModifyTimePakCreateTime.Checked;
+        Properties.Settings.Default.AddModifyTimeKeepExisting = cbModifyTimeKeepExisting.Checked;
+        Properties.Settings.Default.AddModifyTimeSourceModifiedTime = rbModifyTimeSourceModifiedTime.Checked;
+        Properties.Settings.Default.AddModifyTimeSourceCreateTime = rbModifyTimeSourceCreateTime.Checked;
+
+        Properties.Settings.Default.AddMD5Specified = rbMD5Specified.Checked;
+        Properties.Settings.Default.AddMD5Recalculate = rbMD5Recalculate.Checked;
+        Properties.Settings.Default.AddMD5KeepExisting = cbMD5KeepExisting.Checked;
+        Properties.Settings.Default.AddHash = tHash.Text;
+
+        Properties.Settings.Default.AddDummy1 = tDummy1.Text;
+        Properties.Settings.Default.AddDummy1Specified = rbDummy1Specified.Checked;
+        Properties.Settings.Default.AddDummy1Default = rbDummy1Default.Checked;
+        Properties.Settings.Default.AddDummy1KeepExisting = cbDummy1KeepExisting.Checked;
+
+        Properties.Settings.Default.AddDummy2 = tDummy2.Text;
+        Properties.Settings.Default.AddDummy2Specified = rbDummy2Specified.Checked;
+        Properties.Settings.Default.AddDummy2Default = rbDummy2Default.Checked;
+        Properties.Settings.Default.AddDummy2KeepExisting = cbDummy2KeepExisting.Checked;
+
+        Properties.Settings.Default.AddFileReserveSpace = cbReserveSpareSpace.Checked;
+
+        Properties.Settings.Default.Save();
+    }
+
 
     private void cbShowAdvanced_CheckedChanged(object sender, EventArgs e)
     {
@@ -52,7 +154,7 @@ public partial class AddFileDialog : Form
         if (showing)
             ClientSize = new Size(ClientSize.Width, gbDummy1.Bottom + 16);
         else
-            ClientSize = new Size(ClientSize.Width, cbShowAdvanced.Bottom + 16);
+            ClientSize = new Size(ClientSize.Width, btnSetDefaults.Bottom + 16);
     }
 
     private void ePakFileName_TextChanged(object sender, EventArgs e)
@@ -92,6 +194,7 @@ public partial class AddFileDialog : Form
             CreateTimeAsNumber = 0;
             tCreateAsNumber.ForeColor = Color.Red;
         }
+        Changed();
     }
 
     private void tModifyAsNumber_TextChanged(object sender, EventArgs e)
@@ -106,6 +209,7 @@ public partial class AddFileDialog : Form
             ModifyTimeAsNumber = 0;
             tModifyAsNumber.ForeColor = Color.Red;
         }
+        Changed();
     }
 
     private void tHash_TextChanged(object sender, EventArgs e)
@@ -130,6 +234,7 @@ public partial class AddFileDialog : Form
             }
         }
         Md5Value = nHash;
+        Changed();
     }
 
     private void tDummy1_TextChanged(object sender, EventArgs e)
@@ -144,6 +249,7 @@ public partial class AddFileDialog : Form
             Dummy1AsNumber = 0;
             tDummy1.ForeColor = Color.Red;
         }
+        Changed();
     }
 
     private void tDummy2_TextChanged(object sender, EventArgs e)
@@ -158,5 +264,53 @@ public partial class AddFileDialog : Form
             Dummy2AsNumber = 0;
             tDummy2.ForeColor = Color.Red;
         }
+        Changed();
+    }
+
+    private void Changed()
+    {
+        btnSetDefaults.Enabled = true;
+
+    }
+
+    private void btnSetDefaults_Click(object sender, EventArgs e)
+    {
+        cbReserveSpareSpace.Checked = false;
+        cbCreateTimeKeepExisting.Checked = true;
+        rbCreateTimeSourceCreateTime.Checked = true;
+        tCreateAsNumber.Text = "0x0";
+
+        cbModifyTimeKeepExisting.Checked = false;
+        rbModifyTimeSourceModifiedTime.Checked = true;
+        tModifyAsNumber.Text = "0x0";
+
+        cbMD5KeepExisting.Checked = false;
+        rbMD5Recalculate.Checked = true;
+        tHash.Text = string.Empty;
+
+        cbDummy1KeepExisting.Checked = true;
+        rbDummy1Default.Checked = true;
+        tDummy1.Text = "0x0";
+
+        cbDummy2KeepExisting.Checked = true;
+        rbDummy2Default.Checked = true;
+        tDummy2.Text = "0x0";
+
+        btnSetDefaults.Enabled = false;
+    }
+
+    private void SettingsCheckedChanged(object sender, EventArgs e)
+    {
+        Changed();
+    }
+
+    private void btnRevertSaved_Click(object sender, EventArgs e)
+    {
+        RevertSettings();
+    }
+
+    private void btnSaveDefaults_Click(object sender, EventArgs e)
+    {
+        SaveSettings();
     }
 }

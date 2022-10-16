@@ -72,8 +72,10 @@
             this.rbDummy2Default = new System.Windows.Forms.RadioButton();
             this.cbDummy2KeepExisting = new System.Windows.Forms.CheckBox();
             this.cbShowAdvanced = new System.Windows.Forms.CheckBox();
-            this.label2 = new System.Windows.Forms.Label();
             this.cbReserveSpareSpace = new System.Windows.Forms.CheckBox();
+            this.btnSetDefaults = new System.Windows.Forms.Button();
+            this.btnRevertSaved = new System.Windows.Forms.Button();
+            this.btnSaveDefaults = new System.Windows.Forms.Button();
             this.gbCreateTime.SuspendLayout();
             this.gbModifyTime.SuspendLayout();
             this.gbMD5.SuspendLayout();
@@ -192,6 +194,7 @@
             this.rbCreateTimeSpecifiedValue.TabIndex = 14;
             this.rbCreateTimeSpecifiedValue.Text = "Specified value";
             this.rbCreateTimeSpecifiedValue.UseVisualStyleBackColor = true;
+            this.rbCreateTimeSpecifiedValue.CheckedChanged += new System.EventHandler(this.SettingsCheckedChanged);
             // 
             // rbCreateTimeSpecifiedTime
             // 
@@ -202,6 +205,7 @@
             this.rbCreateTimeSpecifiedTime.TabIndex = 13;
             this.rbCreateTimeSpecifiedTime.Text = "Specified time";
             this.rbCreateTimeSpecifiedTime.UseVisualStyleBackColor = true;
+            this.rbCreateTimeSpecifiedTime.CheckedChanged += new System.EventHandler(this.SettingsCheckedChanged);
             // 
             // dtCreateTime
             // 
@@ -211,6 +215,7 @@
             this.dtCreateTime.Name = "dtCreateTime";
             this.dtCreateTime.Size = new System.Drawing.Size(180, 20);
             this.dtCreateTime.TabIndex = 12;
+            this.dtCreateTime.ValueChanged += new System.EventHandler(this.SettingsCheckedChanged);
             // 
             // rbCreateTimeUtcNow
             // 
@@ -221,6 +226,7 @@
             this.rbCreateTimeUtcNow.TabIndex = 4;
             this.rbCreateTimeUtcNow.Text = "UTC Now";
             this.rbCreateTimeUtcNow.UseVisualStyleBackColor = true;
+            this.rbCreateTimeUtcNow.CheckedChanged += new System.EventHandler(this.SettingsCheckedChanged);
             // 
             // rbCreateTimePakCreateTime
             // 
@@ -231,6 +237,7 @@
             this.rbCreateTimePakCreateTime.TabIndex = 3;
             this.rbCreateTimePakCreateTime.Text = "PAK create time";
             this.rbCreateTimePakCreateTime.UseVisualStyleBackColor = true;
+            this.rbCreateTimePakCreateTime.CheckedChanged += new System.EventHandler(this.SettingsCheckedChanged);
             // 
             // cbCreateTimeKeepExisting
             // 
@@ -243,6 +250,7 @@
             this.cbCreateTimeKeepExisting.TabIndex = 2;
             this.cbCreateTimeKeepExisting.Text = "Keep existing when replacing";
             this.cbCreateTimeKeepExisting.UseVisualStyleBackColor = true;
+            this.cbCreateTimeKeepExisting.CheckedChanged += new System.EventHandler(this.SettingsCheckedChanged);
             // 
             // rbCreateTimeSourceModifiedTime
             // 
@@ -253,6 +261,7 @@
             this.rbCreateTimeSourceModifiedTime.TabIndex = 1;
             this.rbCreateTimeSourceModifiedTime.Text = "Source file modified time";
             this.rbCreateTimeSourceModifiedTime.UseVisualStyleBackColor = true;
+            this.rbCreateTimeSourceModifiedTime.CheckedChanged += new System.EventHandler(this.SettingsCheckedChanged);
             // 
             // rbCreateTimeSourceCreateTime
             // 
@@ -265,6 +274,7 @@
             this.rbCreateTimeSourceCreateTime.TabStop = true;
             this.rbCreateTimeSourceCreateTime.Text = "Source file create time";
             this.rbCreateTimeSourceCreateTime.UseVisualStyleBackColor = true;
+            this.rbCreateTimeSourceCreateTime.CheckedChanged += new System.EventHandler(this.SettingsCheckedChanged);
             // 
             // gbModifyTime
             // 
@@ -303,6 +313,7 @@
             this.rbModifyTimeSpecifiedValue.TabIndex = 14;
             this.rbModifyTimeSpecifiedValue.Text = "Specified value";
             this.rbModifyTimeSpecifiedValue.UseVisualStyleBackColor = true;
+            this.rbModifyTimeSpecifiedValue.CheckedChanged += new System.EventHandler(this.SettingsCheckedChanged);
             // 
             // rbModifyTimeSpecifiedTime
             // 
@@ -313,6 +324,7 @@
             this.rbModifyTimeSpecifiedTime.TabIndex = 13;
             this.rbModifyTimeSpecifiedTime.Text = "Specified time";
             this.rbModifyTimeSpecifiedTime.UseVisualStyleBackColor = true;
+            this.rbModifyTimeSpecifiedTime.CheckedChanged += new System.EventHandler(this.SettingsCheckedChanged);
             // 
             // dtModifyTime
             // 
@@ -322,6 +334,7 @@
             this.dtModifyTime.Name = "dtModifyTime";
             this.dtModifyTime.Size = new System.Drawing.Size(180, 20);
             this.dtModifyTime.TabIndex = 12;
+            this.dtModifyTime.ValueChanged += new System.EventHandler(this.SettingsCheckedChanged);
             // 
             // rbModifyTimeUtcNow
             // 
@@ -332,6 +345,7 @@
             this.rbModifyTimeUtcNow.TabIndex = 4;
             this.rbModifyTimeUtcNow.Text = "UTC Now";
             this.rbModifyTimeUtcNow.UseVisualStyleBackColor = true;
+            this.rbModifyTimeUtcNow.CheckedChanged += new System.EventHandler(this.SettingsCheckedChanged);
             // 
             // rbModifyTimePakCreateTime
             // 
@@ -342,6 +356,7 @@
             this.rbModifyTimePakCreateTime.TabIndex = 3;
             this.rbModifyTimePakCreateTime.Text = "PAK create time";
             this.rbModifyTimePakCreateTime.UseVisualStyleBackColor = true;
+            this.rbModifyTimePakCreateTime.CheckedChanged += new System.EventHandler(this.SettingsCheckedChanged);
             // 
             // cbModifyTimeKeepExisting
             // 
@@ -352,6 +367,7 @@
             this.cbModifyTimeKeepExisting.TabIndex = 2;
             this.cbModifyTimeKeepExisting.Text = "Keep existing when replacing";
             this.cbModifyTimeKeepExisting.UseVisualStyleBackColor = true;
+            this.cbModifyTimeKeepExisting.CheckedChanged += new System.EventHandler(this.SettingsCheckedChanged);
             // 
             // rbModifyTimeSourceModifiedTime
             // 
@@ -364,6 +380,7 @@
             this.rbModifyTimeSourceModifiedTime.TabStop = true;
             this.rbModifyTimeSourceModifiedTime.Text = "Source file modified time";
             this.rbModifyTimeSourceModifiedTime.UseVisualStyleBackColor = true;
+            this.rbModifyTimeSourceModifiedTime.CheckedChanged += new System.EventHandler(this.SettingsCheckedChanged);
             // 
             // rbModifyTimeSourceCreateTime
             // 
@@ -374,6 +391,7 @@
             this.rbModifyTimeSourceCreateTime.TabIndex = 0;
             this.rbModifyTimeSourceCreateTime.Text = "Source file create time";
             this.rbModifyTimeSourceCreateTime.UseVisualStyleBackColor = true;
+            this.rbModifyTimeSourceCreateTime.CheckedChanged += new System.EventHandler(this.SettingsCheckedChanged);
             // 
             // gbMD5
             // 
@@ -405,6 +423,7 @@
             this.rbMD5Specified.TabIndex = 5;
             this.rbMD5Specified.Text = "Specified value";
             this.rbMD5Specified.UseVisualStyleBackColor = true;
+            this.rbMD5Specified.CheckedChanged += new System.EventHandler(this.SettingsCheckedChanged);
             // 
             // rbMD5Recalculate
             // 
@@ -417,6 +436,7 @@
             this.rbMD5Recalculate.TabStop = true;
             this.rbMD5Recalculate.Text = "Recalculate";
             this.rbMD5Recalculate.UseVisualStyleBackColor = true;
+            this.rbMD5Recalculate.CheckedChanged += new System.EventHandler(this.SettingsCheckedChanged);
             // 
             // cbMD5KeepExisting
             // 
@@ -427,6 +447,7 @@
             this.cbMD5KeepExisting.TabIndex = 3;
             this.cbMD5KeepExisting.Text = "Keep existing when replacing";
             this.cbMD5KeepExisting.UseVisualStyleBackColor = true;
+            this.cbMD5KeepExisting.CheckedChanged += new System.EventHandler(this.SettingsCheckedChanged);
             // 
             // gbDummy1
             // 
@@ -458,6 +479,7 @@
             this.rbDummy1Specified.TabIndex = 5;
             this.rbDummy1Specified.Text = "Specified value";
             this.rbDummy1Specified.UseVisualStyleBackColor = true;
+            this.rbDummy1Specified.CheckedChanged += new System.EventHandler(this.SettingsCheckedChanged);
             // 
             // rbDummy1Default
             // 
@@ -470,6 +492,7 @@
             this.rbDummy1Default.TabStop = true;
             this.rbDummy1Default.Text = "Default";
             this.rbDummy1Default.UseVisualStyleBackColor = true;
+            this.rbDummy1Default.CheckedChanged += new System.EventHandler(this.SettingsCheckedChanged);
             // 
             // cbDummy1KeepExisting
             // 
@@ -482,6 +505,7 @@
             this.cbDummy1KeepExisting.TabIndex = 3;
             this.cbDummy1KeepExisting.Text = "Keep existing when replacing";
             this.cbDummy1KeepExisting.UseVisualStyleBackColor = true;
+            this.cbDummy1KeepExisting.CheckedChanged += new System.EventHandler(this.SettingsCheckedChanged);
             // 
             // gbDummy2
             // 
@@ -514,6 +538,7 @@
             this.rbDummy2Specified.TabIndex = 5;
             this.rbDummy2Specified.Text = "Specified value";
             this.rbDummy2Specified.UseVisualStyleBackColor = true;
+            this.rbDummy2Specified.CheckedChanged += new System.EventHandler(this.SettingsCheckedChanged);
             // 
             // rbDummy2Default
             // 
@@ -526,6 +551,7 @@
             this.rbDummy2Default.TabStop = true;
             this.rbDummy2Default.Text = "Default";
             this.rbDummy2Default.UseVisualStyleBackColor = true;
+            this.rbDummy2Default.CheckedChanged += new System.EventHandler(this.SettingsCheckedChanged);
             // 
             // cbDummy2KeepExisting
             // 
@@ -538,6 +564,7 @@
             this.cbDummy2KeepExisting.TabIndex = 3;
             this.cbDummy2KeepExisting.Text = "Keep existing when replacing";
             this.cbDummy2KeepExisting.UseVisualStyleBackColor = true;
+            this.cbDummy2KeepExisting.CheckedChanged += new System.EventHandler(this.SettingsCheckedChanged);
             // 
             // cbShowAdvanced
             // 
@@ -550,16 +577,6 @@
             this.cbShowAdvanced.UseVisualStyleBackColor = true;
             this.cbShowAdvanced.CheckedChanged += new System.EventHandler(this.cbShowAdvanced_CheckedChanged);
             // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.ForeColor = System.Drawing.Color.Red;
-            this.label2.Location = new System.Drawing.Point(225, 144);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(189, 13);
-            this.label2.TabIndex = 32;
-            this.label2.Text = "These options are not yet implmented !";
-            // 
             // cbReserveSpareSpace
             // 
             this.cbReserveSpareSpace.AutoSize = true;
@@ -569,6 +586,39 @@
             this.cbReserveSpareSpace.TabIndex = 33;
             this.cbReserveSpareSpace.Text = "Reserve spare space when adding";
             this.cbReserveSpareSpace.UseVisualStyleBackColor = true;
+            this.cbReserveSpareSpace.CheckedChanged += new System.EventHandler(this.SettingsCheckedChanged);
+            // 
+            // btnSetDefaults
+            // 
+            this.btnSetDefaults.Location = new System.Drawing.Point(15, 496);
+            this.btnSetDefaults.Name = "btnSetDefaults";
+            this.btnSetDefaults.Size = new System.Drawing.Size(170, 23);
+            this.btnSetDefaults.TabIndex = 34;
+            this.btnSetDefaults.Text = "Reset to program defaults";
+            this.btnSetDefaults.UseVisualStyleBackColor = true;
+            this.btnSetDefaults.Click += new System.EventHandler(this.btnSetDefaults_Click);
+            // 
+            // btnRevertSaved
+            // 
+            this.btnRevertSaved.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnRevertSaved.Location = new System.Drawing.Point(288, 496);
+            this.btnRevertSaved.Name = "btnRevertSaved";
+            this.btnRevertSaved.Size = new System.Drawing.Size(170, 23);
+            this.btnRevertSaved.TabIndex = 35;
+            this.btnRevertSaved.Text = "Revert to saved default settings";
+            this.btnRevertSaved.UseVisualStyleBackColor = true;
+            this.btnRevertSaved.Click += new System.EventHandler(this.btnRevertSaved_Click);
+            // 
+            // btnSaveDefaults
+            // 
+            this.btnSaveDefaults.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnSaveDefaults.Location = new System.Drawing.Point(464, 496);
+            this.btnSaveDefaults.Name = "btnSaveDefaults";
+            this.btnSaveDefaults.Size = new System.Drawing.Size(170, 23);
+            this.btnSaveDefaults.TabIndex = 36;
+            this.btnSaveDefaults.Text = "Save settings as defaults";
+            this.btnSaveDefaults.UseVisualStyleBackColor = true;
+            this.btnSaveDefaults.Click += new System.EventHandler(this.btnSaveDefaults_Click);
             // 
             // AddFileDialog
             // 
@@ -576,9 +626,11 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.btnCancel;
-            this.ClientSize = new System.Drawing.Size(644, 500);
+            this.ClientSize = new System.Drawing.Size(644, 528);
+            this.Controls.Add(this.btnSaveDefaults);
+            this.Controls.Add(this.btnRevertSaved);
+            this.Controls.Add(this.btnSetDefaults);
             this.Controls.Add(this.cbReserveSpareSpace);
-            this.Controls.Add(this.label2);
             this.Controls.Add(this.cbShowAdvanced);
             this.Controls.Add(this.gbDummy2);
             this.Controls.Add(this.gbDummy1);
@@ -629,7 +681,6 @@
         private System.Windows.Forms.GroupBox gbDummy1;
         private System.Windows.Forms.GroupBox gbDummy2;
         private System.Windows.Forms.CheckBox cbShowAdvanced;
-        private System.Windows.Forms.Label label2;
         public System.Windows.Forms.RadioButton rbCreateTimePakCreateTime;
         public System.Windows.Forms.CheckBox cbCreateTimeKeepExisting;
         public System.Windows.Forms.RadioButton rbCreateTimeSourceModifiedTime;
@@ -661,5 +712,8 @@
         public System.Windows.Forms.RadioButton rbDummy2Default;
         public System.Windows.Forms.CheckBox cbDummy2KeepExisting;
         public System.Windows.Forms.CheckBox cbReserveSpareSpace;
+        private System.Windows.Forms.Button btnSetDefaults;
+        private System.Windows.Forms.Button btnRevertSaved;
+        private System.Windows.Forms.Button btnSaveDefaults;
     }
 }

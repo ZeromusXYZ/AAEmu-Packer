@@ -117,17 +117,64 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="AAModSFX" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\AAMod.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral,
-            PublicKeyToken=b77a5c561934e089</value>
+  <data name="tWarning.Text" xml:space="preserve">
+    <value>!!! Warning !!!
+
+You have opened this pak in read/write mode !
+
+This program comes with absolutely NO warranty.
+It is possible that this program will irreversibly damage your game files while editing.
+Please be sure that you have a backup available of the pak file you are editing.
+That being said, I did my best as to avoid possible damage (other than ordered by the user) caused by malfunctions.
+
+Also, I am in no way responsible for possible damage to the game or the account you will be playing as.
+There are systems in place on the live servers to check the validity of the game files.
+Please consider that changing files as you can potentially get your account banned !
+
+Enjoy, and edit responsibly.
+~ ZeromusXYZ</value>
   </data>
-  <data name="cmdhelp" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\cmdhelp.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral,
-            PublicKeyToken=b77a5c561934e089;Windows-1252</value>
-  </data>
-  <data name="mod_example_icon" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\res\mod_example.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral,
-            PublicKeyToken=b03f5f7f11d50a3a</value>
+  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <data name="pictureBox1.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        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
+        SUVORK5CYII=
+</value>
   </data>
 </root>

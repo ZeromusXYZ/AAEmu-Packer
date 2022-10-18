@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -13,6 +14,7 @@ using AAPacker;
 using AAPakEditor.Properties;
 using AAPakEditor.Helpers;
 using System.Runtime.Remoting.Contexts;
+using FastColoredTextBoxNS;
 
 namespace AAPakEditor.Forms;
 
@@ -436,6 +438,8 @@ public partial class MainForm : Form
             if (pfi.EntryIndexNumber >= 0)
                 lfiIndex.Text = "index: " + pfi.EntryIndexNumber;
             else if (pfi.DeletedIndexNumber >= 0) lfiIndex.Text = "extra-index: " + pfi.DeletedIndexNumber;
+
+            ShowPreview(pfi);
         }
         else
         {
@@ -449,7 +453,76 @@ public partial class MainForm : Form
             lfiIndex.Text = "";
             lCreateRaw.Text = "";
             lModifiedRaw.Text = "";
+            ShowPreview(null);
         }
+    }
+
+    /// <summary>
+    /// Convert a stream into a string
+    /// </summary>
+    /// <param name="stream">Source stream</param>
+    /// <returns>String value of the data isnide the stream</returns>
+    public static string StreamToString(Stream stream)
+    {
+        stream.Position = 0;
+        using StreamReader reader = new StreamReader(stream, Encoding.UTF8);
+        return reader.ReadToEnd();
+    }
+
+    private void ShowPreview(AAPakFileInfo pfi)
+    {
+        if ((pfi == null) || (Properties.Settings.Default.AllowPreview == false))
+        {
+            if (PreviewForm.IsActive)
+                PreviewForm.Instance?.Close();
+            return;
+        }
+
+        var fileExt = Path.GetExtension(pfi.Name)?.ToLower() ?? string.Empty;
+
+        if (fileExt == string.Empty)
+        {
+            if (PreviewForm.IsActive)
+                PreviewForm.Instance?.Close();
+            return;
+        }
+
+        if ((fileExt == ".xml") || (fileExt == ".fdp") || (fileExt == ".lyr") || (fileExt == ".fsq") ||
+            (fileExt == ".joy") || (fileExt == ".fxl") || (fileExt == ".cba") || (fileExt == ".animevents") || 
+            (fileExt == ".lmg") || (fileExt == ".ent") || (fileExt == ".mtl") || (fileExt == ".ccc"))
+        {
+            PreviewForm.Instance.tcViewer.SelectedTab = PreviewForm.Instance.tpBasicText;
+            PreviewForm.Instance.tPreview.Language = Language.XML;
+            var s = StreamToString(Pak.ExportFileAsStream(pfi));
+            PreviewForm.Instance.tPreview.Text = s;
+        }
+        else
+        if ((fileExt == ".txt") || (fileExt == ".g") || (fileExt == ".cfg") || (fileExt == ".cal"))
+        {
+            PreviewForm.Instance.tcViewer.SelectedTab = PreviewForm.Instance.tpBasicText;
+            PreviewForm.Instance.tPreview.Language = Language.Custom;
+            var s = StreamToString(Pak.ExportFileAsStream(pfi));
+            PreviewForm.Instance.tPreview.Text = s;
+        }
+        else
+        if ((fileExt == ".lua"))// || (fileExt == ".alb"))
+        {
+            PreviewForm.Instance.tcViewer.SelectedTab = PreviewForm.Instance.tpBasicText;
+            // TODO: convert Alb to readable Lua
+            PreviewForm.Instance.tPreview.Language = Language.Lua;
+            var s = StreamToString(Pak.ExportFileAsStream(pfi));
+            PreviewForm.Instance.tPreview.Text = s;
+        }
+        else
+        {
+            if (PreviewForm.IsActive)
+                PreviewForm.Instance?.Close();
+            return;
+        }
+
+        PreviewForm.Instance.Show();
+        PreviewForm.Instance.BringToFront();
+        PreviewForm.Instance.Location = new Point(this.Location.X + this.Width, this.Location.Y);
     }
 
     private void lbFiles_SelectedIndexChanged(object sender, EventArgs e)

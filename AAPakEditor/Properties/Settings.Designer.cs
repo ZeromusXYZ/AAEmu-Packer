@@ -452,5 +452,17 @@ namespace AAPakEditor.Properties {
                 this["LastImportFolder"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool AllowPreview {
+            get {
+                return ((bool)(this["AllowPreview"]));
+            }
+            set {
+                this["AllowPreview"] = value;
+            }
+        }
     }
 }

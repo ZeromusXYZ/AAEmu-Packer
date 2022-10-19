@@ -1,9 +1,8 @@
-﻿namespace AAPacker
+﻿namespace AAPacker;
+
+public enum PakFileType
 {
-    public enum PakFileType
-    {
-        Reader,
-        Classic,
-        Csv,
-    }
+    Reader,
+    Classic,
+    Csv,
 }

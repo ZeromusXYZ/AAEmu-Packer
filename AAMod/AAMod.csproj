@@ -56,6 +56,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\AAPacker\AAPak.cs">
+      <Link>AAPak.cs</Link>
+    </Compile>
     <Compile Include="..\AAPacker\AAPakFileFormatReader.cs">
       <Link>AAPakFileFormatReader.cs</Link>
     </Compile>
@@ -68,14 +71,11 @@
     <Compile Include="..\AAPacker\AAPakLoadingProgressType.cs">
       <Link>AAPakLoadingProgressType.cs</Link>
     </Compile>
+    <Compile Include="..\AAPacker\PackerSubStream.cs">
+      <Link>PackerSubStream.cs</Link>
+    </Compile>
     <Compile Include="..\AAPacker\PakFileType.cs">
       <Link>PakFileType.cs</Link>
-    </Compile>
-    <Compile Include="..\Common\AAPak.cs">
-      <Link>AAPak.cs</Link>
-    </Compile>
-    <Compile Include="..\Common\SubStream.cs">
-      <Link>SubStream.cs</Link>
     </Compile>
     <Compile Include="Forms\ModMainForm.cs">
       <SubType>Form</SubType>

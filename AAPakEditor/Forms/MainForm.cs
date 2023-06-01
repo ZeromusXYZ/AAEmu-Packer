@@ -15,6 +15,7 @@ using AAPakEditor.Properties;
 using AAPakEditor.Helpers;
 using System.Runtime.Remoting.Contexts;
 using FastColoredTextBoxNS;
+using Vestris.ResourceLib;
 
 namespace AAPakEditor.Forms;
 
@@ -114,6 +115,7 @@ public partial class MainForm : Form
                 Properties.Settings.Default.SkipEditWarning = false;
                 Properties.Settings.Default.Save();
             }
+            Application.DoEvents();
             Application.UseWaitCursor = true;
             Cursor.Current = Cursors.WaitCursor;
             LoadPakFile(openGamePakDialog.FileName, openGamePakDialog.ReadOnlyChecked);
@@ -497,7 +499,15 @@ public partial class MainForm : Form
             PreviewForm.Instance.tPreview.Text = s;
         }
         else
-        if ((fileExt == ".txt") || (fileExt == ".g") || (fileExt == ".cfg") || (fileExt == ".cal"))
+        if ((fileExt == ".html") || (fileExt == ".htm"))
+        {
+            PreviewForm.Instance.tcViewer.SelectedTab = PreviewForm.Instance.tpBasicText;
+            PreviewForm.Instance.tPreview.Language = Language.HTML;
+            var s = StreamToString(Pak.ExportFileAsStream(pfi));
+            PreviewForm.Instance.tPreview.Text = s;
+        }
+        else
+        if ((fileExt == ".txt") || (fileExt == ".g") || (fileExt == ".cfg") || (fileExt == ".cal") || (fileExt == ".ini"))
         {
             PreviewForm.Instance.tcViewer.SelectedTab = PreviewForm.Instance.tpBasicText;
             PreviewForm.Instance.tPreview.Language = Language.Custom;
@@ -514,6 +524,47 @@ public partial class MainForm : Form
             PreviewForm.Instance.tPreview.Text = s;
         }
         else
+        if ((fileExt == ".jpg") || (fileExt == ".png") || (fileExt == ".bmp"))
+        {
+            PreviewForm.Instance.tcViewer.SelectedTab = PreviewForm.Instance.tpImage;
+            try
+            {
+                var imgStream = Pak.ExportFileAsStream(pfi);
+                var img = Image.FromStream(imgStream);
+                PreviewForm.Instance.pbPreview.Image = img;
+                PreviewForm.Instance.tcViewer.SelectedTab = PreviewForm.Instance.tpImage;
+                PreviewForm.Instance.tPreview.Text = pfi.Name + "\n" + img.Width + " x " + img.Height;
+                PreviewForm.Instance.pbPreview.Size = new Size(img.Width, img.Height);
+            }
+            catch (Exception e)
+            {
+                PreviewForm.Instance.tcViewer.SelectedTab = PreviewForm.Instance.tpBasicText;
+                var s = $"Failed to load {pfi.Name}\n{e.Message}";
+                PreviewForm.Instance.tPreview.Text = s;
+            }
+        }
+        else
+        if ((fileExt == ".dds") || (fileExt == ".tga"))
+        {
+            // Load using Pfim
+            PreviewForm.Instance.tcViewer.SelectedTab = PreviewForm.Instance.tpImage;
+            try
+            {
+                var imgStream = Pak.ExportFileAsStream(pfi);
+                var img = ImageHelpers.ReadDdsFromStream(imgStream);
+                PreviewForm.Instance.pbPreview.Image = img;
+                PreviewForm.Instance.tcViewer.SelectedTab = PreviewForm.Instance.tpImage;
+                PreviewForm.Instance.tPreview.Text = pfi.Name + "\n" + img.Width + " x " + img.Height;
+                PreviewForm.Instance.pbPreview.Size = new Size(img.Width, img.Height);
+            }
+            catch (Exception e)
+            {
+                PreviewForm.Instance.tcViewer.SelectedTab = PreviewForm.Instance.tpBasicText;
+                var s = $"Failed to load {pfi.Name}\n{e.Message}";
+                PreviewForm.Instance.tPreview.Text = s;
+            }
+        }
+        else
         {
             if (PreviewForm.IsActive)
                 PreviewForm.Instance?.Close();
@@ -523,6 +574,9 @@ public partial class MainForm : Form
         PreviewForm.Instance.Show();
         PreviewForm.Instance.BringToFront();
         PreviewForm.Instance.Location = new Point(this.Location.X + this.Width, this.Location.Y);
+        Application.DoEvents();
+        this.Focus();
+        lbFiles.Focus();
     }
 
     private void lbFiles_SelectedIndexChanged(object sender, EventArgs e)
@@ -1858,5 +1912,17 @@ public partial class MainForm : Form
             newItem.Click += MMToolsConvertPak_Click;
             MMToolsConvertMenu.DropDownItems.Add(newItem);
         }
+    }
+
+    private void MMTools_DropDownOpening(object sender, EventArgs e)
+    {
+        MMToolsPreview.Checked = Settings.Default.AllowPreview;
+    }
+
+    private void MMToolsPreview_Click(object sender, EventArgs e)
+    {
+        MMToolsPreview.Checked = !MMToolsPreview.Checked;
+        Settings.Default.AllowPreview = MMToolsPreview.Checked;
+        Settings.Default.Save();
     }
 }

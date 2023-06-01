@@ -33,11 +33,14 @@
             this.tPreview = new FastColoredTextBoxNS.FastColoredTextBox();
             this.tcViewer = new System.Windows.Forms.TabControl();
             this.tpBasicText = new System.Windows.Forms.TabPage();
-            this.tpImage = new System.Windows.Forms.TabPage();
             this.documentMap1 = new FastColoredTextBoxNS.DocumentMap();
+            this.tpImage = new System.Windows.Forms.TabPage();
+            this.pbPreview = new System.Windows.Forms.PictureBox();
             ((System.ComponentModel.ISupportInitialize)(this.tPreview)).BeginInit();
             this.tcViewer.SuspendLayout();
             this.tpBasicText.SuspendLayout();
+            this.tpImage.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pbPreview)).BeginInit();
             this.SuspendLayout();
             // 
             // tPreview
@@ -56,20 +59,26 @@
         '\"',
         '\'',
         '\''};
+            this.tPreview.AutoIndentCharsPatterns = "";
             this.tPreview.AutoScrollMinSize = new System.Drawing.Size(59, 14);
             this.tPreview.BackBrush = null;
             this.tPreview.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.tPreview.CharHeight = 14;
             this.tPreview.CharWidth = 8;
+            this.tPreview.CommentPrefix = null;
             this.tPreview.Cursor = System.Windows.Forms.Cursors.IBeam;
             this.tPreview.DisabledColor = System.Drawing.Color.FromArgb(((int)(((byte)(100)))), ((int)(((byte)(180)))), ((int)(((byte)(180)))), ((int)(((byte)(180)))));
             this.tPreview.Font = new System.Drawing.Font("Courier New", 9.75F);
             this.tPreview.IsReplaceMode = false;
             this.tPreview.Language = FastColoredTextBoxNS.Language.XML;
+            this.tPreview.LeftBracket = '<';
+            this.tPreview.LeftBracket2 = '(';
             this.tPreview.Location = new System.Drawing.Point(0, 0);
             this.tPreview.Name = "tPreview";
             this.tPreview.Paddings = new System.Windows.Forms.Padding(0);
             this.tPreview.ReadOnly = true;
+            this.tPreview.RightBracket = '>';
+            this.tPreview.RightBracket2 = ')';
             this.tPreview.SelectionColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(255)))));
             this.tPreview.ServiceColors = ((FastColoredTextBoxNS.ServiceColors)(resources.GetObject("tPreview.ServiceColors")));
             this.tPreview.ShowFoldingLines = true;
@@ -101,16 +110,6 @@
             this.tpBasicText.Text = "Text";
             this.tpBasicText.UseVisualStyleBackColor = true;
             // 
-            // tpImage
-            // 
-            this.tpImage.Location = new System.Drawing.Point(4, 22);
-            this.tpImage.Name = "tpImage";
-            this.tpImage.Padding = new System.Windows.Forms.Padding(3);
-            this.tpImage.Size = new System.Drawing.Size(527, 434);
-            this.tpImage.TabIndex = 1;
-            this.tpImage.Text = "Image";
-            this.tpImage.UseVisualStyleBackColor = true;
-            // 
             // documentMap1
             // 
             this.documentMap1.Dock = System.Windows.Forms.DockStyle.Right;
@@ -121,6 +120,26 @@
             this.documentMap1.TabIndex = 1;
             this.documentMap1.Target = this.tPreview;
             this.documentMap1.Text = "documentMap1";
+            // 
+            // tpImage
+            // 
+            this.tpImage.AutoScroll = true;
+            this.tpImage.Controls.Add(this.pbPreview);
+            this.tpImage.Location = new System.Drawing.Point(4, 22);
+            this.tpImage.Name = "tpImage";
+            this.tpImage.Padding = new System.Windows.Forms.Padding(3);
+            this.tpImage.Size = new System.Drawing.Size(527, 434);
+            this.tpImage.TabIndex = 1;
+            this.tpImage.Text = "Image";
+            this.tpImage.UseVisualStyleBackColor = true;
+            // 
+            // pbPreview
+            // 
+            this.pbPreview.Location = new System.Drawing.Point(0, 0);
+            this.pbPreview.Name = "pbPreview";
+            this.pbPreview.Size = new System.Drawing.Size(197, 167);
+            this.pbPreview.TabIndex = 0;
+            this.pbPreview.TabStop = false;
             // 
             // PreviewForm
             // 
@@ -134,6 +153,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.tPreview)).EndInit();
             this.tcViewer.ResumeLayout(false);
             this.tpBasicText.ResumeLayout(false);
+            this.tpImage.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.pbPreview)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -144,5 +165,6 @@
         public System.Windows.Forms.TabControl tcViewer;
         public System.Windows.Forms.TabPage tpBasicText;
         public System.Windows.Forms.TabPage tpImage;
+        public System.Windows.Forms.PictureBox pbPreview;
     }
 }

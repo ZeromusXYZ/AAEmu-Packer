@@ -7,10 +7,25 @@ namespace AAPacker;
 /// </summary>
 public enum AAPakFileHeaderElement
 {
+    /// <summary>
+    /// Any byte value
+    /// </summary>
     AnyByte,
+    /// <summary>
+    /// Byte must be zero
+    /// </summary>
     NullByte,
+    /// <summary>
+    /// Header information
+    /// </summary>
     Header,
+    /// <summary>
+    /// Number of normal files in the pak
+    /// </summary>
     FilesCount,
+    /// <summary>
+    /// Number of "extra" files in the pak
+    /// </summary>
     ExtraFilesCount
 }
 
@@ -19,15 +34,45 @@ public enum AAPakFileHeaderElement
 /// </summary>
 public enum AAPakFileInfoElement
 {
+    /// <summary>
+    /// The filename
+    /// </summary>
     FileName,
+    /// <summary>
+    /// Starting offset in the pak
+    /// </summary>
     Offset,
+    /// <summary>
+    /// Actual file size
+    /// </summary>
     Size,
+    /// <summary>
+    /// Duplicate of file size (possibly compressed size)?
+    /// </summary>
     SizeDuplicate,
+    /// <summary>
+    /// Number of bytes used a padding
+    /// </summary>
     PaddingSize,
+    /// <summary>
+    /// MD5 checksum value
+    /// </summary>
     Md5,
+    /// <summary>
+    /// Unused1
+    /// </summary>
     Dummy1,
-    CreateTime,
+    /// <summary>
+    /// Last Modified Time
+    /// </summary>
     ModifyTime,
+    /// <summary>
+    /// File created time
+    /// </summary>
+    CreateTime,
+    /// <summary>
+    /// Ununsed2
+    /// </summary>
     Dummy2,
 }
 
@@ -36,6 +81,10 @@ public enum AAPakFileInfoElement
 /// </summary>
 public class AAPakFileFormatReader
 {
+    /// <summary>
+    /// Class containing structure on how to read/write the data
+    /// </summary>
+    /// <param name="initializeWithDefaults">If true, pre-fills the data</param>
     public AAPakFileFormatReader(bool initializeWithDefaults)
     {
         // Changed default constructor to fix issues related to arrays and json populating

@@ -63,6 +63,9 @@
             this.MMToolsS2 = new System.Windows.Forms.ToolStripSeparator();
             this.MMToolsMD5 = new System.Windows.Forms.ToolStripMenuItem();
             this.MMToolsMD5All = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
+            this.MMToolsConvertMenu = new System.Windows.Forms.ToolStripMenuItem();
+            this.MMToolsConvertPak = new System.Windows.Forms.ToolStripMenuItem();
             this.MMVersion = new System.Windows.Forms.ToolStripMenuItem();
             this.MMVersionGetLatest = new System.Windows.Forms.ToolStripMenuItem();
             this.MMVersionS1 = new System.Windows.Forms.ToolStripSeparator();
@@ -99,9 +102,7 @@
             this.lPakExtraInfo = new System.Windows.Forms.ToolStripStatusLabel();
             this.lTypePak = new System.Windows.Forms.ToolStripStatusLabel();
             this.MainFormSplitter = new System.Windows.Forms.SplitContainer();
-            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
-            this.MMToolsConvertMenu = new System.Windows.Forms.ToolStripMenuItem();
-            this.MMToolsConvertPak = new System.Windows.Forms.ToolStripMenuItem();
+            this.MMToolsPreview = new System.Windows.Forms.ToolStripMenuItem();
             this.MM.SuspendLayout();
             this.pFileInfo.SuspendLayout();
             this.tcDirectoryViews.SuspendLayout();
@@ -340,10 +341,12 @@
             this.MMToolsMD5,
             this.MMToolsMD5All,
             this.toolStripMenuItem1,
-            this.MMToolsConvertMenu});
+            this.MMToolsConvertMenu,
+            this.MMToolsPreview});
             this.MMTools.Name = "MMTools";
             this.MMTools.Size = new System.Drawing.Size(46, 20);
             this.MMTools.Text = "&Tools";
+            this.MMTools.DropDownOpening += new System.EventHandler(this.MMTools_DropDownOpening);
             // 
             // MMToolsMakeMod
             // 
@@ -390,6 +393,28 @@
             this.MMToolsMD5All.Size = new System.Drawing.Size(234, 22);
             this.MMToolsMD5All.Text = "Re-Calculate MD5 of all files ...";
             this.MMToolsMD5All.Click += new System.EventHandler(this.MMExtraMD5All_Click);
+            // 
+            // toolStripMenuItem1
+            // 
+            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(231, 6);
+            // 
+            // MMToolsConvertMenu
+            // 
+            this.MMToolsConvertMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.MMToolsConvertPak});
+            this.MMToolsConvertMenu.Name = "MMToolsConvertMenu";
+            this.MMToolsConvertMenu.Size = new System.Drawing.Size(234, 22);
+            this.MMToolsConvertMenu.Text = "Convert Pak Type";
+            this.MMToolsConvertMenu.DropDownOpening += new System.EventHandler(this.MMToolsConvertMenu_DropDownOpening);
+            // 
+            // MMToolsConvertPak
+            // 
+            this.MMToolsConvertPak.Name = "MMToolsConvertPak";
+            this.MMToolsConvertPak.Size = new System.Drawing.Size(110, 22);
+            this.MMToolsConvertPak.Tag = "1";
+            this.MMToolsConvertPak.Text = "Classic";
+            this.MMToolsConvertPak.Click += new System.EventHandler(this.MMToolsConvertPak_Click);
             // 
             // MMVersion
             // 
@@ -733,27 +758,12 @@
             this.MainFormSplitter.SplitterDistance = 250;
             this.MainFormSplitter.TabIndex = 10;
             // 
-            // toolStripMenuItem1
+            // MMToolsPreview
             // 
-            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(231, 6);
-            // 
-            // MMToolsConvertMenu
-            // 
-            this.MMToolsConvertMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.MMToolsConvertPak});
-            this.MMToolsConvertMenu.Name = "MMToolsConvertMenu";
-            this.MMToolsConvertMenu.Size = new System.Drawing.Size(234, 22);
-            this.MMToolsConvertMenu.Text = "Convert Pak Type";
-            this.MMToolsConvertMenu.DropDownOpening += new System.EventHandler(this.MMToolsConvertMenu_DropDownOpening);
-            // 
-            // MMToolsConvertPak
-            // 
-            this.MMToolsConvertPak.Name = "MMToolsConvertPak";
-            this.MMToolsConvertPak.Size = new System.Drawing.Size(180, 22);
-            this.MMToolsConvertPak.Tag = "1";
-            this.MMToolsConvertPak.Text = "Classic";
-            this.MMToolsConvertPak.Click += new System.EventHandler(this.MMToolsConvertPak_Click);
+            this.MMToolsPreview.Name = "MMToolsPreview";
+            this.MMToolsPreview.Size = new System.Drawing.Size(234, 22);
+            this.MMToolsPreview.Text = "Show Preview";
+            this.MMToolsPreview.Click += new System.EventHandler(this.MMToolsPreview_Click);
             // 
             // MainForm
             // 
@@ -866,6 +876,7 @@
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem MMToolsConvertMenu;
         private System.Windows.Forms.ToolStripMenuItem MMToolsConvertPak;
+        private System.Windows.Forms.ToolStripMenuItem MMToolsPreview;
     }
 }
 

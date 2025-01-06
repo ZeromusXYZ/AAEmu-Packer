@@ -4,21 +4,41 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>disable</Nullable>
         <LangVersion>default</LangVersion>
-        <TargetFrameworks>net48;net6.0</TargetFrameworks>
+        <TargetFrameworks>net48;net8.0;net9.0</TargetFrameworks>
         <RootNamespace>AAPacker</RootNamespace>
         <GenerateDocumentationFile>True</GenerateDocumentationFile>
         <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
         <Title>AAPacker game_pak file handler</Title>
         <Description>Provides a AAPak class that can be used to read and manipulate game_pak files from ArcheAge</Description>
-        <Copyright>© 2019-2022 ZeromusXYZ</Copyright>
+        <Copyright>© 2019-2025 ZeromusXYZ</Copyright>
         <EnableNETAnalyzers>False</EnableNETAnalyzers>
     </PropertyGroup>
 
-    <ItemGroup>
-    </ItemGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net8.0|AnyCPU'">
+      <WarningLevel>4</WarningLevel>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net8.0|AnyCPU'">
+      <WarningLevel>4</WarningLevel>
+    </PropertyGroup>
 
     <ItemGroup>
       <PackageReference Include="System.Net.Http" Version="4.3.4" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Update="Properties\Settings.Designer.cs">
+        <DesignTimeSharedInput>True</DesignTimeSharedInput>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>Settings.settings</DependentUpon>
+      </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="Properties\Settings.settings">
+        <Generator>SettingsSingleFileGenerator</Generator>
+        <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+      </None>
     </ItemGroup>
 
 </Project>

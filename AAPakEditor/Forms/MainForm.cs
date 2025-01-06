@@ -7,15 +7,13 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Threading;
 using System.Windows.Forms;
 using Newtonsoft.Json;
 using AAPacker;
 using AAPakEditor.Properties;
 using AAPakEditor.Helpers;
-using System.Runtime.Remoting.Contexts;
 using FastColoredTextBoxNS;
-using Vestris.ResourceLib;
+using MethodInvoker = System.Windows.Forms.MethodInvoker;
 
 namespace AAPakEditor.Forms;
 
@@ -24,11 +22,9 @@ public partial class MainForm : Form
     private string _baseTitle = "";
     private string _currentFileViewFolder = "";
 
-    private readonly byte[] _customKey = new byte[16]
-        { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+    private readonly byte[] _customKey = [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00];
 
-    private readonly byte[] _dbKey = new byte[16]
-        { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+    private readonly byte[] _dbKey = [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00];
 
     private readonly List<FileListEntry> _fileListEntries = new();
     public AAPak Pak;
@@ -41,6 +37,23 @@ public partial class MainForm : Form
     public MainForm()
     {
         InitializeComponent();
+    }
+
+    private static void OpenUrl(string url)
+    {
+        try
+        {
+            var ps = new ProcessStartInfo(url)
+            {
+                UseShellExecute = true,
+                Verb = "open"
+            };
+            Process.Start(ps);
+        }
+        catch (Exception e)
+        {
+            MessageBox.Show($"Error opening URL:\n{url}\n{e.Message}");
+        }
     }
 
     private void UpdateMm()
@@ -1345,7 +1358,7 @@ public partial class MainForm : Form
 
     private void MMVersionSourceCode_Click(object sender, EventArgs e)
     {
-        Process.Start(_urlGitHub);
+        OpenUrl(_urlGitHub);
     }
 
     private void MMExportDB_Click(object sender, EventArgs e)
@@ -1383,7 +1396,7 @@ public partial class MainForm : Form
 
     private void VisitDiscordToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        Process.Start(_urlDiscord);
+        OpenUrl(_urlDiscord);
     }
 
     private void MMExtraMakeMod_Click(object sender, EventArgs e)
@@ -1849,7 +1862,7 @@ public partial class MainForm : Form
 
     private void MMVersionGetLatest_Click(object sender, EventArgs e)
     {
-        Process.Start(_urlGitHubLatestRelease);
+        OpenUrl(_urlGitHubLatestRelease);
     }
 
     private void MMToolsConvertPak_Click(object sender, EventArgs e)

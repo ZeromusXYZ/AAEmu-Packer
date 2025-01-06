@@ -1,22 +1,8 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\packages\Costura.Fody.4.0.0\build\Costura.Fody.props" Condition="Exists('..\packages\Costura.Fody.4.0.0\build\Costura.Fody.props')" />
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{FFF94EB7-B728-4AAA-98EC-5B17A1C5EDB3}</ProjectGuid>
+    <TargetFramework>net8.0-windows</TargetFramework>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>AAPakEditor</RootNamespace>
-    <AssemblyName>AAPakEditor</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <Deterministic>true</Deterministic>
     <IsWebBootstrapper>false</IsWebBootstrapper>
-    <TargetFrameworkProfile />
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
     <LangVersion>default</LangVersion>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
@@ -29,29 +15,16 @@
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>0.8.0.%2a</ApplicationVersion>
+    <ApplicationVersion>1.0.8.0</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+    <GenerateAssemblyInfo>True</GenerateAssemblyInfo>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>true</SelfContained>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
   </PropertyGroup>
   <PropertyGroup>
     <ManifestCertificateThumbprint>51DC8C416D128512BAD9559A12A11B532D379D14</ManifestCertificateThumbprint>
@@ -75,149 +48,11 @@
     <ApplicationIcon>aapakeditor_icon.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>
-    </StartupObject>
+    <StartupObject></StartupObject>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Version>1.0.8.0</Version>
+    <Copyright>Copyright © 2019-2025, No rights reserved</Copyright>
   </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="Costura, Version=4.0.0.0, Culture=neutral, PublicKeyToken=9919ef960d84173d, processorArchitecture=MSIL">
-      <HintPath>..\packages\Costura.Fody.4.0.0\lib\net40\Costura.dll</HintPath>
-    </Reference>
-    <Reference Include="FastColoredTextBox, Version=2.16.24.0, Culture=neutral, PublicKeyToken=fb8aa12b994ef61b, processorArchitecture=MSIL">
-      <HintPath>..\packages\FCTB.2.16.24\lib\FastColoredTextBox.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="Pfim, Version=0.11.2.0, Culture=neutral, PublicKeyToken=c0ebc20d008ae134, processorArchitecture=MSIL">
-      <HintPath>..\packages\Pfim.0.11.2\lib\netstandard2.0\Pfim.dll</HintPath>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Deployment" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml" />
-    <Reference Include="Vestris.ResourceLib, Version=2.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Vestris.ResourceLib.2.1.0\lib\net45\Vestris.ResourceLib.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Forms\EditWarningDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\EditWarningDialog.Designer.cs">
-      <DependentUpon>EditWarningDialog.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\FilePropForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\FilePropForm.Designer.cs">
-      <DependentUpon>FilePropForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\ImportFolderDlg.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\ImportFolderDlg.Designer.cs">
-      <DependentUpon>ImportFolderDlg.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\ExportAllDlg.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\ExportAllDlg.Designer.cs">
-      <DependentUpon>ExportAllDlg.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\AddFileDlg.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\AddFileDlg.Designer.cs">
-      <DependentUpon>AddFileDlg.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\MainForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\MainForm.Designer.cs">
-      <DependentUpon>MainForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\MakeModForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\MakeModForm.Designer.cs">
-      <DependentUpon>MakeModForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\PreviewForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\PreviewForm.Designer.cs">
-      <DependentUpon>PreviewForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Helpers\ImageHelpers.cs" />
-    <Compile Include="Helpers\JsonHelpers.cs" />
-    <Compile Include="Program.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Forms\ReMD5Dlg.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\ReMD5Dlg.Designer.cs">
-      <DependentUpon>ReMD5Dlg.cs</DependentUpon>
-    </Compile>
-    <EmbeddedResource Include="Forms\EditWarningDialog.resx">
-      <DependentUpon>EditWarningDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\FilePropForm.resx">
-      <DependentUpon>FilePropForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\ImportFolderDlg.resx">
-      <DependentUpon>ImportFolderDlg.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\ExportAllDlg.resx">
-      <DependentUpon>ExportAllDlg.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\AddFileDlg.resx">
-      <DependentUpon>AddFileDlg.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\MainForm.resx">
-      <DependentUpon>MainForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\MakeModForm.resx">
-      <DependentUpon>MakeModForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\PreviewForm.resx">
-      <DependentUpon>PreviewForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-      <DesignTime>True</DesignTime>
-    </Compile>
-    <EmbeddedResource Include="Forms\ReMD5Dlg.resx">
-      <DependentUpon>ReMD5Dlg.cs</DependentUpon>
-    </EmbeddedResource>
-    <None Include="aa.bms" />
-    <None Include="packages.config" />
-    <None Include="Properties\app.manifest" />
-    <None Include="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
-    <Compile Include="Properties\Settings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.7.2">
       <Visible>False</Visible>
@@ -233,26 +68,32 @@
   <ItemGroup>
     <Content Include="aapakeditor_icon.ico" />
     <Content Include="charge_package.ico" />
-    <None Include="Resources\warning.png" />
     <None Include="Resources\warning_icon.bmp" />
-    <None Include="Resources\cmdhelp.txt" />
-    <None Include="Resources\AAMod.exe" />
-    <None Include="res\mod_example.png" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\AAPacker\AAPacker.csproj">
-      <Project>{66655932-62c0-44f6-a0b9-788e386751df}</Project>
-      <Name>AAPacker</Name>
-    </ProjectReference>
+    <ProjectReference Include="..\AAPacker\AAPacker.csproj" />
   </ItemGroup>
-  <ItemGroup />
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them. For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('..\packages\Costura.Fody.4.0.0\build\Costura.Fody.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Costura.Fody.4.0.0\build\Costura.Fody.props'))" />
-    <Error Condition="!Exists('..\packages\Fody.5.0.6\build\Fody.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Fody.5.0.6\build\Fody.targets'))" />
-  </Target>
-  <Import Project="..\packages\Fody.5.0.6\build\Fody.targets" Condition="Exists('..\packages\Fody.5.0.6\build\Fody.targets')" />
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+    <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="FCTB" Version="2.16.24" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Pfim" Version="0.11.3" />
+    <PackageReference Include="Vestris.ResourceLib" Version="2.2.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Properties\Settings.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
 </Project>

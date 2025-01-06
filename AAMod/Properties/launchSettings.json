@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "AAMod": {
+      "commandName": "Project",
+      "commandLineArgs": "-m \"d:\\Dev\\GitHub\\ZeromusXYZ\\AAEmu-Packer\\Common\\empty_pak\""
+    }
+  }
+}

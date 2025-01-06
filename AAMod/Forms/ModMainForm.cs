@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -12,6 +13,7 @@ using AAPacker;
 
 namespace AAMod.Forms
 {
+    [SuppressMessage("Interoperability", "CA1416:Validate platform compatibility")]
     public partial class ModMainForm : Form
     {
         private static readonly string appVerDate = "V20190518";

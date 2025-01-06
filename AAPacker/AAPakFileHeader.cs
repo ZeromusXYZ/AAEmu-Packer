@@ -20,6 +20,7 @@ public class AAPakFileHeader
     /// <summary>
     /// Empty MD5 Hash as a hex string to compare against
     /// </summary>
+    // ReSharper disable once UnusedMember.Global
     public static string NullHashString { get; } = "".PadRight(32, '0');
 
     /// <summary>
@@ -31,7 +32,9 @@ public class AAPakFileHeader
     /// Default AES128 key used by XLGames for ArcheAge as encryption key for header and fileInfo data
     /// 32 1F 2A EE AA 58 4A B4 9A 6C 9E 09 D5 9E 9C 6F
     /// </summary>
-    private static byte[] XlGamesKey { get; } = { 0x32, 0x1F, 0x2A, 0xEE, 0xAA, 0x58, 0x4A, 0xB4, 0x9A, 0x6C, 0x9E, 0x09, 0xD5, 0x9E, 0x9C, 0x6F };
+    private static byte[] XlGamesKey { get; } = [
+        0x32, 0x1F, 0x2A, 0xEE, 0xAA, 0x58, 0x4A, 0xB4, 0x9A, 0x6C, 0x9E, 0x09, 0xD5, 0x9E, 0x9C, 0x6F
+    ];
 
     /// <summary>
     /// Reference to owning pakFile object
@@ -64,7 +67,7 @@ public class AAPakFileHeader
     private uint FileCount { get; set; }
 
     /// <summary>
-    /// Offset in pakFile where the meta data of the first file in the list is stored
+    /// Offset in pakFile where the metadata of the first file in the list is stored
     /// </summary>
     public long FirstFileInfoOffset { get; set; }
 
@@ -254,7 +257,7 @@ public class AAPakFileHeader
             
         Owner.TriggerProgress(AAPakLoadingProgressType.WritingFAT, 0, totalFileCount);
 
-        var invertedOrder = (Owner.PakType == PakFileType.Reader) && (Owner.Reader != null) && (Owner.Reader.InvertFileCounter);
+        var invertedOrder = (Owner.PakType == PakFileType.Reader) && Owner.Reader is { InvertFileCounter: true };
 
         for (var i = 0; i < totalFileCount; i++)
         {
@@ -443,7 +446,7 @@ public class AAPakFileHeader
         var deletedIndexCounter = -1;
         Owner.TriggerProgress(AAPakLoadingProgressType.ReadingFAT, 0, (int)totalFileCount);
 
-        var invertedOrder = (Owner.PakType == PakFileType.Reader) && (Owner.Reader != null) && (Owner.Reader.InvertFileCounter);
+        var invertedOrder = (Owner.PakType == PakFileType.Reader) && Owner.Reader is { InvertFileCounter: true };
 
         for (uint i = 0; i < totalFileCount; i++)
         {
@@ -657,7 +660,7 @@ public class AAPakFileHeader
     /// <returns></returns>
     private bool ValidateHeaderWithReader(AAPakFileFormatReader reader, byte[] raw, byte[] encryptionKey)
     {
-        Data = EncryptAes(RawData, encryptionKey, false);
+        Data = EncryptAes(raw, encryptionKey, false);
         var cursor = 0;
         var fCount = 0u;
         var eCount = 0u;
@@ -693,6 +696,8 @@ public class AAPakFileHeader
                         return false; // Expected value is not 0x00
                     break;
                 case AAPakFileHeaderElement.Header:
+                    // ReSharper disable once ForCanBeConvertedToForeach
+                    // ReSharper disable once LoopCanBeConvertedToQuery
                     for (var i = 0; i < reader.HeaderBytes.Length; i++)
                     {
                         var b = ReadByte();
@@ -727,7 +732,7 @@ public class AAPakFileHeader
         // If assigned a reader manually, check that one first
         if (Owner.Reader != null)
         {
-            if ((preDefinedKey != null) && (preDefinedKey.Length == 16))
+            if (preDefinedKey is { Length: 16 })
             {
                 IsValid = ValidateHeaderWithReader(Owner.Reader, RawData, preDefinedKey);
                 if (IsValid)
@@ -745,7 +750,7 @@ public class AAPakFileHeader
         // Try guessing what reader to use from the ReaderPool
         foreach (var readerCheck in AAPak.ReaderPool)
         {
-            if ((preDefinedKey != null) && (preDefinedKey.Length == 16))
+            if (preDefinedKey is { Length: 16 })
             {
                 if (ValidateHeaderWithReader(readerCheck, RawData, preDefinedKey))
                 {
@@ -769,7 +774,7 @@ public class AAPakFileHeader
         // custom reader didn't work, try the default styles
         Data = EncryptAes(RawData, Key, false);
 
-        // A valid header/footer check by it's identifier
+        // A valid header/footer check by its identifiers
         if (Data[0] == 'W' && Data[1] == 'I' && Data[2] == 'B' && Data[3] == 'O')
         {
             // W I B O = 0x57 0x49 0x42 0x4F
@@ -780,7 +785,7 @@ public class AAPakFileHeader
         }
         else
         {
-            // Doesn't look like this is a pak file, the file is corrupted, or is in a unknown layout/format
+            // Doesn't look like this is a pak file, the file is corrupted, or is in an unknown layout/format
             FileCount = 0;
             ExtraFileCount = 0;
             IsValid = false;

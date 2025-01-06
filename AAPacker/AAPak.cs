@@ -1,6 +1,6 @@
 ﻿using System;
-using System.IO;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -17,7 +17,10 @@ public class AAPak
     /// </summary>
     public AAPakFileFormatReader Reader { get; set; }
 
-    public static List<AAPakFileFormatReader> ReaderPool { get; set; } = new() { new AAPakFileFormatReader(true) };
+    /// <summary>
+    /// List of possible File Format Reader to try
+    /// </summary>
+    public static List<AAPakFileFormatReader> ReaderPool { get; set; } = [new AAPakFileFormatReader(true)];
 
     /// <summary>
     /// Points to this pakFile's header
@@ -71,7 +74,7 @@ public class AAPak
     public AAPakFileInfo NullAAPakFileInfo { get; } = new();
 
     /// <summary>
-    /// If set to true, adds the freed space from a delete to the previous file's padding.
+    /// If set to true, adds the freed space from a delete operation to the previous file's padding.
     /// If false (default), it "moves" the file into extraFiles for freeing up space, allowing it to be reused instead.
     /// Should only need to be changed if you are writing your own specialized patcher, and only in special cases
     /// </summary>
@@ -604,15 +607,6 @@ public class AAPak
     {
         fileInfo = Files.FirstOrDefault(pfi => pfi.Name == filename) ?? NullAAPakFileInfo;
         return fileInfo != null;
-        /*
-        foreach (var pfi in Files.Where(pfi => pfi.Name == filename))
-        {
-            fileInfo = pfi;
-            return true;
-        }
-        fileInfo = NullAAPakFileInfo; // return null file if it fails
-        return false;
-        */
     }
 
     /// <summary>
@@ -625,16 +619,6 @@ public class AAPak
     {
         fileInfo = Files.FirstOrDefault(pfi => pfi.EntryIndexNumber == fileIndex) ?? NullAAPakFileInfo;
         return fileInfo != null;
-        /*
-        foreach (var pfi in Files.Where(pfi => pfi.EntryIndexNumber == fileIndex))
-        {
-            fileInfo = pfi;
-            return true;
-        }
-
-        fileInfo = NullAAPakFileInfo; // return null file if it fails
-        return false;
-        */
     }
 
     /// <summary>
@@ -644,13 +628,7 @@ public class AAPak
     /// <returns>Returns true if the file was found</returns>
     public bool FileExists(string filename)
     {
-        return Files.Select(pfi => pfi.Name == filename).FirstOrDefault();
-        /*
-        foreach (var pfi in Files)
-            if (pfi.Name == filename)
-                return true;
-        return false;
-        */
+        return Files.Any(pfi => pfi.Name == filename);
     }
 
     /// <summary>
@@ -660,18 +638,21 @@ public class AAPak
     /// <returns>Returns a PackerSubStream of file within the pak</returns>
     public Stream ExportFileAsStream(AAPakFileInfo file)
     {
-        return new PackerSubStream(GpFileStream, file.Offset, file.Size);
+        // Open a new File Handle
+        var newFileStream = File.Open(GpFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+        // Create a sub*stream for it
+        return new PackerSubStream(newFileStream, file.Offset, file.Size);
     }
 
     /// <summary>
     /// Exports a given file as stream
     /// </summary>
     /// <param name="fileName">filename inside the pak of the file to be exported</param>
-    /// <returns>Returns a PackerSubStream of file within the pak, or a empty MemoryStream if the file was not found</returns>
+    /// <returns>Returns a PackerSubStream of file within the pak, or an empty MemoryStream if the file was not found</returns>
     public Stream ExportFileAsStream(string fileName)
     {
-        if (GetFileByName(fileName, out var file))
-            return new PackerSubStream(GpFileStream, file.Offset, file.Size);
+        if (GetFileByName(fileName, out var aaPakFileInfo))
+            return ExportFileAsStream(aaPakFileInfo);
         return new MemoryStream();
     }
 
@@ -713,10 +694,10 @@ public class AAPak
 
 
     /// <summary>
-    /// Try to find a file inside the pak file based on a Offset position inside the pak file.
+    /// Try to find a file inside the pak file based on an Offset position inside the pak file.
     /// Note: this only checks inside the used files and does not account for "deleted" files
     /// </summary>
-    /// <param name="Offset">Offset to check against</param>
+    /// <param name="offset">Offset to check against</param>
     /// <param name="fileInfo">Returns the found file's info, or nullAAPakFileInfo if nothing was found</param>
     /// <returns>Returns true if the location was found to be inside a valid file</returns>
     public bool FindFileByOffset(long offset, out AAPakFileInfo fileInfo)
@@ -1019,6 +1000,12 @@ public class AAPak
         Header.SetDefaultKey();
     }
 
+    /// <summary>
+    /// Send progress updates to the OnProgress event handler
+    /// </summary>
+    /// <param name="progressType"></param>
+    /// <param name="step"></param>
+    /// <param name="maximum"></param>
     public void TriggerProgress(AAPakLoadingProgressType progressType, int step, int maximum)
     {
         OnProgress?.Invoke(this, progressType, step, maximum);

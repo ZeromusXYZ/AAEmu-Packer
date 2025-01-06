@@ -7,4 +7,4 @@ Edit with care, always use a backup!
 
 This program and code is in no way affiliated or edorsed by XLGames.
 
-Requires .NET Framework 4.8 to run the latest version.
+Requires .NET 8.0 or higher to run the latest version.

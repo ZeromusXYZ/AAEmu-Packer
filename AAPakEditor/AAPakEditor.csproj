@@ -15,7 +15,7 @@
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>1.0.8.1</ApplicationVersion>
+    <ApplicationVersion>1.0.8.2</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
@@ -50,7 +50,7 @@
   <PropertyGroup>
     <StartupObject></StartupObject>
     <ImplicitUsings>disable</ImplicitUsings>
-    <Version>1.0.8.0</Version>
+    <Version>$(ApplicationVersion)</Version>
     <Copyright>Copyright © 2019-2025, No rights reserved</Copyright>
   </PropertyGroup>
   <ItemGroup>
@@ -71,11 +71,9 @@
     <None Include="Resources\warning_icon.bmp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\AAPacker\AAPacker.csproj" />
-  </ItemGroup>
-  <ItemGroup>
+    <PackageReference Include="AAPacker" Version="1.1.2" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
+    <PackageReference Include="System.Data.DataSetExtensions" Version="4.6.0-preview3.19128.7" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="FCTB" Version="2.16.24" />

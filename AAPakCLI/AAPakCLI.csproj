@@ -13,8 +13,10 @@
     <AssemblyTitle>AAPakCLI</AssemblyTitle>
     <Product>AAPakCLI</Product>
     <Copyright>Copyright © 2019-2025, No rights reserved</Copyright>
-    <AssemblyVersion>1.0.8.0</AssemblyVersion>
-    <FileVersion>1.0.8.0</FileVersion>
+    <AssemblyVersion>1.0.8.2</AssemblyVersion>
+    <FileVersion>1.0.8.2</FileVersion>
+    <Version>1.0.8.2</Version>
+    <Authors>ZeromusXYZ</Authors>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\AAPakEditor\Helpers\JsonHelpers.cs">
@@ -36,11 +38,9 @@
     <Content Include="aapakcli_icon.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\AAPacker\AAPacker.csproj" />
-  </ItemGroup>
-  <ItemGroup>
+    <PackageReference Include="AAPacker" Version="1.1.2" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
+    <PackageReference Include="System.Data.DataSetExtensions" Version="4.6.0-preview3.19128.7" />
   </ItemGroup>
 </Project>

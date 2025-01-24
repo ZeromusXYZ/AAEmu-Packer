@@ -15,41 +15,21 @@
     <AssemblyTitle>AAMod</AssemblyTitle>
     <Product>AAMod</Product>
     <Copyright>Copyright © 2019-2025, No rights reserved</Copyright>
-    <AssemblyVersion>1.0.8.0</AssemblyVersion>
-    <FileVersion>1.0.8.0</FileVersion>
+    <AssemblyVersion>1.0.8.2</AssemblyVersion>
+    <FileVersion>1.0.8.2</FileVersion>
   </PropertyGroup>
   <PropertyGroup>
     <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+    <Version>1.0.8.2</Version>
+    <Authors>ZeromusXYZ</Authors>
   </PropertyGroup>
-  <ItemGroup>
-    <Compile Include="..\AAPacker\AAPak.cs">
-      <Link>AAPak.cs</Link>
-    </Compile>
-    <Compile Include="..\AAPacker\AAPakFileFormatReader.cs">
-      <Link>AAPakFileFormatReader.cs</Link>
-    </Compile>
-    <Compile Include="..\AAPacker\AAPakFileHeader.cs">
-      <Link>AAPakFileHeader.cs</Link>
-    </Compile>
-    <Compile Include="..\AAPacker\AAPakFileInfo.cs">
-      <Link>AAPakFileInfo.cs</Link>
-    </Compile>
-    <Compile Include="..\AAPacker\AAPakLoadingProgressType.cs">
-      <Link>AAPakLoadingProgressType.cs</Link>
-    </Compile>
-    <Compile Include="..\AAPacker\PackerSubStream.cs">
-      <Link>PackerSubStream.cs</Link>
-    </Compile>
-    <Compile Include="..\AAPacker\PakFileType.cs">
-      <Link>PakFileType.cs</Link>
-    </Compile>
-  </ItemGroup>
   <ItemGroup>
     <Content Include="aamod_icon.ico" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="AAPacker" Version="1.1.2" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
+    <PackageReference Include="System.Data.DataSetExtensions" Version="4.6.0-preview3.19128.7" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Properties\Settings.Designer.cs">

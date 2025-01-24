@@ -1,15 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.12.35527.113 d17.12
+VisualStudioVersion = 17.12.35527.113
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AAPakEditor", "AAPakEditor\AAPakEditor.csproj", "{FFF94EB7-B728-4AAA-98EC-5B17A1C5EDB3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AAMod", "AAMod\AAMod.csproj", "{7FA9DDE6-4799-4269-9C2D-F5ADF66F10AC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AAPakCLI", "AAPakCLI\AAPakCLI.csproj", "{2B8C2FF6-F5D5-4FB1-BEB8-2DA60EEA45D1}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AAPacker", "AAPacker\AAPacker.csproj", "{66655932-62C0-44F6-A0B9-788E386751DF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,10 +27,6 @@ Global
 		{2B8C2FF6-F5D5-4FB1-BEB8-2DA60EEA45D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2B8C2FF6-F5D5-4FB1-BEB8-2DA60EEA45D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2B8C2FF6-F5D5-4FB1-BEB8-2DA60EEA45D1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{66655932-62C0-44F6-A0B9-788E386751DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{66655932-62C0-44F6-A0B9-788E386751DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{66655932-62C0-44F6-A0B9-788E386751DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{66655932-62C0-44F6-A0B9-788E386751DF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

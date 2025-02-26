@@ -14,6 +14,7 @@ using AAPakEditor.Properties;
 using AAPakEditor.Helpers;
 using FastColoredTextBoxNS;
 using MethodInvoker = System.Windows.Forms.MethodInvoker;
+using System.Text.RegularExpressions;
 
 namespace AAPakEditor.Forms;
 
@@ -141,8 +142,8 @@ public partial class MainForm : Form
 
     private void LoadCustomReaders(string userFolder)
     {
-        AAPak.ReaderPool.Clear(); 
-        
+        AAPak.ReaderPool.Clear();
+
         var jsonSettings = new JsonSerializerSettings
         {
             Culture = CultureInfo.InvariantCulture,
@@ -503,7 +504,7 @@ public partial class MainForm : Form
         }
 
         if ((fileExt == ".xml") || (fileExt == ".fdp") || (fileExt == ".lyr") || (fileExt == ".fsq") ||
-            (fileExt == ".joy") || (fileExt == ".fxl") || (fileExt == ".cba") || (fileExt == ".animevents") || 
+            (fileExt == ".joy") || (fileExt == ".fxl") || (fileExt == ".cba") || (fileExt == ".animevents") ||
             (fileExt == ".lmg") || (fileExt == ".ent") || (fileExt == ".mtl") || (fileExt == ".ccc"))
         {
             PreviewForm.Instance.tcViewer.SelectedTab = PreviewForm.Instance.tpBasicText;
@@ -609,12 +610,12 @@ public partial class MainForm : Form
 
         try
         {
-            if (lbFiles.SelectedItem is FileListEntry fle) 
+            if (lbFiles.SelectedItem is FileListEntry fle)
                 ShowFileInfo(fle.Pfi);
         }
         catch
         {
-            if (Pak.GetFileByName(d, out var pfi)) 
+            if (Pak.GetFileByName(d, out var pfi))
                 ShowFileInfo(pfi);
         }
 
@@ -1039,7 +1040,7 @@ public partial class MainForm : Form
         if (lbFiles.SelectedIndex >= 0)
         {
             replaceFileName = _currentFileViewFolder;
-            if (replaceFileName != "") 
+            if (replaceFileName != "")
                 replaceFileName += "/";
             replaceFileName += lbFiles.SelectedItem.ToString();
         }
@@ -1136,11 +1137,11 @@ public partial class MainForm : Form
 
                 // Reset the flag
                 Pak.AutoUpdateMd5WhenAdding = oldMd5ReCalc;
-                
+
                 if (res)
                 {
                     // Update values as needed
-                    
+
                     // Create time
                     if (isReplacing && addDlg.cbCreateTimeKeepExisting.Checked)
                     {
@@ -1188,7 +1189,7 @@ public partial class MainForm : Form
                     {
                         pfi.Md5 = oldPakFileInfoMd5;
                     }
-                    else 
+                    else
                     if (addDlg.rbMD5Specified.Checked)
                     {
                         pfi.Md5 = addDlg.Md5Value;
@@ -1580,7 +1581,7 @@ public partial class MainForm : Form
                 else
                 {
                     using var importFolder = new ImportFolderDlg();
-                    
+
                     importFolder.pak = Pak;
                     importFolder.InitAutoRun(arg1, arg2);
                     try
@@ -1836,7 +1837,8 @@ public partial class MainForm : Form
 
     public void AAPakNotify(AAPak sender, AAPakLoadingProgressType progressType, int step, int maximum)
     {
-        Invoke((MethodInvoker)delegate {
+        Invoke((MethodInvoker)delegate
+        {
             // Running on the UI thread
             pbGeneric.Minimum = 0;
             pbGeneric.Maximum = maximum;
@@ -1930,6 +1932,7 @@ public partial class MainForm : Form
     private void MMTools_DropDownOpening(object sender, EventArgs e)
     {
         MMToolsPreview.Checked = Settings.Default.AllowPreview;
+        MMToolsCreatePatch.Enabled = Pak.IsOpen && !Pak.IsDirty;
     }
 
     private void MMToolsPreview_Click(object sender, EventArgs e)
@@ -1937,5 +1940,212 @@ public partial class MainForm : Form
         MMToolsPreview.Checked = !MMToolsPreview.Checked;
         Settings.Default.AllowPreview = MMToolsPreview.Checked;
         Settings.Default.Save();
+    }
+
+    private void MMToolsCreatePatch_Click(object sender, EventArgs e)
+    {
+        if (MessageBox.Show(
+                $"Do you want to create a patch file for a older pak file to make it up to date to the currently opened one?",
+                "Create Patch", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
+        {
+            return;
+        }
+
+        if (openGamePakDialog.ShowDialog() != DialogResult.OK)
+        {
+            return;
+        }
+
+        lFileCount.Text = $"Opening old pak {openGamePakDialog.FileName} ...";
+
+        var oldPak = new AAPak();
+        oldPak.OnProgress += AAPakNotify;
+        try
+        {
+            if (!oldPak.OpenPak(openGamePakDialog.FileName, true))
+            {
+                lFileCount.Text = $"Failed to open {openGamePakDialog.FileName}";
+                MessageBox.Show($"Source file must be a pak file", "Not a pak", MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+                return;
+            }
+        }
+        catch (Exception exception)
+        {
+            lFileCount.Text = $"Failed to open {openGamePakDialog.FileName}";
+            MessageBox.Show(exception.Message, @"Exception", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return;
+        }
+
+        var filesToAdd = new List<string>();
+        var filesToDelete = new List<string>();
+
+        oldPak.OnProgress -= AAPakNotify;
+
+        pbGeneric.Visible = true;
+        pbGeneric.Minimum = 0;
+        pbGeneric.Maximum = Pak.Files.Count;
+        pbGeneric.Step = 1;
+
+        lFileCount.Text = $"Sorting ...";
+        statusBar.Refresh();
+
+        var pakFiles = new Dictionary<string, AAPakFileInfo>();
+        var oldFiles = new Dictionary<string, AAPakFileInfo>();
+        var sortedPakFiles = Pak.Files.ToList();
+        sortedPakFiles.Sort();
+        foreach (var sortedPakFile in sortedPakFiles)
+        {
+            pakFiles.Add(sortedPakFile.Name, sortedPakFile);
+        }
+
+        var sortedOldPakFiles = oldPak.Files.ToList();
+        sortedOldPakFiles.Sort();
+        foreach (var oldSortedPakFile in sortedOldPakFiles)
+        {
+            oldFiles.Add(oldSortedPakFile.Name, oldSortedPakFile);
+        }
+
+        lFileCount.Text = $"Analyzing changed files ...";
+        statusBar.Refresh();
+
+        // Check changed and new files
+        foreach (var (fileName, aaPakFileInfo) in pakFiles)
+        {
+            pbGeneric.PerformStep();
+            if (!oldFiles.TryGetValue(fileName, out var oldAAPakFileInfo))
+            {
+                filesToAdd.Add(aaPakFileInfo.Name);
+                continue;
+            }
+
+            if (
+                (oldAAPakFileInfo.CreateTime != aaPakFileInfo.CreateTime) ||
+                (oldAAPakFileInfo.ModifyTime != aaPakFileInfo.ModifyTime) ||
+                (oldAAPakFileInfo.Dummy1 != aaPakFileInfo.Dummy1) ||
+                (oldAAPakFileInfo.Dummy2 != aaPakFileInfo.Dummy2) ||
+                (oldAAPakFileInfo.Size != aaPakFileInfo.Size) ||
+                (oldAAPakFileInfo.SizeDuplicate != aaPakFileInfo.SizeDuplicate) ||
+                (oldAAPakFileInfo.Md5.SequenceEqual(aaPakFileInfo.Md5) == false)
+            )
+            {
+                filesToAdd.Add(aaPakFileInfo.Name);
+            }
+        }
+
+        lFileCount.Text = $"Analyzing deleted files ...";
+        pbGeneric.Minimum = 0;
+        pbGeneric.Maximum = oldPak.Files.Count;
+        pbGeneric.Step = 1;
+        statusBar.Refresh();
+
+        // Check deleted files
+        foreach (var (fileName, oldAAPakFileInfo) in oldFiles)
+        {
+            pbGeneric.PerformStep();
+            if (!pakFiles.TryGetValue(fileName, out var aaPakFileInfo))
+            {
+                filesToDelete.Add(fileName);
+            }
+        }
+
+        lFileCount.Text = $"Analyzing files ...";
+
+        if (MessageBox.Show($"Data changes from\r\n" +
+                            $"{oldPak.GpFilePath}\r\n" +
+                            $"=>\r\n" +
+                            $"{Pak.GpFilePath}\r\n" +
+                            $"\r\n" +
+                            $"{filesToAdd.Count} file(s) added or changed\r\n" +
+                            $"{filesToDelete.Count} file(s) removed\r\n" +
+                            $"\r\n" +
+                            $"Create patch pak file?",
+                "Create Patch", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
+        {
+            lFileCount.Text = $"Cancelled";
+            oldPak.ClosePak();
+            return;
+        }
+
+        if (saveGamePakDialog.ShowDialog() != DialogResult.OK)
+        {
+            lFileCount.Text = $"Cancelled";
+            oldPak.ClosePak();
+            return;
+        }
+
+        lFileCount.Text = $"Creating {saveGamePakDialog.FileName}";
+
+        var patchPak = new AAPak(saveGamePakDialog.FileName, false, true);
+        patchPak.AutoUpdateMd5WhenAdding = true;
+
+        lFileCount.Text = $"Adding {filesToAdd} file(s) ...";
+
+        // Add files
+        foreach (var fileName in filesToAdd)
+        {
+            if (!pakFiles.TryGetValue(fileName, out var aaPakFileInfo))
+            {
+                MessageBox.Show($"Where did {fileName} to go?");
+                lFileCount.Text = $"Failed";
+                patchPak.ClosePak();
+                oldPak.ClosePak();
+                return;
+            }
+
+            var fs = Pak.ExportFileAsStream(aaPakFileInfo);
+            if (!patchPak.AddFileFromStream(fileName,
+                    fs,
+                    DateTime.FromFileTimeUtc(aaPakFileInfo.CreateTime),
+                    DateTime.FromFileTimeUtc(aaPakFileInfo.ModifyTime),
+                    false,
+                    out var addedFile))
+            {
+                lFileCount.Text = $"Failed";
+                MessageBox.Show($"Failed to add {fileName} to {patchPak.GpFilePath} !");
+                patchPak.ClosePak();
+                oldPak.ClosePak();
+                return;
+            }
+        }
+
+        // Add deleted.txt file
+        if (filesToDelete.Count > 0)
+        {
+            var sb = new StringBuilder(filesToDelete.Count);
+            sb.AppendJoin('\n', filesToDelete);
+            var deletedStream = AAPak.StringToStream(sb.ToString());
+            if (!patchPak.AddFileFromStream("deleted.txt", deletedStream, DateTime.UtcNow, DateTime.UtcNow, false,
+                    out _))
+            {
+                MessageBox.Show($"Failed to add deleted.txt to {patchPak.GpFilePath} !");
+            }
+        }
+
+        var patchPakFileName = patchPak.GpFilePath;
+
+        lFileCount.Text = $"Cleaning up ...";
+
+        oldPak.ClosePak();
+        var totalAdded = patchPak.Files.Count;
+        patchPak.ClosePak();
+
+        lFileCount.Text = $"Complete!";
+
+        if (MessageBox.Show($"Create patch pak completed !\n\r" +
+                            $"Added {totalAdded} file(s)\n\r" +
+                            $"\n\r" +
+                            $"Do you want to open this new patch pak?",
+                "Create patch", MessageBoxButtons.YesNo) != DialogResult.Yes)
+            return;
+
+        // Open the patch
+        Application.DoEvents();
+        Application.UseWaitCursor = true;
+        Cursor.Current = Cursors.WaitCursor;
+        LoadPakFile(saveGamePakDialog.FileName, false, false);
+        Cursor.Current = Cursors.Default;
+        Application.UseWaitCursor = false;
+        UpdateMm();
     }
 }

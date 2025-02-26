@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "AAPakEditor": {
+      "commandName": "Project",
+      "commandLineArgs": "-o \"c:\\Temp\\game_pak_r668310\""
+    }
+  }
+}

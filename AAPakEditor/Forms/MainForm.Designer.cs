@@ -103,6 +103,7 @@
             lPakExtraInfo = new System.Windows.Forms.ToolStripStatusLabel();
             lTypePak = new System.Windows.Forms.ToolStripStatusLabel();
             MainFormSplitter = new System.Windows.Forms.SplitContainer();
+            saveGamePakDialog = new System.Windows.Forms.SaveFileDialog();
             MM.SuspendLayout();
             pFileInfo.SuspendLayout();
             tcDirectoryViews.SuspendLayout();
@@ -137,14 +138,14 @@
             // 
             MMFileOpen.Name = "MMFileOpen";
             MMFileOpen.ShortcutKeys = System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O;
-            MMFileOpen.Size = new System.Drawing.Size(202, 22);
+            MMFileOpen.Size = new System.Drawing.Size(203, 22);
             MMFileOpen.Text = "&Open ...";
             MMFileOpen.Click += MMFileOpen_Click;
             // 
             // MMFileTryOpenUsingKeyList
             // 
             MMFileTryOpenUsingKeyList.Name = "MMFileTryOpenUsingKeyList";
-            MMFileTryOpenUsingKeyList.Size = new System.Drawing.Size(202, 22);
+            MMFileTryOpenUsingKeyList.Size = new System.Drawing.Size(203, 22);
             MMFileTryOpenUsingKeyList.Text = "Try open using key list ...";
             MMFileTryOpenUsingKeyList.Visible = false;
             MMFileTryOpenUsingKeyList.Click += MMExtraTryOpenUsingKeyList_Click;
@@ -153,20 +154,20 @@
             // 
             MMFileSave.Name = "MMFileSave";
             MMFileSave.ShortcutKeys = System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S;
-            MMFileSave.Size = new System.Drawing.Size(202, 22);
+            MMFileSave.Size = new System.Drawing.Size(203, 22);
             MMFileSave.Text = "&Save now";
             MMFileSave.Click += MMFileSave_Click;
             // 
             // MMFileS1
             // 
             MMFileS1.Name = "MMFileS1";
-            MMFileS1.Size = new System.Drawing.Size(199, 6);
+            MMFileS1.Size = new System.Drawing.Size(200, 6);
             // 
             // MMFileNew
             // 
             MMFileNew.Name = "MMFileNew";
             MMFileNew.ShortcutKeys = System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.N;
-            MMFileNew.Size = new System.Drawing.Size(202, 22);
+            MMFileNew.Size = new System.Drawing.Size(203, 22);
             MMFileNew.Text = "New ...";
             MMFileNew.Click += MMFileNew_Click;
             // 
@@ -174,21 +175,21 @@
             // 
             MMFileClose.Name = "MMFileClose";
             MMFileClose.ShortcutKeys = System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.W;
-            MMFileClose.Size = new System.Drawing.Size(202, 22);
+            MMFileClose.Size = new System.Drawing.Size(203, 22);
             MMFileClose.Text = "&Close";
             MMFileClose.Click += MMFileClose_Click;
             // 
             // MMFileS2
             // 
             MMFileS2.Name = "MMFileS2";
-            MMFileS2.Size = new System.Drawing.Size(199, 6);
+            MMFileS2.Size = new System.Drawing.Size(200, 6);
             MMFileS2.Click += MMFileS2_Click;
             // 
             // MMFileExit
             // 
             MMFileExit.Name = "MMFileExit";
             MMFileExit.ShortcutKeys = System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.X;
-            MMFileExit.Size = new System.Drawing.Size(202, 22);
+            MMFileExit.Size = new System.Drawing.Size(203, 22);
             MMFileExit.Text = "E&xit";
             MMFileExit.Click += MMFileExit_Click;
             // 
@@ -203,14 +204,14 @@
             // 
             MMEditAddFile.Name = "MMEditAddFile";
             MMEditAddFile.ShortcutKeys = System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.A;
-            MMEditAddFile.Size = new System.Drawing.Size(220, 22);
+            MMEditAddFile.Size = new System.Drawing.Size(222, 22);
             MMEditAddFile.Text = "Add/Replace File ...";
             MMEditAddFile.Click += MMEditAddFile_Click;
             // 
             // MMEditReplace
             // 
             MMEditReplace.Name = "MMEditReplace";
-            MMEditReplace.Size = new System.Drawing.Size(220, 22);
+            MMEditReplace.Size = new System.Drawing.Size(222, 22);
             MMEditReplace.Text = "Replace selected file ...";
             MMEditReplace.Visible = false;
             MMEditReplace.Click += MMEditReplace_Click;
@@ -218,33 +219,33 @@
             // MMEditFileProp
             // 
             MMEditFileProp.Name = "MMEditFileProp";
-            MMEditFileProp.Size = new System.Drawing.Size(220, 22);
+            MMEditFileProp.Size = new System.Drawing.Size(222, 22);
             MMEditFileProp.Text = "Edit File Properties ...";
             MMEditFileProp.Click += manualEditFileMD5ToolStripMenuItem_Click;
             // 
             // MMEditS2
             // 
             MMEditS2.Name = "MMEditS2";
-            MMEditS2.Size = new System.Drawing.Size(217, 6);
+            MMEditS2.Size = new System.Drawing.Size(219, 6);
             // 
             // MMEditDeleteSelected
             // 
             MMEditDeleteSelected.Name = "MMEditDeleteSelected";
             MMEditDeleteSelected.ShortcutKeys = System.Windows.Forms.Keys.Delete;
-            MMEditDeleteSelected.Size = new System.Drawing.Size(220, 22);
+            MMEditDeleteSelected.Size = new System.Drawing.Size(222, 22);
             MMEditDeleteSelected.Text = "Delete selected file ...";
             MMEditDeleteSelected.Click += MMEditDeleteSelected_Click;
             // 
             // MMEditS1
             // 
             MMEditS1.Name = "MMEditS1";
-            MMEditS1.Size = new System.Drawing.Size(217, 6);
+            MMEditS1.Size = new System.Drawing.Size(219, 6);
             // 
             // MMEditImportFiles
             // 
             MMEditImportFiles.Name = "MMEditImportFiles";
             MMEditImportFiles.ShortcutKeys = System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift | System.Windows.Forms.Keys.A;
-            MMEditImportFiles.Size = new System.Drawing.Size(220, 22);
+            MMEditImportFiles.Size = new System.Drawing.Size(222, 22);
             MMEditImportFiles.Text = "&Import Files ...";
             MMEditImportFiles.Click += MMEditImportFiles_Click;
             // 
@@ -252,7 +253,7 @@
             // 
             MMExport.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { MMExportSelectedFile, MMExportSelectedFolder, MMExportS1, MMExportAll, MMExportS2, MMExportDB, MMExportAsCsv });
             MMExport.Name = "MMExport";
-            MMExport.Size = new System.Drawing.Size(53, 20);
+            MMExport.Size = new System.Drawing.Size(52, 20);
             MMExport.Text = "&Export";
             // 
             // MMExportSelectedFile
@@ -307,73 +308,72 @@
             // 
             MMTools.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { MMToolsMakeMod, MMToolsS1, MMToolsCreatePatch, MMToolsApplyPatch, MMToolsS2, MMToolsMD5, MMToolsMD5All, toolStripMenuItem1, MMToolsConvertMenu, MMToolsPreview });
             MMTools.Name = "MMTools";
-            MMTools.Size = new System.Drawing.Size(46, 20);
+            MMTools.Size = new System.Drawing.Size(47, 20);
             MMTools.Text = "&Tools";
             MMTools.DropDownOpening += MMTools_DropDownOpening;
             // 
             // MMToolsMakeMod
             // 
             MMToolsMakeMod.Name = "MMToolsMakeMod";
-            MMToolsMakeMod.Size = new System.Drawing.Size(233, 22);
+            MMToolsMakeMod.Size = new System.Drawing.Size(234, 22);
             MMToolsMakeMod.Text = "Export pak as mod ...";
             MMToolsMakeMod.Click += MMExtraMakeMod_Click;
             // 
             // MMToolsS1
             // 
             MMToolsS1.Name = "MMToolsS1";
-            MMToolsS1.Size = new System.Drawing.Size(230, 6);
+            MMToolsS1.Size = new System.Drawing.Size(231, 6);
             // 
             // MMToolsCreatePatch
             // 
             MMToolsCreatePatch.Name = "MMToolsCreatePatch";
-            MMToolsCreatePatch.Size = new System.Drawing.Size(233, 22);
+            MMToolsCreatePatch.Size = new System.Drawing.Size(234, 22);
             MMToolsCreatePatch.Text = "Create patch file ...";
-            MMToolsCreatePatch.Visible = false;
+            MMToolsCreatePatch.Click += MMToolsCreatePatch_Click;
             // 
             // MMToolsApplyPatch
             // 
             MMToolsApplyPatch.Name = "MMToolsApplyPatch";
-            MMToolsApplyPatch.Size = new System.Drawing.Size(233, 22);
+            MMToolsApplyPatch.Size = new System.Drawing.Size(234, 22);
             MMToolsApplyPatch.Text = "Apply patch file ...";
             MMToolsApplyPatch.Visible = false;
             // 
             // MMToolsS2
             // 
             MMToolsS2.Name = "MMToolsS2";
-            MMToolsS2.Size = new System.Drawing.Size(230, 6);
-            MMToolsS2.Visible = false;
+            MMToolsS2.Size = new System.Drawing.Size(231, 6);
             // 
             // MMToolsMD5
             // 
             MMToolsMD5.Name = "MMToolsMD5";
-            MMToolsMD5.Size = new System.Drawing.Size(233, 22);
+            MMToolsMD5.Size = new System.Drawing.Size(234, 22);
             MMToolsMD5.Text = "Re-Calculate MD5";
             MMToolsMD5.Click += MMEXtraMD5_Click;
             // 
             // MMToolsMD5All
             // 
             MMToolsMD5All.Name = "MMToolsMD5All";
-            MMToolsMD5All.Size = new System.Drawing.Size(233, 22);
+            MMToolsMD5All.Size = new System.Drawing.Size(234, 22);
             MMToolsMD5All.Text = "Re-Calculate MD5 of all files ...";
             MMToolsMD5All.Click += MMExtraMD5All_Click;
             // 
             // toolStripMenuItem1
             // 
             toolStripMenuItem1.Name = "toolStripMenuItem1";
-            toolStripMenuItem1.Size = new System.Drawing.Size(230, 6);
+            toolStripMenuItem1.Size = new System.Drawing.Size(231, 6);
             // 
             // MMToolsConvertMenu
             // 
             MMToolsConvertMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { MMToolsConvertPak });
             MMToolsConvertMenu.Name = "MMToolsConvertMenu";
-            MMToolsConvertMenu.Size = new System.Drawing.Size(233, 22);
+            MMToolsConvertMenu.Size = new System.Drawing.Size(234, 22);
             MMToolsConvertMenu.Text = "Convert Pak Type";
             MMToolsConvertMenu.DropDownOpening += MMToolsConvertMenu_DropDownOpening;
             // 
             // MMToolsConvertPak
             // 
             MMToolsConvertPak.Name = "MMToolsConvertPak";
-            MMToolsConvertPak.Size = new System.Drawing.Size(109, 22);
+            MMToolsConvertPak.Size = new System.Drawing.Size(110, 22);
             MMToolsConvertPak.Tag = "1";
             MMToolsConvertPak.Text = "Classic";
             MMToolsConvertPak.Click += MMToolsConvertPak_Click;
@@ -381,7 +381,7 @@
             // MMToolsPreview
             // 
             MMToolsPreview.Name = "MMToolsPreview";
-            MMToolsPreview.Size = new System.Drawing.Size(233, 22);
+            MMToolsPreview.Size = new System.Drawing.Size(234, 22);
             MMToolsPreview.Text = "Show Preview";
             MMToolsPreview.Click += MMToolsPreview_Click;
             // 
@@ -396,32 +396,32 @@
             // MMVersionGetLatest
             // 
             MMVersionGetLatest.Name = "MMVersionGetLatest";
-            MMVersionGetLatest.Size = new System.Drawing.Size(235, 22);
+            MMVersionGetLatest.Size = new System.Drawing.Size(236, 22);
             MMVersionGetLatest.Text = "Check for Latest version online";
             MMVersionGetLatest.Click += MMVersionGetLatest_Click;
             // 
             // MMVersionS1
             // 
             MMVersionS1.Name = "MMVersionS1";
-            MMVersionS1.Size = new System.Drawing.Size(232, 6);
+            MMVersionS1.Size = new System.Drawing.Size(233, 6);
             // 
             // MMVersionSourceCode
             // 
             MMVersionSourceCode.Name = "MMVersionSourceCode";
-            MMVersionSourceCode.Size = new System.Drawing.Size(235, 22);
+            MMVersionSourceCode.Size = new System.Drawing.Size(236, 22);
             MMVersionSourceCode.Text = "Source Code";
             MMVersionSourceCode.Click += MMVersionSourceCode_Click;
             // 
             // MMVersionDiscord
             // 
             MMVersionDiscord.Name = "MMVersionDiscord";
-            MMVersionDiscord.Size = new System.Drawing.Size(235, 22);
+            MMVersionDiscord.Size = new System.Drawing.Size(236, 22);
             MMVersionDiscord.Text = "Visit Discord";
             MMVersionDiscord.Click += VisitDiscordToolStripMenuItem_Click;
             // 
             // openGamePakDialog
             // 
-            openGamePakDialog.Filter = "Known pak file types|*_pak;*_pak.*;*.aamod;*.csv|ArcheAge Game Pak|*_pak;*_pak.*|CSV Files|*.csv|All Files|*.*";
+            openGamePakDialog.Filter = "Known pak file types|*_pak*;*_pak*.*;*.aamod;*.csv|ArcheAge Game Pak|*_pak;*_pak.*|CSV Files|*.csv|All Files|*.*";
             openGamePakDialog.ReadOnlyChecked = true;
             openGamePakDialog.RestoreDirectory = true;
             openGamePakDialog.ShowReadOnly = true;
@@ -430,10 +430,11 @@
             // 
             lbFolders.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
             lbFolders.FormattingEnabled = true;
+            lbFolders.ItemHeight = 15;
             lbFolders.Location = new System.Drawing.Point(4, 7);
-            lbFolders.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            lbFolders.Margin = new System.Windows.Forms.Padding(4);
             lbFolders.Name = "lbFolders";
-            lbFolders.Size = new System.Drawing.Size(275, 388);
+            lbFolders.Size = new System.Drawing.Size(274, 349);
             lbFolders.TabIndex = 1;
             lbFolders.SelectedIndexChanged += lbFolders_SelectedIndexChanged;
             // 
@@ -441,10 +442,11 @@
             // 
             lbFiles.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
             lbFiles.FormattingEnabled = true;
-            lbFiles.Location = new System.Drawing.Point(7, 34);
-            lbFiles.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            lbFiles.ItemHeight = 15;
+            lbFiles.Location = new System.Drawing.Point(7, 32);
+            lbFiles.Margin = new System.Windows.Forms.Padding(4);
             lbFiles.Name = "lbFiles";
-            lbFiles.Size = new System.Drawing.Size(368, 212);
+            lbFiles.Size = new System.Drawing.Size(363, 184);
             lbFiles.TabIndex = 4;
             lbFiles.SelectedIndexChanged += lbFiles_SelectedIndexChanged;
             // 
@@ -454,7 +456,7 @@
             lFiles.Location = new System.Drawing.Point(6, 7);
             lFiles.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             lFiles.Name = "lFiles";
-            lFiles.Size = new System.Drawing.Size(30, 16);
+            lFiles.Size = new System.Drawing.Size(30, 15);
             lFiles.TabIndex = 5;
             lFiles.Text = "Files";
             // 
@@ -472,39 +474,39 @@
             pFileInfo.Controls.Add(lfiHash);
             pFileInfo.Controls.Add(lfiSize);
             pFileInfo.Controls.Add(lfiName);
-            pFileInfo.Location = new System.Drawing.Point(7, 263);
-            pFileInfo.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            pFileInfo.Location = new System.Drawing.Point(7, 244);
+            pFileInfo.Margin = new System.Windows.Forms.Padding(4);
             pFileInfo.Name = "pFileInfo";
-            pFileInfo.Size = new System.Drawing.Size(368, 184);
+            pFileInfo.Size = new System.Drawing.Size(363, 173);
             pFileInfo.TabIndex = 6;
             // 
             // lfiCreateTime
             // 
             lfiCreateTime.AutoSize = true;
-            lfiCreateTime.Location = new System.Drawing.Point(4, 66);
+            lfiCreateTime.Location = new System.Drawing.Point(4, 62);
             lfiCreateTime.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             lfiCreateTime.Name = "lfiCreateTime";
-            lfiCreateTime.Size = new System.Drawing.Size(39, 16);
+            lfiCreateTime.Size = new System.Drawing.Size(39, 15);
             lfiCreateTime.TabIndex = 3;
             lfiCreateTime.Text = "create";
             // 
             // lfiModifyTime
             // 
             lfiModifyTime.AutoSize = true;
-            lfiModifyTime.Location = new System.Drawing.Point(4, 86);
+            lfiModifyTime.Location = new System.Drawing.Point(4, 81);
             lfiModifyTime.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             lfiModifyTime.Name = "lfiModifyTime";
-            lfiModifyTime.Size = new System.Drawing.Size(54, 16);
+            lfiModifyTime.Size = new System.Drawing.Size(55, 15);
             lfiModifyTime.TabIndex = 5;
             lfiModifyTime.Text = "modified";
             // 
             // lModifiedRaw
             // 
             lModifiedRaw.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-            lModifiedRaw.Location = new System.Drawing.Point(169, 86);
+            lModifiedRaw.Location = new System.Drawing.Point(164, 81);
             lModifiedRaw.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             lModifiedRaw.Name = "lModifiedRaw";
-            lModifiedRaw.Size = new System.Drawing.Size(194, 16);
+            lModifiedRaw.Size = new System.Drawing.Size(194, 15);
             lModifiedRaw.TabIndex = 9;
             lModifiedRaw.Text = "( )";
             lModifiedRaw.TextAlign = System.Drawing.ContentAlignment.TopRight;
@@ -512,10 +514,10 @@
             // lCreateRaw
             // 
             lCreateRaw.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-            lCreateRaw.Location = new System.Drawing.Point(169, 66);
+            lCreateRaw.Location = new System.Drawing.Point(164, 62);
             lCreateRaw.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             lCreateRaw.Name = "lCreateRaw";
-            lCreateRaw.Size = new System.Drawing.Size(194, 16);
+            lCreateRaw.Size = new System.Drawing.Size(194, 15);
             lCreateRaw.TabIndex = 8;
             lCreateRaw.Text = "( )";
             lCreateRaw.TextAlign = System.Drawing.ContentAlignment.TopRight;
@@ -523,50 +525,50 @@
             // lfiIndex
             // 
             lfiIndex.AutoSize = true;
-            lfiIndex.Location = new System.Drawing.Point(4, 160);
+            lfiIndex.Location = new System.Drawing.Point(4, 150);
             lfiIndex.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             lfiIndex.Name = "lfiIndex";
-            lfiIndex.Size = new System.Drawing.Size(36, 16);
+            lfiIndex.Size = new System.Drawing.Size(35, 15);
             lfiIndex.TabIndex = 7;
             lfiIndex.Text = "index";
             // 
             // lfiExtras
             // 
             lfiExtras.AutoSize = true;
-            lfiExtras.Location = new System.Drawing.Point(4, 142);
+            lfiExtras.Location = new System.Drawing.Point(4, 133);
             lfiExtras.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             lfiExtras.Name = "lfiExtras";
-            lfiExtras.Size = new System.Drawing.Size(57, 16);
+            lfiExtras.Size = new System.Drawing.Size(57, 15);
             lfiExtras.TabIndex = 6;
             lfiExtras.Text = "unknown";
             // 
             // lfiStartOffset
             // 
             lfiStartOffset.AutoSize = true;
-            lfiStartOffset.Location = new System.Drawing.Point(4, 114);
+            lfiStartOffset.Location = new System.Drawing.Point(4, 107);
             lfiStartOffset.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             lfiStartOffset.Name = "lfiStartOffset";
-            lfiStartOffset.Size = new System.Drawing.Size(39, 16);
+            lfiStartOffset.Size = new System.Drawing.Size(39, 15);
             lfiStartOffset.TabIndex = 4;
             lfiStartOffset.Text = "Offset";
             // 
             // lfiHash
             // 
             lfiHash.AutoSize = true;
-            lfiHash.Location = new System.Drawing.Point(4, 47);
+            lfiHash.Location = new System.Drawing.Point(4, 44);
             lfiHash.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             lfiHash.Name = "lfiHash";
-            lfiHash.Size = new System.Drawing.Size(32, 16);
+            lfiHash.Size = new System.Drawing.Size(32, 15);
             lfiHash.TabIndex = 2;
             lfiHash.Text = "hash";
             // 
             // lfiSize
             // 
             lfiSize.AutoSize = true;
-            lfiSize.Location = new System.Drawing.Point(4, 27);
+            lfiSize.Location = new System.Drawing.Point(4, 25);
             lfiSize.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             lfiSize.Name = "lfiSize";
-            lfiSize.Size = new System.Drawing.Size(27, 16);
+            lfiSize.Size = new System.Drawing.Size(27, 15);
             lfiSize.TabIndex = 1;
             lfiSize.Text = "Size";
             // 
@@ -577,7 +579,7 @@
             lfiName.Location = new System.Drawing.Point(4, 0);
             lfiName.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             lfiName.Name = "lfiName";
-            lfiName.Size = new System.Drawing.Size(38, 16);
+            lfiName.Size = new System.Drawing.Size(39, 15);
             lfiName.TabIndex = 0;
             lfiName.Text = "Name";
             lfiName.Click += lfiName_Click;
@@ -597,9 +599,9 @@
             // 
             tvFolders.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
             tvFolders.Location = new System.Drawing.Point(7, 7);
-            tvFolders.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            tvFolders.Margin = new System.Windows.Forms.Padding(4);
             tvFolders.Name = "tvFolders";
-            tvFolders.Size = new System.Drawing.Size(267, 409);
+            tvFolders.Size = new System.Drawing.Size(267, 382);
             tvFolders.TabIndex = 7;
             tvFolders.AfterSelect += tvFolders_AfterSelect;
             // 
@@ -610,20 +612,20 @@
             tcDirectoryViews.Controls.Add(tpExtraFiles);
             tcDirectoryViews.Dock = System.Windows.Forms.DockStyle.Fill;
             tcDirectoryViews.Location = new System.Drawing.Point(0, 0);
-            tcDirectoryViews.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            tcDirectoryViews.Margin = new System.Windows.Forms.Padding(4);
             tcDirectoryViews.Name = "tcDirectoryViews";
             tcDirectoryViews.SelectedIndex = 0;
-            tcDirectoryViews.Size = new System.Drawing.Size(291, 460);
+            tcDirectoryViews.Size = new System.Drawing.Size(291, 428);
             tcDirectoryViews.TabIndex = 8;
             // 
             // tpTreeView
             // 
             tpTreeView.Controls.Add(tvFolders);
-            tpTreeView.Location = new System.Drawing.Point(4, 25);
-            tpTreeView.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            tpTreeView.Location = new System.Drawing.Point(4, 24);
+            tpTreeView.Margin = new System.Windows.Forms.Padding(4);
             tpTreeView.Name = "tpTreeView";
-            tpTreeView.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            tpTreeView.Size = new System.Drawing.Size(283, 431);
+            tpTreeView.Padding = new System.Windows.Forms.Padding(4);
+            tpTreeView.Size = new System.Drawing.Size(283, 400);
             tpTreeView.TabIndex = 0;
             tpTreeView.Text = "Tree View";
             tpTreeView.UseVisualStyleBackColor = true;
@@ -631,11 +633,11 @@
             // tpFlatDirView
             // 
             tpFlatDirView.Controls.Add(lbFolders);
-            tpFlatDirView.Location = new System.Drawing.Point(4, 25);
-            tpFlatDirView.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            tpFlatDirView.Location = new System.Drawing.Point(4, 24);
+            tpFlatDirView.Margin = new System.Windows.Forms.Padding(4);
             tpFlatDirView.Name = "tpFlatDirView";
-            tpFlatDirView.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            tpFlatDirView.Size = new System.Drawing.Size(284, 420);
+            tpFlatDirView.Padding = new System.Windows.Forms.Padding(4);
+            tpFlatDirView.Size = new System.Drawing.Size(283, 400);
             tpFlatDirView.TabIndex = 1;
             tpFlatDirView.Text = "Flat Folder View";
             tpFlatDirView.UseVisualStyleBackColor = true;
@@ -643,11 +645,11 @@
             // tpExtraFiles
             // 
             tpExtraFiles.Controls.Add(lbExtraFiles);
-            tpExtraFiles.Location = new System.Drawing.Point(4, 25);
-            tpExtraFiles.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            tpExtraFiles.Location = new System.Drawing.Point(4, 24);
+            tpExtraFiles.Margin = new System.Windows.Forms.Padding(4);
             tpExtraFiles.Name = "tpExtraFiles";
-            tpExtraFiles.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            tpExtraFiles.Size = new System.Drawing.Size(284, 420);
+            tpExtraFiles.Padding = new System.Windows.Forms.Padding(4);
+            tpExtraFiles.Size = new System.Drawing.Size(283, 400);
             tpExtraFiles.TabIndex = 2;
             tpExtraFiles.Text = "Deleted Files";
             tpExtraFiles.UseVisualStyleBackColor = true;
@@ -656,10 +658,11 @@
             // 
             lbExtraFiles.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
             lbExtraFiles.FormattingEnabled = true;
+            lbExtraFiles.ItemHeight = 15;
             lbExtraFiles.Location = new System.Drawing.Point(4, 6);
-            lbExtraFiles.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            lbExtraFiles.Margin = new System.Windows.Forms.Padding(4);
             lbExtraFiles.Name = "lbExtraFiles";
-            lbExtraFiles.Size = new System.Drawing.Size(275, 388);
+            lbExtraFiles.Size = new System.Drawing.Size(274, 349);
             lbExtraFiles.TabIndex = 2;
             lbExtraFiles.SelectedIndexChanged += LbExtraFiles_SelectedIndexChanged;
             // 
@@ -674,7 +677,7 @@
             // 
             statusBar.GripStyle = System.Windows.Forms.ToolStripGripStyle.Visible;
             statusBar.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { pbGeneric, lFileCount, lPakExtraInfo, lTypePak });
-            statusBar.Location = new System.Drawing.Point(0, 484);
+            statusBar.Location = new System.Drawing.Point(0, 452);
             statusBar.Name = "statusBar";
             statusBar.Padding = new System.Windows.Forms.Padding(1, 0, 16, 0);
             statusBar.Size = new System.Drawing.Size(681, 22);
@@ -684,7 +687,7 @@
             // pbGeneric
             // 
             pbGeneric.Name = "pbGeneric";
-            pbGeneric.Size = new System.Drawing.Size(146, 20);
+            pbGeneric.Size = new System.Drawing.Size(146, 16);
             pbGeneric.Visible = false;
             // 
             // lFileCount
@@ -713,7 +716,7 @@
             // 
             MainFormSplitter.Dock = System.Windows.Forms.DockStyle.Fill;
             MainFormSplitter.Location = new System.Drawing.Point(0, 24);
-            MainFormSplitter.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            MainFormSplitter.Margin = new System.Windows.Forms.Padding(4);
             MainFormSplitter.Name = "MainFormSplitter";
             // 
             // MainFormSplitter.Panel1
@@ -727,22 +730,29 @@
             MainFormSplitter.Panel2.Controls.Add(lbFiles);
             MainFormSplitter.Panel2.Controls.Add(pFileInfo);
             MainFormSplitter.Panel2MinSize = 300;
-            MainFormSplitter.Size = new System.Drawing.Size(681, 460);
+            MainFormSplitter.Size = new System.Drawing.Size(681, 428);
             MainFormSplitter.SplitterDistance = 291;
             MainFormSplitter.SplitterWidth = 5;
             MainFormSplitter.TabIndex = 10;
             // 
+            // saveGamePakDialog
+            // 
+            saveGamePakDialog.AddToRecent = false;
+            saveGamePakDialog.Filter = "Known pak file types|*_pak;*_pak.*;*.aamod;*.csv|ArcheAge Game Pak|*_pak;*_pak.*|All Files|*.*";
+            saveGamePakDialog.RestoreDirectory = true;
+            saveGamePakDialog.Title = "Save pak file";
+            // 
             // MainForm
             // 
-            AutoScaleDimensions = new System.Drawing.SizeF(7F, 16F);
+            AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            ClientSize = new System.Drawing.Size(681, 506);
+            ClientSize = new System.Drawing.Size(681, 474);
             Controls.Add(MainFormSplitter);
             Controls.Add(statusBar);
             Controls.Add(MM);
             Icon = (System.Drawing.Icon)resources.GetObject("$this.Icon");
             MainMenuStrip = MM;
-            Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            Margin = new System.Windows.Forms.Padding(4);
             Name = "MainForm";
             Text = "AAPakEditor";
             FormClosed += MainForm_FormClosed;
@@ -844,6 +854,7 @@
         private System.Windows.Forms.ToolStripMenuItem MMToolsConvertMenu;
         private System.Windows.Forms.ToolStripMenuItem MMToolsConvertPak;
         private System.Windows.Forms.ToolStripMenuItem MMToolsPreview;
+        private System.Windows.Forms.SaveFileDialog saveGamePakDialog;
     }
 }
 

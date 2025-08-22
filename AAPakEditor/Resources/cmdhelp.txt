@@ -23,11 +23,17 @@ Adds a single file as target filename
 -f <filename>
 Deletes target filename from the pak
 
-+d <sourcedirecotry> <directory>
++d <sourcedirectry> <directory>
 Adds all files in sourcedirectory and all of it's sub-directories to the pakfile inside pakdirectory
 
 -d <directory>
 Removes all files in target directory and all off the subfolders of the pakfile
+
+-u <sourcedirectry> <directory>
+Extracts all files from the pak's sourcedirectory to target directory in disk
+
+-l <sourcefile> <targetfile>
+Extracts a single sourcefile from the pak as targetfile on disk
 
 -s
 Force-Save pakfile

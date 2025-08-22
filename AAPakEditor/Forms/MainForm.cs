@@ -1,4 +1,9 @@
-﻿using System;
+﻿using AAPacker;
+using AAPakEditor.Helpers;
+using AAPakEditor.Properties;
+using FastColoredTextBoxNS;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -8,13 +13,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
-using Newtonsoft.Json;
-using AAPacker;
-using AAPakEditor.Properties;
-using AAPakEditor.Helpers;
-using FastColoredTextBoxNS;
 using MethodInvoker = System.Windows.Forms.MethodInvoker;
-using System.Text.RegularExpressions;
 
 namespace AAPakEditor.Forms;
 
@@ -1650,6 +1649,31 @@ public partial class MainForm : Form
                     {
                         if (exportDlg.ShowDialog() != DialogResult.OK)
                             cmdErrors += "Possible errors while unpacking directory\r\n" + arg1 + "\r\n=>\r\n" + arg2;
+                    }
+                    catch (Exception x)
+                    {
+                        cmdErrors += "EXCEPTION: " + x.Message + " \r\nPossible file corruption !";
+                    }
+                }
+            }
+            else if (arg == "-l" || arg == "+l")
+            {
+                i += 2;
+                if (Pak == null || !Pak.IsOpen)
+                    cmdErrors += "Pak file needs to be opened to be able to add extract a file!\r\n";
+                else
+                {
+                    try
+                    {
+                        if (Pak.GetFileByName(arg1, out var pfi))
+                        {
+                            if (!ExportFile(pfi, arg2))
+                                MessageBox.Show($"Failed to export {arg1} as {pfi.Name} => {arg2}");
+                        }
+                        else
+                        {
+                            MessageBox.Show($"File does not exist {arg1}");
+                        }
                     }
                     catch (Exception x)
                     {

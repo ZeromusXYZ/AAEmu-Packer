@@ -2,7 +2,7 @@
   "profiles": {
     "AAPakEditor": {
       "commandName": "Project",
-      "commandLineArgs": "-o \"c:\\Temp\\game_pak_r668310\""
+      "commandLineArgs": "-o \"c:\\Temp\\game_pak_r668310\" -u \"game/db\" \"c:\\Temp\\ExportTest\" +x"
     }
   }
 }

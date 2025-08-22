@@ -1633,6 +1633,30 @@ public partial class MainForm : Form
                 i++;
                 MessageBox.Show(arg1, "Command-Line Message", MessageBoxButtons.OK, MessageBoxIcon.Stop);
             }
+            else if (arg == "-u" || arg == "+u")
+            {
+                i += 2;
+                if (Pak == null || !Pak.IsOpen)
+                    cmdErrors += "Pak file needs to be opened to be able to add extract a folder!\r\n";
+                else
+                {
+                    using var exportDlg = new ExportAllDlg();
+                    exportDlg.pak = Pak;
+                    exportDlg.masterRoot = arg1.TrimEnd('/').TrimEnd('\\') + "/";
+                    exportDlg.TargetDir = arg2;
+                    exportDlg.Text = "Export " + _currentFileViewFolder;
+
+                    try
+                    {
+                        if (exportDlg.ShowDialog() != DialogResult.OK)
+                            cmdErrors += "Possible errors while unpacking directory\r\n" + arg1 + "\r\n=>\r\n" + arg2;
+                    }
+                    catch (Exception x)
+                    {
+                        cmdErrors += "EXCEPTION: " + x.Message + " \r\nPossible file corruption !";
+                    }
+                }
+            }
             else if (arg == "-csv" || arg == "+csv")
             {
                 i++; // take one arg

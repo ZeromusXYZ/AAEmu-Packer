@@ -93,6 +93,83 @@ namespace AAPakCLI
             return filesAdded;
         }
 
+        private static (int, long, int) ExtractFolder(ref AAPak pak, string sourceDir, string targetDir)
+        {
+            var filesDone = 0;
+            long totalExportedSize = 0;
+            var errorCount = 0;
+
+            foreach (var pfi in pak.Files)
+            {
+                if (sourceDir != "")
+                    if (pfi.Name.Length <= sourceDir.Length || pfi.Name.Substring(0, sourceDir.Length) != sourceDir)
+                        continue;
+
+                var destName = targetDir.TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
+                var exportedFileName = pfi.Name.Substring(sourceDir.Length);
+                destName += exportedFileName.Replace('/', Path.DirectorySeparatorChar);
+
+                // Check if target directory exists
+                var destFolder = string.Empty;
+                try
+                {
+                    destFolder = Path.GetDirectoryName(destName);
+                }
+                catch
+                {
+                    // Fallback for stuff with invalid chars
+                    destFolder = targetDir + Path.DirectorySeparatorChar;
+                }
+
+                if (!Directory.Exists(destFolder))
+                    Directory.CreateDirectory(destFolder);
+
+                // Export the file
+                if (ExportFile(pfi, destName))
+                {
+                    filesDone++;
+                    totalExportedSize += pfi.Size;
+                }
+                else
+                {
+                    errorCount++;
+                }
+            }
+
+            return (filesDone, totalExportedSize, errorCount);
+        }
+
+        public static bool ExportFile(AAPakFileInfo pfi, string destName)
+        {
+            try
+            {
+                var destFolder = Path.GetDirectoryName(destName);
+                if (!Directory.Exists(destFolder))
+                    Directory.CreateDirectory(destFolder);
+
+                // Save file stream
+                var filePakStream = pak.ExportFileAsStream(pfi);
+                var fs = new FileStream(destName, FileMode.Create);
+                filePakStream.Position = 0;
+
+                filePakStream.CopyTo(fs);
+
+                filePakStream.Dispose();
+                fs.Dispose();
+
+                // Update file details
+                File.SetCreationTime(destName, DateTime.FromFileTimeUtc(pfi.CreateTime));
+                File.SetLastWriteTime(destName, DateTime.FromFileTimeUtc(pfi.ModifyTime));
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine($"[EXCEPTION] {ex.Message}");
+                return false;
+            }
+
+            return true;
+        }
+
         private static void CreateCSVFile(ref AAPak pak, string filename = "")
         {
             if (filename == string.Empty) return;
@@ -330,8 +407,7 @@ namespace AAPakCLI
                     i += 2; // take two args
                     if (pak == null || !pak.IsOpen || pak.ReadOnly)
                     {
-                        cmdErrors +=
-                            "[ERROR] Pak file needs to be opened in read/write mode to be able to add a file !\r\n";
+                        cmdErrors += "[ERROR] Pak file needs to be opened in read/write mode to be able to add a file !\r\n";
                     }
                     else
                     {
@@ -396,6 +472,65 @@ namespace AAPakCLI
                     Console.WriteLine("[INFO] {0} ", arg1);
                     Console.Write("Press ENTER to continue ...");
                     _ = Console.ReadLine();
+                }
+                else if (arg == "-u" || arg == "+u")
+                {
+                    i += 2;
+                    if (pak == null || !pak.IsOpen)
+                        cmdErrors += "Pak file needs to be opened to be able to add extract a folder!\r\n";
+                    else
+                    {
+                        try
+                        {
+                            var (fileExtracted, sizeExtracted, errors) = ExtractFolder(ref pak, arg1, arg2);
+                            if (errors > 0)
+                                cmdErrors += $"[ERROR] Possible errors while unpacking directory {arg1} => {arg2}";
+                            if (fileExtracted > 0)
+                            {
+                                Console.WriteLine($"[PAK] Extracted {fileExtracted} file(s) from {arg1} => {arg2} for {sizeExtracted} bytes");
+                            }
+                            else
+                            {
+                                Console.WriteLine($"[PAK] No files extract from {arg1}");
+                            }
+
+                        }
+                        catch (Exception x)
+                        {
+                            cmdErrors += $"[EXCEPTION] {x.Message} \r\nPossible file corruption !";
+                        }
+                    }
+                }
+                else if (arg == "-l" || arg == "+l")
+                {
+                    i += 2;
+                    if (pak == null || !pak.IsOpen)
+                        cmdErrors += "[ERROR] Pak file needs to be opened to be able to add extract a file!\r\n";
+                    else
+                    {
+                        try
+                        {
+                            if (pak.GetFileByName(arg1, out var pfi))
+                            {
+                                if (ExportFile(pfi, arg2))
+                                {
+                                    Console.WriteLine($"[PAK] Extracted file from {arg1} => {arg2} for {pfi.Size} bytes");
+                                }
+                                else
+                                {
+                                    cmdErrors += $"[ERROR] Error while unpacking file {arg1} => {arg2}";
+                                }
+                            }
+                            else
+                            {
+                                cmdErrors += $"[ERROR] File does not exist {arg1}";
+                            }
+                        }
+                        catch (Exception x)
+                        {
+                            cmdErrors += $"[EXCEPTION] {x.Message} \r\nPossible file corruption !";
+                        }
+                    }
                 }
                 else if (arg == "-csv" || arg == "+csv")
                 {

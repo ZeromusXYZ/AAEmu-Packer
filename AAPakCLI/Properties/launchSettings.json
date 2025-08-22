@@ -2,7 +2,7 @@
   "profiles": {
     "AAPakCLI": {
       "commandName": "Project",
-      "commandLineArgs": "-o \"c:\\Temp\\game_pak_r668310\" -u \"game/db/\" \"c:\\Temp\\ExportTest\" +m \"Done\" +x"
+      "commandLineArgs": "-o \"c:\\Temp\\game_pak_r668310\" -pbc \"c:\\Temp\\game_pak_r667380\" \"c:\\Temp\\game_pak_changes\" +m \"Done\" +x"
     }
   }
 }

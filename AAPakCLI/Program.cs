@@ -5,6 +5,7 @@ using System.Linq;
 using AAPakCLI.Properties;
 using AAPacker;
 using System.Globalization;
+using System.Text;
 using AAPakEditor.Helpers;
 using Newtonsoft.Json;
 
@@ -569,10 +570,14 @@ namespace AAPakCLI
                         }
                         else
                         {
-                            Console.WriteLine("Current File: " + pak.GpFilePath);
-                            Console.WriteLine("Compare to old file: " + arg1);
-                            Console.WriteLine("Write changes to: " + arg2);
-                            Console.WriteLine("[NYI] This function is not yet implemented");
+                            // Console.WriteLine($"[PAK] Current File: {pak.GpFilePath}");
+                            Console.WriteLine($"[PAK] Comparing to: {arg1}");
+                            Console.WriteLine($"[PAK] Write changes to: {arg2}");
+                            // Console.WriteLine("[NYI] This function is not yet implemented");
+                            if (CreatePatchFileByPakComparison(arg1, arg2, out var filesAddedCount))
+                            {
+                                Console.WriteLine($"[PAK] Created new pak file {arg2} with {filesAddedCount} files");
+                            }
                         }
                     }
                 }
@@ -600,6 +605,102 @@ namespace AAPakCLI
             if (cmdErrors != string.Empty) Console.WriteLine(cmdErrors);
 
             return closeWhenDone;
+        }
+
+        private static bool CreatePatchFileByPakComparison(string oldPakFileName, string newPatchFileName, out int filesAddedCount)
+        {
+            filesAddedCount = 0;
+            try
+            {
+                Console.WriteLine($"[PAK] Opening {oldPakFileName}");
+                var oldPak = new AAPak(oldPakFileName, true, false);
+                Console.WriteLine($"[PAK] Creating {newPatchFileName}");
+                var targetPak = new AAPak(newPatchFileName, false, true);
+
+                // Create cache data
+                var mainFilesCache = new Dictionary<string, AAPakFileInfo>();
+                pak.Files.Sort();
+                foreach (var aaPakFileInfo in pak.Files)
+                    mainFilesCache.Add(aaPakFileInfo.Name.ToLower(), aaPakFileInfo);
+
+                var oldFilesCache = new Dictionary<string, AAPakFileInfo>();
+                oldPak.Files.Sort();
+                foreach (var aaPakFileInfo in oldPak.Files)
+                    oldFilesCache.Add(aaPakFileInfo.Name.ToLower(), aaPakFileInfo);
+
+                // Loop all files in compare pak to check if they are new or changed
+                foreach (var (oldFileName, oldFileInfo) in oldFilesCache)
+                {
+                    // Ignore the deleted.txt file
+                    if (oldFileName == "deleted.txt")
+                        continue;
+
+                    // File
+                    if (mainFilesCache.TryGetValue(oldFileName, out var mainFileInfo))
+                    {
+                        // Check if it changed
+                        if (mainFileInfo.Size == oldFileInfo.Size)
+                            continue;
+                        if (mainFileInfo.Md5.SequenceEqual(oldFileInfo.Md5))
+                            continue;
+                    }
+
+                    var modTime = DateTime.UtcNow;
+                    var createTime = DateTime.UtcNow;
+                    try
+                    {
+                        createTime = DateTime.FromFileTimeUtc(oldFileInfo.CreateTime);
+                        modTime = DateTime.FromFileTimeUtc(oldFileInfo.ModifyTime);
+                    }
+                    catch
+                    {
+                        modTime = DateTime.UtcNow;
+                        createTime = DateTime.UtcNow;
+                    }
+
+                    var tempStream = oldPak.ExportFileAsStream(oldFileInfo);
+                    if (targetPak.AddFileFromStream(oldFileInfo.Name, tempStream, createTime, modTime, false, out var newFileAddedInfo))
+                    {
+                        filesAddedCount++;
+                        Console.WriteLine($"[PAK] Added {newFileAddedInfo.Name}");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"[ERROR] Error adding {oldFileInfo.Name}");
+                    }
+                }
+
+                var deletedFiles = new List<string>();
+                // Check for deleted files
+                foreach (var (mainFileName, mainFileInfo) in mainFilesCache)
+                {
+                    // Ignore the deleted.txt file
+                    if (mainFileName == "deleted.txt")
+                        continue;
+
+                    // File
+                    if (!oldFilesCache.ContainsKey(mainFileName))
+                    {
+                        Console.WriteLine($"[PAK] File was removed {mainFileInfo.Name}");
+                        deletedFiles.Add(mainFileInfo.Name);
+                    }
+                }
+
+                if (deletedFiles.Count > 0)
+                {
+                    var sb = new StringBuilder();
+                    foreach (var fileName in deletedFiles)
+                        sb.AppendLine(fileName);
+                    using var delStream = AAPak.StringToStream(sb.ToString());
+                    targetPak.AddFileFromStream("deleted.txt", delStream, DateTime.UtcNow, DateTime.UtcNow, false, out _);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"[EXCEPTION] {e}");
+                return false;
+            }
+            return true;
         }
 
         private static void Main(string[] args)

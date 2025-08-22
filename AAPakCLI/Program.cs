@@ -612,8 +612,8 @@ namespace AAPakCLI
             filesAddedCount = 0;
             try
             {
-                Console.WriteLine($"[PAK] Opening {oldPakFileName}");
-                var oldPak = new AAPak(oldPakFileName, true, false);
+                AAPak oldPak = null;
+                LoadPakFile(ref oldPak, oldPakFileName, true, true, false);
                 Console.WriteLine($"[PAK] Creating {newPatchFileName}");
                 var targetPak = new AAPak(newPatchFileName, false, true);
 
@@ -697,6 +697,7 @@ namespace AAPakCLI
 
                 targetPak.SaveHeader();
                 targetPak.ClosePak();
+                oldPak.ClosePak();
             }
             catch (Exception e)
             {

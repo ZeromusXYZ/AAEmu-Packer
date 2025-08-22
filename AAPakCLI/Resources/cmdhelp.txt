@@ -25,6 +25,18 @@
 		Removes all files in target directory and all of the 
 		subfolders of the pakfile
 
+	-u <sourcedirectry> <directory>
+		Extracts all files from the pak's sourcedirectory to target directory in disk
+
+	-l <sourcefile> <targetfile>
+		Extracts a single sourcefile from the pak as targetfile on disk
+
+	-pbc <oldpakfile> <newpatchfile>
+		Creates a newpatchfile containing only the files from the currently
+		opened file that are different from the files in the oldpakfile.
+		Compares only by file names, sizes and the MD5 hash.
+		Will always overwrite newpatchfile if it already exists.
+
 	-s
 		Force-Save pakfile
 

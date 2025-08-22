@@ -694,6 +694,9 @@ namespace AAPakCLI
                     using var delStream = AAPak.StringToStream(sb.ToString());
                     targetPak.AddFileFromStream("deleted.txt", delStream, DateTime.UtcNow, DateTime.UtcNow, false, out _);
                 }
+
+                targetPak.SaveHeader();
+                targetPak.ClosePak();
             }
             catch (Exception e)
             {

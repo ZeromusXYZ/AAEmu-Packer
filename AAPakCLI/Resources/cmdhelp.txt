@@ -37,6 +37,11 @@
 		Compares only by file names, sizes and the MD5 hash.
 		Will always overwrite newpatchfile if it already exists.
 
+	+pbc <oldpakfile> <newpatchfile>
+		The same as -pbc but will compare all file meta properties.
+		It still does not compare the actual content of the files.
+		This is the same behavior as the patch creator in the GUI.
+
 	-s
 		Force-Save pakfile
 

@@ -1416,8 +1416,8 @@ public partial class MainForm : Form
             return;
         }
 
-        // Warn user if not using a default pak type
-        if (!((Pak.PakType == PakFileType.Classic) || (Pak.Reader?.IsDefault == true)))
+        // Warn user if not using a default pak type (also assume that the name "Default" is a copy of the default settings for XLGames)
+        if ((Pak.PakType != PakFileType.Classic) && (Pak.Reader?.ReaderName != "Default"))
         {
             if (MessageBox.Show(
                     "Your currently opened a pak file that is not in the default format!\r\n" +

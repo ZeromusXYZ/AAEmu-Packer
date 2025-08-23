@@ -22,7 +22,7 @@ namespace AAPakEditor.Properties {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class Resources {
+    public class Resources {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
@@ -36,7 +36,7 @@ namespace AAPakEditor.Properties {
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Resources.ResourceManager ResourceManager {
+        public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("AAPakEditor.Properties.Resources", typeof(Resources).Assembly);
@@ -51,7 +51,7 @@ namespace AAPakEditor.Properties {
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Globalization.CultureInfo Culture {
+        public static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -63,7 +63,7 @@ namespace AAPakEditor.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] AAModSFX {
+        public static byte[] AAModSFX {
             get {
                 object obj = ResourceManager.GetObject("AAModSFX", resourceCulture);
                 return ((byte[])(obj));
@@ -88,7 +88,7 @@ namespace AAPakEditor.Properties {
         ///Adds the mod installer into the pakfile, this must be the first thing added on a new pakfile to work 
         ///You can either add a description fil [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string cmdhelp {
+        public static string cmdhelp {
             get {
                 return ResourceManager.GetString("cmdhelp", resourceCulture);
             }
@@ -97,7 +97,7 @@ namespace AAPakEditor.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap mod_example_icon {
+        public static System.Drawing.Bitmap mod_example_icon {
             get {
                 object obj = ResourceManager.GetObject("mod_example_icon", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));

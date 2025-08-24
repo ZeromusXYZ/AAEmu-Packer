@@ -13,7 +13,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using MethodInvoker = System.Windows.Forms.MethodInvoker;
 
 namespace AAPakEditor.Forms;
@@ -230,18 +229,20 @@ public partial class MainForm : Form
     private void GenerateFolderViews()
     {
         lFileCount.Text = "Analyzing folder structure ... ";
-        //lFileCount.Refresh();
 
         QuickGenerateFolderListForPak(ref Pak);
         //Pak.GenerateFolderList();
-
-        lFileCount.Text = "Loading ... ";
-        //lFileCount.Refresh();
 
         lbFolders.Items.Clear();
         lbFiles.Items.Clear();
         tvFolders.Nodes.Clear();
         lbExtraFiles.Items.Clear();
+        
+        lFileCount.Text = "Generating folder tree ... ";
+        AAPakNotify(Pak, AAPakLoadingProgressType.GeneratingDirectories, 0, 1);
+        //var clock = Stopwatch.StartNew();
+        //clock.Start();
+
         var rootNode = tvFolders.Nodes.Add("", "<root>");
         var c = 0;
         lbFolders.Items.Add("<root>");
@@ -249,11 +250,11 @@ public partial class MainForm : Form
         {
             lbFolders.Items.Add(s);
             c++;
-            if (c % 250 == 0)
-                lFileCount.Text = "Loading folders ... " + c + " / " + Pak.Folders.Count;
-            //lFileCount.Refresh();
-            //Thread.Sleep(1);
-
+            if (c % 500 == 0)
+            {
+                AAPakNotify(Pak, AAPakLoadingProgressType.GeneratingDirectories, c, Pak.Folders.Count);
+                // lFileCount.Text = "Loading folders ... " + c + " / " + Pak.Folders.Count;
+            }
 
             if (s != "")
             {
@@ -266,16 +267,8 @@ public partial class MainForm : Form
                         dd += "/";
                     dd += ds;
 
-                    TreeNode foundNode = null;
-                    foreach (TreeNode n in lastNode.Nodes)
-                        if (n.Name == dd)
-                        {
-                            foundNode = n;
-                            break;
-                        }
-
-                    //TreeNode[] nsearch = lastNode.Nodes.Find(ds, false);
-                    // if (nsearch.Length <= 0)
+                    var foundNode = lastNode.Nodes.Cast<TreeNode>().FirstOrDefault(n => n.Name == dd);
+                    
                     if (foundNode == null)
                         // No node for this yet, make one
                         lastNode = lastNode.Nodes.Add(dd, ds);
@@ -286,7 +279,10 @@ public partial class MainForm : Form
         }
 
         rootNode.Expand();
-        lFileCount.Text = Pak.Files.Count + " files in " + Pak.Folders.Count + " folders";
+        lFileCount.Text = $"{Pak.Files.Count} files in {Pak.Folders.Count} folders";
+        AAPakNotify(Pak, AAPakLoadingProgressType.GeneratingDirectories, 0, 0);
+        //clock.Stop();
+        //MessageBox.Show($"{clock.ElapsedMilliseconds} ms");
         foreach (var pfi in Pak.ExtraFiles) lbExtraFiles.Items.Add(pfi.Name);
         UpdateMm();
     }

@@ -13,6 +13,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using MethodInvoker = System.Windows.Forms.MethodInvoker;
 
 namespace AAPakEditor.Forms;
@@ -231,7 +232,8 @@ public partial class MainForm : Form
         lFileCount.Text = "Analyzing folder structure ... ";
         //lFileCount.Refresh();
 
-        Pak.GenerateFolderList();
+        QuickGenerateFolderListForPak(ref Pak);
+        //Pak.GenerateFolderList();
 
         lFileCount.Text = "Loading ... ";
         //lFileCount.Refresh();
@@ -241,7 +243,6 @@ public partial class MainForm : Form
         tvFolders.Nodes.Clear();
         lbExtraFiles.Items.Clear();
         var rootNode = tvFolders.Nodes.Add("", "<root>");
-        TreeNode foundNode = null;
         var c = 0;
         lbFolders.Items.Add("<root>");
         foreach (var s in Pak.Folders)
@@ -265,7 +266,7 @@ public partial class MainForm : Form
                         dd += "/";
                     dd += ds;
 
-                    foundNode = null;
+                    TreeNode foundNode = null;
                     foreach (TreeNode n in lastNode.Nodes)
                         if (n.Name == dd)
                         {
@@ -2196,4 +2197,59 @@ public partial class MainForm : Form
         Application.UseWaitCursor = false;
         UpdateMm();
     }
+
+    private void QuickGenerateFolderListForPak(ref AAPak pak)
+    {
+        if (!pak.IsOpen || !pak.Header.IsValid) return;
+        AAPakNotify(pak, AAPakLoadingProgressType.GeneratingDirectories, 0, pak.Files.Count);
+
+        // First generate a temporary sorted list of the files
+        var sortedList = new SortedDictionary<string, AAPakFileInfo>();
+        foreach (var aaPakFileInfo in pak.Files)
+        {
+            var sortName = aaPakFileInfo.Name.ToLower();
+            _ = sortedList.TryAdd(sortName, aaPakFileInfo);
+        }
+        pak.Folders.Clear();
+
+        AAPakNotify(pak, AAPakLoadingProgressType.GeneratingDirectories, 1, pak.Files.Count);
+
+        // There is no actual directory info stored in the pak file, so we just generate it based on fileNames
+        var c = 0;
+        foreach (var (sortedName, pfi) in sortedList)
+        {
+            c++;
+            if (sortedName == string.Empty)
+                continue;
+            try
+            {
+                // Horror function, I know :p
+                var n = Path.GetDirectoryName(pfi.Name.Replace('/', Path.DirectorySeparatorChar))?.Replace(Path.DirectorySeparatorChar, '/');
+
+                // Skip adding code if it's the same as the last entry
+                if (pak.Folders.Count > 0 && pak.Folders[^1] == n)
+                    continue;
+
+                var pos = pak.Folders.IndexOf(n);
+
+                if ((c % pak.OnProgressFATFileInterval) == 0)
+                    AAPakNotify(pak, AAPakLoadingProgressType.GeneratingDirectories, c, sortedList.Count);
+
+                if (pos >= 0)
+                    continue;
+                pak.Folders.Add(n);
+            }
+            catch (Exception ex)
+            {
+                pak.LastError = ex.Message;
+            }
+        }
+
+        if (sortedList.Count > 2)
+            AAPakNotify(pak, AAPakLoadingProgressType.GeneratingDirectories, sortedList.Count - 1, sortedList.Count);
+
+        AAPakNotify(pak, AAPakLoadingProgressType.GeneratingDirectories, sortedList.Count, sortedList.Count);
+    }
+
+
 }

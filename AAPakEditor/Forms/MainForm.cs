@@ -56,6 +56,15 @@ public partial class MainForm : Form
         }
     }
 
+    private void MMEditDeleteFolder_Click(object sender, EventArgs e)
+{
+    if (tvFolders.SelectedNode != null)
+    {
+        string folderPath = tvFolders.SelectedNode.Name;
+        DeleteFolderRecursive(folderPath);
+    }
+}
+
     private void UpdateMm()
     {
         MMFileSave.Enabled = Pak?.IsOpen == true && Pak.ReadOnly == false && Pak.IsDirty;
@@ -64,6 +73,12 @@ public partial class MainForm : Form
         MMEditAddFile.Enabled = Pak is { IsOpen: true, ReadOnly: false } && !Pak.IsVirtual;
         MMEditImportFiles.Enabled = Pak?.IsOpen == true && Pak.ReadOnly == false && !Pak.IsVirtual;
         MMEditDeleteSelected.Enabled = Pak?.IsOpen == true && Pak.ReadOnly == false && lbFiles.SelectedIndex >= 0 && !Pak.IsVirtual;
+        MMEditDeleteFolder.Enabled = Pak?.IsOpen == true && 
+                             Pak.ReadOnly == false && 
+                             !Pak.IsVirtual && 
+                             tcDirectoryViews.SelectedTab == tpTreeView && 
+                             tvFolders.SelectedNode != null && 
+                             tvFolders.SelectedNode.Name != ""; // Name != "" ensures we don't try to delete root
         MMEditReplace.Enabled = Pak?.IsOpen == true && !Pak.IsVirtual && Pak.ReadOnly == false && lbFiles.SelectedIndex >= 0;
         MMEditFileProp.Enabled = Pak?.IsOpen == true && !Pak.IsVirtual && Pak.ReadOnly == false && lbFiles.SelectedIndex >= 0;
         MMEdit.Visible = Pak?.IsOpen == true && !Pak.IsVirtual && Pak.ReadOnly == false;
@@ -972,54 +987,92 @@ public partial class MainForm : Form
         UpdateMm();
     }
 
-    private void MMEditDeleteSelected_Click(object sender, EventArgs e)
+   private void DeleteFolderRecursive(string folderPath)
+{
+    if (Pak == null || Pak.ReadOnly) return;
+
+    string searchPath = folderPath.Replace("\\", "/").ToLower();
+    if (searchPath != "" && !searchPath.EndsWith("/")) searchPath += "/";
+
+    var filesToDelete = Pak.Files.Where(pfi => pfi.Name.ToLower().StartsWith(searchPath)).ToList();
+
+    if (filesToDelete.Count == 0)
     {
-        if (Pak == null || !Pak.IsOpen || lbFiles.SelectedIndex < 0)
-            return;
+        MessageBox.Show("No files found in folder: " + folderPath);
+        return;
+    }
 
-        if (Pak.ReadOnly)
+    if (MessageBox.Show($"Are you sure you want to delete folder '{folderPath}'?\nThis will delete {filesToDelete.Count} files.", 
+        "Delete Folder", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
+    {
+        foreach (var pfi in filesToDelete)
         {
-            MessageBox.Show("Pak is opened in Read-Only mode, cannot delete files.");
-            return;
+            Pak.DeleteFile(pfi);
         }
-
-        if (lbFiles.SelectedIndex < 0)
-        {
-            MessageBox.Show("Nothing selected to delete.");
-            return;
-        }
-
-        var filename = _currentFileViewFolder;
-        if (filename != "") filename += "/";
-        filename += lbFiles.SelectedItem.ToString();
-
-        if (!(lbFiles.SelectedItem is FileListEntry fle))
-        {
-            MessageBox.Show($"Invalid file entry for\r\n" + filename, "Delete", MessageBoxButtons.OK,
-                MessageBoxIcon.Error);
-            return;
-        }
-
-        /*
-        ref AAPakFileInfo pfi = ref pak.nullAAPakFileInfo;
-        if (!pak.GetFileByName(filename, ref pfi))
-            return;
-        */
-
-        if (MessageBox.Show("Are you sure you want to delete this file ?\r\n" + filename, "Delete",
-                MessageBoxButtons.YesNo) != DialogResult.Yes)
-            return;
-
-        if (Pak.DeleteFile(fle.Pfi)) MessageBox.Show("Reference to " + filename + " has been removed from the pak.");
-
-        if (lbFiles.Items.Count <= 1)
-            // If this was the last file listed in the directory listing, we will need to re-populate the folder views to update this change
-            GenerateFolderViews();
+        
+        MessageBox.Show($"Removed {filesToDelete.Count} files.");
+        GenerateFolderViews(); 
         lbFiles.Items.Clear();
-        PopulateFilesList(_currentFileViewFolder);
-
         UpdateMm();
     }
+}
+
+    private void MMEditDeleteSelected_Click(object sender, EventArgs e)
+{
+    if (Pak == null || !Pak.IsOpen)
+        return;
+
+    if (Pak.ReadOnly)
+    {
+        MessageBox.Show("Pak is opened in Read-Only mode, cannot delete files.");
+        return;
+    }
+
+    // --- NEW LOGIC START ---
+    // Check if we are on the TreeView tab and have a node selected that isn't root
+    if (tcDirectoryViews.SelectedTab == tpTreeView && tvFolders.SelectedNode != null)
+    {
+        string folderPath = tvFolders.SelectedNode.Name; // .Name holds the path in your app
+        if (folderPath != "") // Don't delete the actual root string
+        {
+            DeleteFolderRecursive(folderPath);
+            UpdateMm();
+            return; 
+        }
+    }
+    // --- NEW LOGIC END ---
+
+    // Original single file logic follows:
+    if (lbFiles.SelectedIndex < 0)
+    {
+        MessageBox.Show("Nothing selected to delete.");
+        return;
+    }
+
+    var filename = _currentFileViewFolder;
+    if (filename != "") filename += "/";
+    filename += lbFiles.SelectedItem.ToString();
+
+    if (!(lbFiles.SelectedItem is FileListEntry fle))
+    {
+        MessageBox.Show($"Invalid file entry for\r\n" + filename, "Delete", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        return;
+    }
+
+    if (MessageBox.Show("Are you sure you want to delete this file ?\r\n" + filename, "Delete",
+            MessageBoxButtons.YesNo) != DialogResult.Yes)
+        return;
+
+    if (Pak.DeleteFile(fle.Pfi)) MessageBox.Show("Reference to " + filename + " has been removed from the pak.");
+
+    if (lbFiles.Items.Count <= 1)
+        GenerateFolderViews();
+        
+    lbFiles.Items.Clear();
+    PopulateFilesList(_currentFileViewFolder);
+
+    UpdateMm();
+}
 
     private void MMEditAddFile_Click(object sender, EventArgs e)
     {

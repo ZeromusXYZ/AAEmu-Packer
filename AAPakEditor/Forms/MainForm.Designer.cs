@@ -20,6 +20,8 @@
             base.Dispose(disposing);
         }
 
+        
+
         #region Windows Form Designer generated code
 
         /// <summary>
@@ -45,6 +47,7 @@
             MMEditFileProp = new System.Windows.Forms.ToolStripMenuItem();
             MMEditS2 = new System.Windows.Forms.ToolStripSeparator();
             MMEditDeleteSelected = new System.Windows.Forms.ToolStripMenuItem();
+            MMEditDeleteFolder = new System.Windows.Forms.ToolStripMenuItem();
             MMEditS1 = new System.Windows.Forms.ToolStripSeparator();
             MMEditImportFiles = new System.Windows.Forms.ToolStripMenuItem();
             MMExport = new System.Windows.Forms.ToolStripMenuItem();
@@ -195,7 +198,7 @@
             // 
             // MMEdit
             // 
-            MMEdit.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { MMEditAddFile, MMEditReplace, MMEditFileProp, MMEditS2, MMEditDeleteSelected, MMEditS1, MMEditImportFiles });
+            MMEdit.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { MMEditAddFile, MMEditReplace, MMEditFileProp, MMEditS2, MMEditDeleteSelected, MMEditDeleteFolder, MMEditS1, MMEditImportFiles });
             MMEdit.Name = "MMEdit";
             MMEdit.Size = new System.Drawing.Size(39, 20);
             MMEdit.Text = "&Edit";
@@ -235,6 +238,15 @@
             MMEditDeleteSelected.Size = new System.Drawing.Size(222, 22);
             MMEditDeleteSelected.Text = "Delete selected file ...";
             MMEditDeleteSelected.Click += MMEditDeleteSelected_Click;
+             // 
+             // MMEditDeleteFolder
+            // 
+            MMEditDeleteFolder.Name = "MMEditDeleteFolder";
+            MMEditDeleteFolder.Size = new System.Drawing.Size(222, 22);
+            MMEditDeleteFolder.Text = "Delete selected folder ...";
+            MMEditDeleteFolder.Click += MMEditDeleteFolder_Click;
+
+
             // 
             // MMEditS1
             // 
@@ -817,6 +829,7 @@
         private System.Windows.Forms.TabPage tpTreeView;
         private System.Windows.Forms.TabPage tpFlatDirView;
         private System.Windows.Forms.ToolStripMenuItem MMEditDeleteSelected;
+        private System.Windows.Forms.ToolStripMenuItem MMEditDeleteFolder;
         private System.Windows.Forms.ToolStripSeparator MMEditS1;
         private System.Windows.Forms.ToolStripMenuItem MMEditAddFile;
         private System.Windows.Forms.ToolStripSeparator MMEditS2;

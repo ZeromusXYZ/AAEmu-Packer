@@ -155,5 +155,52 @@ namespace AAPakEditor.Helpers
                 }
             }
         }
+
+        public void DumpResidualData(long minSize, Action<int> reportProgress = null)
+{
+    string timestamp = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
+    string dumpPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "residual_dump", timestamp);
+    Directory.CreateDirectory(dumpPath);
+
+    // Sort files by offset so we can see the gaps between them
+    var sortedFiles = _pak.Files.OrderBy(f => f.Offset).ToList();
+    int processedCount = 0;
+
+    using (FileStream fs = new FileStream(_pak.GpFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+    {
+        for (int i = 0; i < sortedFiles.Count - 1; i++)
+        {
+            processedCount++;
+            if (reportProgress != null && processedCount % 100 == 0)
+                reportProgress(processedCount);
+
+            var current = sortedFiles[i];
+            var next = sortedFiles[i + 1];
+
+            long currentEnd = current.Offset + current.Size + current.PaddingSize;
+            long gapSize = next.Offset - currentEnd;
+
+            if (gapSize >= minSize && gapSize > 0)
+            {
+                // Seek to the hole
+                fs.Seek(currentEnd, SeekOrigin.Begin);
+                
+                byte[] fullBuffer = new byte[gapSize];
+                fs.Read(fullBuffer, 0, (int)gapSize);
+
+                // Only save if it's not just a block of Zeros
+                if (fullBuffer.Any(b => b != 0))
+                {
+                    // Clean up the name of the file before the hole to use in the filename
+                    string prevName = Path.GetFileName(current.Name).Replace(".", "_");
+                    string outName = $"Hole_After_{prevName}_at_0x{currentEnd:X}.bin";
+                    
+                    // Write the UNIQUE file to the folder
+                    File.WriteAllBytes(Path.Combine(dumpPath, outName), fullBuffer);
+                }
+            }
+        }
+    }
+}
     }
 }

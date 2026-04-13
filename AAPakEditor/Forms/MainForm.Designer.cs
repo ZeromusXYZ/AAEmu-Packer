@@ -113,6 +113,7 @@
             this.MMReportHoleScan = new System.Windows.Forms.ToolStripMenuItem();
             this.MMReportPaddingCheck = new System.Windows.Forms.ToolStripMenuItem();
             MMReportDumpPadding = new System.Windows.Forms.ToolStripMenuItem();
+            MMReportDumpResidual = new System.Windows.Forms.ToolStripMenuItem();
             //
             MM.SuspendLayout();
             pFileInfo.SuspendLayout();
@@ -129,7 +130,7 @@
             // 
             // MM
             // 
-            MM.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { MMFile, MMEdit, MMExport, MMTools,MMReport, MMReportDumpPadding, MMVersion });
+            MM.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { MMFile, MMEdit, MMExport, MMTools,MMReport, MMReportDumpPadding, MMReportDumpResidual, MMVersion });
             MM.Location = new System.Drawing.Point(0, 0);
             MM.Name = "MM";
             MM.Padding = new System.Windows.Forms.Padding(7, 2, 0, 2);
@@ -441,6 +442,13 @@ MMReportDumpPadding.Name = "MMReportDumpPadding";
 MMReportDumpPadding.Size = new System.Drawing.Size(211, 22);
 MMReportDumpPadding.Text = "Dump Large Ghost Data (>1MB)";
 MMReportDumpPadding.Click += MMReportDumpPadding_Click;
+//
+//MMReportDumpResidual
+//
+MMReportDumpResidual.Name = "MMReportDumpResidual";
+MMReportDumpResidual.Size = new System.Drawing.Size(211, 22);
+MMReportDumpResidual.Text = "Dump Large Residual Data (>1MB)";
+MMReportDumpResidual.Click += MMReportDumpResidual_Click;
             // 
             // MMVersion
             // 
@@ -920,6 +928,7 @@ MMReportDumpPadding.Click += MMReportDumpPadding_Click;
         private System.Windows.Forms.ToolStripMenuItem MMReportHoleScan;
         private System.Windows.Forms.ToolStripMenuItem MMReportPaddingCheck;
         private System.Windows.Forms.ToolStripMenuItem MMReportDumpPadding;
+        private System.Windows.Forms.ToolStripMenuItem MMReportDumpResidual;
         //
     }
 }

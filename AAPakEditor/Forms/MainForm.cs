@@ -2375,6 +2375,42 @@ private async void MMReportDumpPadding_Click(object sender, EventArgs e)
         Process.Start("explorer.exe", dumpPath);
 }
 
+private async void MMReportDumpResidual_Click(object sender, EventArgs e)
+{
+    if (Pak == null || !Pak.IsOpen) return;
+
+    var result = MessageBox.Show("This will extract all 'Orphaned Residual Data' (Holes) larger than 1MB. Continue?", 
+        "Residual Dump", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+    
+    if (result != DialogResult.Yes) return;
+
+    MMReport.Enabled = false;
+    pbGeneric.Visible = true;
+    pbGeneric.Value = 0;
+    pbGeneric.Maximum = Pak.Files.Count;
+    lFileCount.Text = "Exhuming orphaned data...";
+
+await Task.Run(() => 
+{
+    var scanner = new AAPakEditor.Helpers.PakScanner(Pak);
+    // Lowered to 10KB (10 * 1024) to catch almost everything in your report
+    scanner.DumpResidualData(10 * 1024, (progress) => {
+        this.Invoke((MethodInvoker)delegate {
+            if (progress <= pbGeneric.Maximum)
+                pbGeneric.Value = progress;
+        });
+    });
+});
+
+    pbGeneric.Visible = false;
+    MMReport.Enabled = true;
+    lFileCount.Text = "Residual Dump Complete.";
+    
+    string dumpPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "residual_dump");
+    if (Directory.Exists(dumpPath))
+        Process.Start("explorer.exe", dumpPath);
+}
+
 
 
 

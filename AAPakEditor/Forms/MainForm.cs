@@ -14,6 +14,8 @@ using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
 using MethodInvoker = System.Windows.Forms.MethodInvoker;
+using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace AAPakEditor.Forms;
 
@@ -2261,4 +2263,119 @@ public partial class MainForm : Form
         Application.UseWaitCursor = false;
         UpdateMm();
     }
+
+
+    private void SaveReport(string filename, string content)
+    {
+        try
+        {
+            // Create reports folder with current date
+            string reportFolder = Path.Combine(Application.StartupPath, "Reports", DateTime.Now.ToString("yyyy-MM-dd"));
+            Directory.CreateDirectory(reportFolder);
+
+            string fullPath = Path.Combine(reportFolder, $"{DateTime.Now.ToString("HH-mm-ss")}_{filename}");
+            File.WriteAllText(fullPath, content);
+
+            MessageBox.Show($"Report generated successfully:\n{fullPath}", "Report Complete");
+
+            // Optional: Open the folder automatically
+            Process.Start("explorer.exe", reportFolder);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show("Error creating report: " + ex.Message);
+        }
+    }
+
+    private void MMReportExportCsv_Click(object sender, EventArgs e)
+    {
+        if (Pak == null || !Pak.IsOpen) return;
+        var scanner = new Helpers.PakScanner(Pak);
+        SaveReport("file_list.csv", scanner.GenerateCsvReport());
+    }
+
+    private void MMReportHoleScan_Click(object sender, EventArgs e)
+    {
+        if (Pak == null || !Pak.IsOpen) return;
+        var scanner = new Helpers.PakScanner(Pak);
+        SaveReport("holes.txt", scanner.GenerateHoleReport());
+    }
+
+private async void MMReportPaddingCheck_Click(object sender, EventArgs e)
+{
+    if (Pak == null || !Pak.IsOpen) return;
+
+    MMReport.Enabled = false;
+    pbGeneric.Visible = true;
+    pbGeneric.Value = 0;
+    pbGeneric.Maximum = Pak.Files.Count;
+    lFileCount.Text = "Scanning signatures...";
+
+    try 
+    {
+        string csvContent = await Task.Run(() => 
+        {
+            var scanner = new AAPakEditor.Helpers.PakScanner(Pak);
+            // Calling our new optimized CSV reporter
+            return scanner.GeneratePaddingReportCsv((progress) => {
+                this.Invoke((MethodInvoker)delegate {
+                    if (progress <= pbGeneric.Maximum)
+                        pbGeneric.Value = progress;
+                });
+            });
+        });
+
+        // Save as CSV instead of TXT
+        SaveReport("ghost_signatures.csv", csvContent);
+    }
+    catch (Exception ex)
+    {
+        MessageBox.Show("Scan Error: " + ex.Message);
+    }
+    finally 
+    {
+        pbGeneric.Visible = false;
+        MMReport.Enabled = true;
+        lFileCount.Text = "Scan Complete.";
+    }
+}
+private async void MMReportDumpPadding_Click(object sender, EventArgs e)
+{
+    if (Pak == null || !Pak.IsOpen) return;
+
+    var result = MessageBox.Show("This will extract all 'Ghost Data' larger than 1MB to your hard drive. Continue?", 
+        "Data Dump", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+    
+    if (result != DialogResult.Yes) return;
+
+    MMReport.Enabled = false;
+    pbGeneric.Visible = true;
+    pbGeneric.Value = 0;
+    pbGeneric.Maximum = Pak.Files.Count;
+    lFileCount.Text = "Dumping ghosts to disk...";
+
+    await Task.Run(() => 
+    {
+        var scanner = new AAPakEditor.Helpers.PakScanner(Pak);
+        // 1024 * 1024 = 1MB
+        scanner.DumpDirtyPadding(1024 * 1024, (progress) => {
+            this.Invoke((MethodInvoker)delegate {
+                if (progress <= pbGeneric.Maximum)
+                    pbGeneric.Value = progress;
+            });
+        });
+    });
+
+    pbGeneric.Visible = false;
+    MMReport.Enabled = true;
+    lFileCount.Text = "Dump Complete.";
+    
+    string dumpPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "padding_dump");
+    if (Directory.Exists(dumpPath))
+        Process.Start("explorer.exe", dumpPath);
+}
+
+
+
+
 }

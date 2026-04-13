@@ -56,15 +56,6 @@ public partial class MainForm : Form
         }
     }
 
-    private void MMEditDeleteFolder_Click(object sender, EventArgs e)
-{
-    if (tvFolders.SelectedNode != null)
-    {
-        string folderPath = tvFolders.SelectedNode.Name;
-        DeleteFolderRecursive(folderPath);
-    }
-}
-
     private void UpdateMm()
     {
         MMFileSave.Enabled = Pak?.IsOpen == true && Pak.ReadOnly == false && Pak.IsDirty;
@@ -73,12 +64,13 @@ public partial class MainForm : Form
         MMEditAddFile.Enabled = Pak is { IsOpen: true, ReadOnly: false } && !Pak.IsVirtual;
         MMEditImportFiles.Enabled = Pak?.IsOpen == true && Pak.ReadOnly == false && !Pak.IsVirtual;
         MMEditDeleteSelected.Enabled = Pak?.IsOpen == true && Pak.ReadOnly == false && lbFiles.SelectedIndex >= 0 && !Pak.IsVirtual;
-        MMEditDeleteFolder.Enabled = Pak?.IsOpen == true && 
-                             Pak.ReadOnly == false && 
-                             !Pak.IsVirtual && 
-                             tcDirectoryViews.SelectedTab == tpTreeView && 
-                             tvFolders.SelectedNode != null && 
+        MMEditDeleteFolder.Enabled = Pak?.IsOpen == true &&
+                             Pak.ReadOnly == false &&
+                             !Pak.IsVirtual &&
+                             tcDirectoryViews.SelectedTab == tpTreeView &&
+                             tvFolders.SelectedNode != null &&
                              tvFolders.SelectedNode.Name != ""; // Name != "" ensures we don't try to delete root
+
         MMEditReplace.Enabled = Pak?.IsOpen == true && !Pak.IsVirtual && Pak.ReadOnly == false && lbFiles.SelectedIndex >= 0;
         MMEditFileProp.Enabled = Pak?.IsOpen == true && !Pak.IsVirtual && Pak.ReadOnly == false && lbFiles.SelectedIndex >= 0;
         MMEdit.Visible = Pak?.IsOpen == true && !Pak.IsVirtual && Pak.ReadOnly == false;
@@ -527,77 +519,77 @@ public partial class MainForm : Form
             PreviewForm.Instance.tPreview.Text = s;
         }
         else
-        if ((fileExt == ".html") || (fileExt == ".htm"))
-        {
-            PreviewForm.Instance.tcViewer.SelectedTab = PreviewForm.Instance.tpBasicText;
-            PreviewForm.Instance.tPreview.Language = Language.HTML;
-            var s = StreamToString(Pak.ExportFileAsStream(pfi));
-            PreviewForm.Instance.tPreview.Text = s;
-        }
-        else
-        if ((fileExt == ".txt") || (fileExt == ".g") || (fileExt == ".cfg") || (fileExt == ".cal") || (fileExt == ".ini"))
-        {
-            PreviewForm.Instance.tcViewer.SelectedTab = PreviewForm.Instance.tpBasicText;
-            PreviewForm.Instance.tPreview.Language = Language.Custom;
-            var s = StreamToString(Pak.ExportFileAsStream(pfi));
-            PreviewForm.Instance.tPreview.Text = s;
-        }
-        else
-        if ((fileExt == ".lua"))// || (fileExt == ".alb"))
-        {
-            PreviewForm.Instance.tcViewer.SelectedTab = PreviewForm.Instance.tpBasicText;
-            // TODO: convert Alb to readable Lua
-            PreviewForm.Instance.tPreview.Language = Language.Lua;
-            var s = StreamToString(Pak.ExportFileAsStream(pfi));
-            PreviewForm.Instance.tPreview.Text = s;
-        }
-        else
-        if ((fileExt == ".jpg") || (fileExt == ".png") || (fileExt == ".bmp"))
-        {
-            PreviewForm.Instance.tcViewer.SelectedTab = PreviewForm.Instance.tpImage;
-            try
-            {
-                var imgStream = Pak.ExportFileAsStream(pfi);
-                var img = Image.FromStream(imgStream);
-                PreviewForm.Instance.pbPreview.Image = img;
-                PreviewForm.Instance.tcViewer.SelectedTab = PreviewForm.Instance.tpImage;
-                PreviewForm.Instance.tPreview.Text = pfi.Name + "\n" + img.Width + " x " + img.Height;
-                PreviewForm.Instance.pbPreview.Size = new Size(img.Width, img.Height);
-            }
-            catch (Exception e)
+            if ((fileExt == ".html") || (fileExt == ".htm"))
             {
                 PreviewForm.Instance.tcViewer.SelectedTab = PreviewForm.Instance.tpBasicText;
-                var s = $"Failed to load {pfi.Name}\n{e.Message}";
+                PreviewForm.Instance.tPreview.Language = Language.HTML;
+                var s = StreamToString(Pak.ExportFileAsStream(pfi));
                 PreviewForm.Instance.tPreview.Text = s;
             }
-        }
-        else
-        if ((fileExt == ".dds") || (fileExt == ".tga"))
-        {
-            // Load using Pfim
-            PreviewForm.Instance.tcViewer.SelectedTab = PreviewForm.Instance.tpImage;
-            try
-            {
-                var imgStream = Pak.ExportFileAsStream(pfi);
-                var img = ImageHelpers.ReadDdsFromStream(imgStream);
-                PreviewForm.Instance.pbPreview.Image = img;
-                PreviewForm.Instance.tcViewer.SelectedTab = PreviewForm.Instance.tpImage;
-                PreviewForm.Instance.tPreview.Text = pfi.Name + "\n" + img.Width + " x " + img.Height;
-                PreviewForm.Instance.pbPreview.Size = new Size(img.Width, img.Height);
-            }
-            catch (Exception e)
-            {
-                PreviewForm.Instance.tcViewer.SelectedTab = PreviewForm.Instance.tpBasicText;
-                var s = $"Failed to load {pfi.Name}\n{e.Message}";
-                PreviewForm.Instance.tPreview.Text = s;
-            }
-        }
-        else
-        {
-            if (PreviewForm.IsActive)
-                PreviewForm.Instance?.Close();
-            return;
-        }
+            else
+                if ((fileExt == ".txt") || (fileExt == ".g") || (fileExt == ".cfg") || (fileExt == ".cal") || (fileExt == ".ini"))
+                {
+                    PreviewForm.Instance.tcViewer.SelectedTab = PreviewForm.Instance.tpBasicText;
+                    PreviewForm.Instance.tPreview.Language = Language.Custom;
+                    var s = StreamToString(Pak.ExportFileAsStream(pfi));
+                    PreviewForm.Instance.tPreview.Text = s;
+                }
+                else
+                    if ((fileExt == ".lua"))// || (fileExt == ".alb"))
+                    {
+                        PreviewForm.Instance.tcViewer.SelectedTab = PreviewForm.Instance.tpBasicText;
+                        // TODO: convert Alb to readable Lua
+                        PreviewForm.Instance.tPreview.Language = Language.Lua;
+                        var s = StreamToString(Pak.ExportFileAsStream(pfi));
+                        PreviewForm.Instance.tPreview.Text = s;
+                    }
+                    else
+                        if ((fileExt == ".jpg") || (fileExt == ".png") || (fileExt == ".bmp"))
+                        {
+                            PreviewForm.Instance.tcViewer.SelectedTab = PreviewForm.Instance.tpImage;
+                            try
+                            {
+                                var imgStream = Pak.ExportFileAsStream(pfi);
+                                var img = Image.FromStream(imgStream);
+                                PreviewForm.Instance.pbPreview.Image = img;
+                                PreviewForm.Instance.tcViewer.SelectedTab = PreviewForm.Instance.tpImage;
+                                PreviewForm.Instance.tPreview.Text = pfi.Name + "\n" + img.Width + " x " + img.Height;
+                                PreviewForm.Instance.pbPreview.Size = new Size(img.Width, img.Height);
+                            }
+                            catch (Exception e)
+                            {
+                                PreviewForm.Instance.tcViewer.SelectedTab = PreviewForm.Instance.tpBasicText;
+                                var s = $"Failed to load {pfi.Name}\n{e.Message}";
+                                PreviewForm.Instance.tPreview.Text = s;
+                            }
+                        }
+                        else
+                            if ((fileExt == ".dds") || (fileExt == ".tga"))
+                            {
+                                // Load using Pfim
+                                PreviewForm.Instance.tcViewer.SelectedTab = PreviewForm.Instance.tpImage;
+                                try
+                                {
+                                    var imgStream = Pak.ExportFileAsStream(pfi);
+                                    var img = ImageHelpers.ReadDdsFromStream(imgStream);
+                                    PreviewForm.Instance.pbPreview.Image = img;
+                                    PreviewForm.Instance.tcViewer.SelectedTab = PreviewForm.Instance.tpImage;
+                                    PreviewForm.Instance.tPreview.Text = pfi.Name + "\n" + img.Width + " x " + img.Height;
+                                    PreviewForm.Instance.pbPreview.Size = new Size(img.Width, img.Height);
+                                }
+                                catch (Exception e)
+                                {
+                                    PreviewForm.Instance.tcViewer.SelectedTab = PreviewForm.Instance.tpBasicText;
+                                    var s = $"Failed to load {pfi.Name}\n{e.Message}";
+                                    PreviewForm.Instance.tPreview.Text = s;
+                                }
+                            }
+                            else
+                            {
+                                if (PreviewForm.IsActive)
+                                    PreviewForm.Instance?.Close();
+                                return;
+                            }
 
         PreviewForm.Instance.Show();
         PreviewForm.Instance.BringToFront();
@@ -987,92 +979,112 @@ public partial class MainForm : Form
         UpdateMm();
     }
 
-   private void DeleteFolderRecursive(string folderPath)
-{
-    if (Pak == null || Pak.ReadOnly) return;
 
-    string searchPath = folderPath.Replace("\\", "/").ToLower();
-    if (searchPath != "" && !searchPath.EndsWith("/")) searchPath += "/";
-
-    var filesToDelete = Pak.Files.Where(pfi => pfi.Name.ToLower().StartsWith(searchPath)).ToList();
-
-    if (filesToDelete.Count == 0)
+    private void MMEditDeleteSelected_Click(object sender, EventArgs e)
     {
-        MessageBox.Show("No files found in folder: " + folderPath);
-        return;
+        if (Pak == null || !Pak.IsOpen || lbFiles.SelectedIndex < 0)
+            return;
+
+        if (Pak.ReadOnly)
+        {
+            MessageBox.Show("Pak is opened in Read-Only mode, cannot delete files.");
+            return;
+        }
+
+        if (lbFiles.SelectedIndex < 0)
+        {
+            MessageBox.Show("Nothing selected to delete.");
+            return;
+        }
+
+        var filename = _currentFileViewFolder;
+        if (filename != "") filename += "/";
+        filename += lbFiles.SelectedItem.ToString();
+
+        if (!(lbFiles.SelectedItem is FileListEntry fle))
+        {
+            MessageBox.Show($"Invalid file entry for\r\n" + filename, "Delete", MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
+            return;
+        }
+
+        /*
+        ref AAPakFileInfo pfi = ref pak.nullAAPakFileInfo;
+        if (!pak.GetFileByName(filename, ref pfi))
+            return;
+        */
+
+        if (MessageBox.Show("Are you sure you want to delete this file ?\r\n" + filename, "Delete",
+                MessageBoxButtons.YesNo) != DialogResult.Yes)
+            return;
+
+        if (Pak.DeleteFile(fle.Pfi)) MessageBox.Show("Reference to " + filename + " has been removed from the pak.");
+
+        if (lbFiles.Items.Count <= 1)
+            // If this was the last file listed in the directory listing, we will need to re-populate the folder views to update this change
+            GenerateFolderViews();
+        lbFiles.Items.Clear();
+        PopulateFilesList(_currentFileViewFolder);
+
+        UpdateMm();
     }
 
-    if (MessageBox.Show($"Are you sure you want to delete folder '{folderPath}'?\nThis will delete {filesToDelete.Count} files.", 
-        "Delete Folder", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
+    //added delete folder
+    private void MMEditDeleteFolder_Click(object sender, EventArgs e)
     {
+
+        if (Pak == null || !Pak.IsOpen)
+            return;
+
+        if (Pak.ReadOnly)
+        {
+            MessageBox.Show("Pak is opened in Read-Only mode, cannot delete folders.");
+            return;
+        }
+
+        if (tvFolders.SelectedNode is not TreeNode selectedNode)
+            return;
+
+        string folderPath = selectedNode.Name;
+
+        if (string.IsNullOrEmpty(folderPath))
+        {
+            MessageBox.Show("Cannot delete the root folder.");
+            return;
+        }
+
+        string searchPath = folderPath.Replace("\\", "/").ToLower();
+        if (!searchPath.EndsWith("/")) searchPath += "/";
+
+
+        var filesToDelete = Pak.Files.Where(pfi => pfi.Name.ToLower().StartsWith(searchPath)).ToList();
+
+        if (filesToDelete.Count == 0)
+        {
+            MessageBox.Show("No files found in folder: " + folderPath);
+            return;
+        }
+
+        var confirmResult = MessageBox.Show(
+            $"Are you sure you want to delete folder '{folderPath}'?\r\nThis will delete {filesToDelete.Count} files.",
+            "Delete Folder",
+            MessageBoxButtons.YesNo,
+            MessageBoxIcon.Warning);
+
+        if (confirmResult != DialogResult.Yes)
+            return;
+
         foreach (var pfi in filesToDelete)
         {
             Pak.DeleteFile(pfi);
         }
-        
-        MessageBox.Show($"Removed {filesToDelete.Count} files.");
-        GenerateFolderViews(); 
+
+        MessageBox.Show($"Removed {filesToDelete.Count} files from the pak.");
+
+        GenerateFolderViews();
         lbFiles.Items.Clear();
         UpdateMm();
     }
-}
-
-    private void MMEditDeleteSelected_Click(object sender, EventArgs e)
-{
-    if (Pak == null || !Pak.IsOpen)
-        return;
-
-    if (Pak.ReadOnly)
-    {
-        MessageBox.Show("Pak is opened in Read-Only mode, cannot delete files.");
-        return;
-    }
-
-    // --- NEW LOGIC START ---
-    // Check if we are on the TreeView tab and have a node selected that isn't root
-    if (tcDirectoryViews.SelectedTab == tpTreeView && tvFolders.SelectedNode != null)
-    {
-        string folderPath = tvFolders.SelectedNode.Name; // .Name holds the path in your app
-        if (folderPath != "") // Don't delete the actual root string
-        {
-            DeleteFolderRecursive(folderPath);
-            UpdateMm();
-            return; 
-        }
-    }
-    // --- NEW LOGIC END ---
-
-    // Original single file logic follows:
-    if (lbFiles.SelectedIndex < 0)
-    {
-        MessageBox.Show("Nothing selected to delete.");
-        return;
-    }
-
-    var filename = _currentFileViewFolder;
-    if (filename != "") filename += "/";
-    filename += lbFiles.SelectedItem.ToString();
-
-    if (!(lbFiles.SelectedItem is FileListEntry fle))
-    {
-        MessageBox.Show($"Invalid file entry for\r\n" + filename, "Delete", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        return;
-    }
-
-    if (MessageBox.Show("Are you sure you want to delete this file ?\r\n" + filename, "Delete",
-            MessageBoxButtons.YesNo) != DialogResult.Yes)
-        return;
-
-    if (Pak.DeleteFile(fle.Pfi)) MessageBox.Show("Reference to " + filename + " has been removed from the pak.");
-
-    if (lbFiles.Items.Count <= 1)
-        GenerateFolderViews();
-        
-    lbFiles.Items.Clear();
-    PopulateFilesList(_currentFileViewFolder);
-
-    UpdateMm();
-}
 
     private void MMEditAddFile_Click(object sender, EventArgs e)
     {
@@ -1242,10 +1254,10 @@ public partial class MainForm : Form
                         pfi.Md5 = oldPakFileInfoMd5;
                     }
                     else
-                    if (addDlg.rbMD5Specified.Checked)
-                    {
-                        pfi.Md5 = addDlg.Md5Value;
-                    }
+                        if (addDlg.rbMD5Specified.Checked)
+                        {
+                            pfi.Md5 = addDlg.Md5Value;
+                        }
 
                     // Dummy 1
                     if (isReplacing && addDlg.cbDummy1KeepExisting.Checked)
@@ -1253,10 +1265,10 @@ public partial class MainForm : Form
                         pfi.Dummy1 = oldPakFileInfoDummy1;
                     }
                     else
-                    if (addDlg.rbDummy1Specified.Checked)
-                    {
-                        pfi.Dummy1 = addDlg.Dummy1AsNumber;
-                    }
+                        if (addDlg.rbDummy1Specified.Checked)
+                        {
+                            pfi.Dummy1 = addDlg.Dummy1AsNumber;
+                        }
 
                     // Dummy 2
                     if (isReplacing && addDlg.cbDummy2KeepExisting.Checked)
@@ -1264,10 +1276,10 @@ public partial class MainForm : Form
                         pfi.Dummy2 = oldPakFileInfoDummy2;
                     }
                     else
-                    if (addDlg.rbDummy2Specified.Checked)
-                    {
-                        pfi.Dummy2 = addDlg.Dummy2AsNumber;
-                    }
+                        if (addDlg.rbDummy2Specified.Checked)
+                        {
+                            pfi.Dummy2 = addDlg.Dummy2AsNumber;
+                        }
 
                     MessageBox.Show("File:\r\n" + diskFileName + "\r\n\r\nadded as:\r\n" + pfi.Name);
 
@@ -1985,14 +1997,14 @@ public partial class MainForm : Form
                     newReader = ffr;
                 }
                 else
-                if (toolStripMenuItem.Tag is string val)
-                {
-                    if (val == "1")
+                    if (toolStripMenuItem.Tag is string val)
                     {
-                        newType = PakFileType.Classic;
-                        newReader = null;
+                        if (val == "1")
+                        {
+                            newType = PakFileType.Classic;
+                            newReader = null;
+                        }
                     }
-                }
             }
 
             if ((newType != Pak.PakType) || (newReader != Pak.Reader))

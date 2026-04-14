@@ -14,8 +14,6 @@ using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
 using MethodInvoker = System.Windows.Forms.MethodInvoker;
-using System.Threading.Tasks;
-using System.Diagnostics;
 
 namespace AAPakEditor.Forms;
 
@@ -66,13 +64,7 @@ public partial class MainForm : Form
         MMEditAddFile.Enabled = Pak is { IsOpen: true, ReadOnly: false } && !Pak.IsVirtual;
         MMEditImportFiles.Enabled = Pak?.IsOpen == true && Pak.ReadOnly == false && !Pak.IsVirtual;
         MMEditDeleteSelected.Enabled = Pak?.IsOpen == true && Pak.ReadOnly == false && lbFiles.SelectedIndex >= 0 && !Pak.IsVirtual;
-        MMEditDeleteFolder.Enabled = Pak?.IsOpen == true &&
-                             Pak.ReadOnly == false &&
-                             !Pak.IsVirtual &&
-                             tcDirectoryViews.SelectedTab == tpTreeView &&
-                             tvFolders.SelectedNode != null &&
-                             tvFolders.SelectedNode.Name != ""; // Name != "" ensures we don't try to delete root
-
+        MMEditDeleteFolder.Enabled = Pak?.IsOpen == true && Pak.ReadOnly == false && !Pak.IsVirtual && tcDirectoryViews.SelectedTab == tpTreeView && tvFolders.SelectedNode != null && tvFolders.SelectedNode.Name != ""; // Name != "" ensures we don't try to delete root
         MMEditReplace.Enabled = Pak?.IsOpen == true && !Pak.IsVirtual && Pak.ReadOnly == false && lbFiles.SelectedIndex >= 0;
         MMEditFileProp.Enabled = Pak?.IsOpen == true && !Pak.IsVirtual && Pak.ReadOnly == false && lbFiles.SelectedIndex >= 0;
         MMEdit.Visible = Pak?.IsOpen == true && !Pak.IsVirtual && Pak.ReadOnly == false;
@@ -521,77 +513,77 @@ public partial class MainForm : Form
             PreviewForm.Instance.tPreview.Text = s;
         }
         else
-            if ((fileExt == ".html") || (fileExt == ".htm"))
+        if ((fileExt == ".html") || (fileExt == ".htm"))
+        {
+            PreviewForm.Instance.tcViewer.SelectedTab = PreviewForm.Instance.tpBasicText;
+            PreviewForm.Instance.tPreview.Language = Language.HTML;
+            var s = StreamToString(Pak.ExportFileAsStream(pfi));
+            PreviewForm.Instance.tPreview.Text = s;
+        }
+        else
+        if ((fileExt == ".txt") || (fileExt == ".g") || (fileExt == ".cfg") || (fileExt == ".cal") || (fileExt == ".ini"))
+        {
+            PreviewForm.Instance.tcViewer.SelectedTab = PreviewForm.Instance.tpBasicText;
+            PreviewForm.Instance.tPreview.Language = Language.Custom;
+            var s = StreamToString(Pak.ExportFileAsStream(pfi));
+            PreviewForm.Instance.tPreview.Text = s;
+        }
+        else
+        if ((fileExt == ".lua"))// || (fileExt == ".alb"))
+        {
+            PreviewForm.Instance.tcViewer.SelectedTab = PreviewForm.Instance.tpBasicText;
+            // TODO: convert Alb to readable Lua
+            PreviewForm.Instance.tPreview.Language = Language.Lua;
+            var s = StreamToString(Pak.ExportFileAsStream(pfi));
+            PreviewForm.Instance.tPreview.Text = s;
+        }
+        else
+        if ((fileExt == ".jpg") || (fileExt == ".png") || (fileExt == ".bmp"))
+        {
+            PreviewForm.Instance.tcViewer.SelectedTab = PreviewForm.Instance.tpImage;
+            try
+            {
+                var imgStream = Pak.ExportFileAsStream(pfi);
+                var img = Image.FromStream(imgStream);
+                PreviewForm.Instance.pbPreview.Image = img;
+                PreviewForm.Instance.tcViewer.SelectedTab = PreviewForm.Instance.tpImage;
+                PreviewForm.Instance.tPreview.Text = pfi.Name + "\n" + img.Width + " x " + img.Height;
+                PreviewForm.Instance.pbPreview.Size = new Size(img.Width, img.Height);
+            }
+            catch (Exception e)
             {
                 PreviewForm.Instance.tcViewer.SelectedTab = PreviewForm.Instance.tpBasicText;
-                PreviewForm.Instance.tPreview.Language = Language.HTML;
-                var s = StreamToString(Pak.ExportFileAsStream(pfi));
+                var s = $"Failed to load {pfi.Name}\n{e.Message}";
                 PreviewForm.Instance.tPreview.Text = s;
             }
-            else
-                if ((fileExt == ".txt") || (fileExt == ".g") || (fileExt == ".cfg") || (fileExt == ".cal") || (fileExt == ".ini"))
-                {
-                    PreviewForm.Instance.tcViewer.SelectedTab = PreviewForm.Instance.tpBasicText;
-                    PreviewForm.Instance.tPreview.Language = Language.Custom;
-                    var s = StreamToString(Pak.ExportFileAsStream(pfi));
-                    PreviewForm.Instance.tPreview.Text = s;
-                }
-                else
-                    if ((fileExt == ".lua"))// || (fileExt == ".alb"))
-                    {
-                        PreviewForm.Instance.tcViewer.SelectedTab = PreviewForm.Instance.tpBasicText;
-                        // TODO: convert Alb to readable Lua
-                        PreviewForm.Instance.tPreview.Language = Language.Lua;
-                        var s = StreamToString(Pak.ExportFileAsStream(pfi));
-                        PreviewForm.Instance.tPreview.Text = s;
-                    }
-                    else
-                        if ((fileExt == ".jpg") || (fileExt == ".png") || (fileExt == ".bmp"))
-                        {
-                            PreviewForm.Instance.tcViewer.SelectedTab = PreviewForm.Instance.tpImage;
-                            try
-                            {
-                                var imgStream = Pak.ExportFileAsStream(pfi);
-                                var img = Image.FromStream(imgStream);
-                                PreviewForm.Instance.pbPreview.Image = img;
-                                PreviewForm.Instance.tcViewer.SelectedTab = PreviewForm.Instance.tpImage;
-                                PreviewForm.Instance.tPreview.Text = pfi.Name + "\n" + img.Width + " x " + img.Height;
-                                PreviewForm.Instance.pbPreview.Size = new Size(img.Width, img.Height);
-                            }
-                            catch (Exception e)
-                            {
-                                PreviewForm.Instance.tcViewer.SelectedTab = PreviewForm.Instance.tpBasicText;
-                                var s = $"Failed to load {pfi.Name}\n{e.Message}";
-                                PreviewForm.Instance.tPreview.Text = s;
-                            }
-                        }
-                        else
-                            if ((fileExt == ".dds") || (fileExt == ".tga"))
-                            {
-                                // Load using Pfim
-                                PreviewForm.Instance.tcViewer.SelectedTab = PreviewForm.Instance.tpImage;
-                                try
-                                {
-                                    var imgStream = Pak.ExportFileAsStream(pfi);
-                                    var img = ImageHelpers.ReadDdsFromStream(imgStream);
-                                    PreviewForm.Instance.pbPreview.Image = img;
-                                    PreviewForm.Instance.tcViewer.SelectedTab = PreviewForm.Instance.tpImage;
-                                    PreviewForm.Instance.tPreview.Text = pfi.Name + "\n" + img.Width + " x " + img.Height;
-                                    PreviewForm.Instance.pbPreview.Size = new Size(img.Width, img.Height);
-                                }
-                                catch (Exception e)
-                                {
-                                    PreviewForm.Instance.tcViewer.SelectedTab = PreviewForm.Instance.tpBasicText;
-                                    var s = $"Failed to load {pfi.Name}\n{e.Message}";
-                                    PreviewForm.Instance.tPreview.Text = s;
-                                }
-                            }
-                            else
-                            {
-                                if (PreviewForm.IsActive)
-                                    PreviewForm.Instance?.Close();
-                                return;
-                            }
+        }
+        else
+        if ((fileExt == ".dds") || (fileExt == ".tga"))
+        {
+            // Load using Pfim
+            PreviewForm.Instance.tcViewer.SelectedTab = PreviewForm.Instance.tpImage;
+            try
+            {
+                var imgStream = Pak.ExportFileAsStream(pfi);
+                var img = ImageHelpers.ReadDdsFromStream(imgStream);
+                PreviewForm.Instance.pbPreview.Image = img;
+                PreviewForm.Instance.tcViewer.SelectedTab = PreviewForm.Instance.tpImage;
+                PreviewForm.Instance.tPreview.Text = pfi.Name + "\n" + img.Width + " x " + img.Height;
+                PreviewForm.Instance.pbPreview.Size = new Size(img.Width, img.Height);
+            }
+            catch (Exception e)
+            {
+                PreviewForm.Instance.tcViewer.SelectedTab = PreviewForm.Instance.tpBasicText;
+                var s = $"Failed to load {pfi.Name}\n{e.Message}";
+                PreviewForm.Instance.tPreview.Text = s;
+            }
+        }
+        else
+        {
+            if (PreviewForm.IsActive)
+                PreviewForm.Instance?.Close();
+            return;
+        }
 
         PreviewForm.Instance.Show();
         PreviewForm.Instance.BringToFront();
@@ -981,7 +973,6 @@ public partial class MainForm : Form
         UpdateMm();
     }
 
-
     private void MMEditDeleteSelected_Click(object sender, EventArgs e)
     {
         if (Pak == null || !Pak.IsOpen || lbFiles.SelectedIndex < 0)
@@ -1031,7 +1022,6 @@ public partial class MainForm : Form
         UpdateMm();
     }
 
-    //added delete folder
     private void MMEditDeleteFolder_Click(object sender, EventArgs e)
     {
 
@@ -1256,10 +1246,10 @@ public partial class MainForm : Form
                         pfi.Md5 = oldPakFileInfoMd5;
                     }
                     else
-                        if (addDlg.rbMD5Specified.Checked)
-                        {
-                            pfi.Md5 = addDlg.Md5Value;
-                        }
+                    if (addDlg.rbMD5Specified.Checked)
+                    {
+                        pfi.Md5 = addDlg.Md5Value;
+                    }
 
                     // Dummy 1
                     if (isReplacing && addDlg.cbDummy1KeepExisting.Checked)
@@ -1267,10 +1257,10 @@ public partial class MainForm : Form
                         pfi.Dummy1 = oldPakFileInfoDummy1;
                     }
                     else
-                        if (addDlg.rbDummy1Specified.Checked)
-                        {
-                            pfi.Dummy1 = addDlg.Dummy1AsNumber;
-                        }
+                    if (addDlg.rbDummy1Specified.Checked)
+                    {
+                        pfi.Dummy1 = addDlg.Dummy1AsNumber;
+                    }
 
                     // Dummy 2
                     if (isReplacing && addDlg.cbDummy2KeepExisting.Checked)
@@ -1278,10 +1268,10 @@ public partial class MainForm : Form
                         pfi.Dummy2 = oldPakFileInfoDummy2;
                     }
                     else
-                        if (addDlg.rbDummy2Specified.Checked)
-                        {
-                            pfi.Dummy2 = addDlg.Dummy2AsNumber;
-                        }
+                    if (addDlg.rbDummy2Specified.Checked)
+                    {
+                        pfi.Dummy2 = addDlg.Dummy2AsNumber;
+                    }
 
                     MessageBox.Show("File:\r\n" + diskFileName + "\r\n\r\nadded as:\r\n" + pfi.Name);
 
@@ -1999,14 +1989,14 @@ public partial class MainForm : Form
                     newReader = ffr;
                 }
                 else
-                    if (toolStripMenuItem.Tag is string val)
+                if (toolStripMenuItem.Tag is string val)
+                {
+                    if (val == "1")
                     {
-                        if (val == "1")
-                        {
-                            newType = PakFileType.Classic;
-                            newReader = null;
-                        }
+                        newType = PakFileType.Classic;
+                        newReader = null;
                     }
+                }
             }
 
             if ((newType != Pak.PakType) || (newReader != Pak.Reader))
@@ -2263,155 +2253,4 @@ public partial class MainForm : Form
         Application.UseWaitCursor = false;
         UpdateMm();
     }
-
-
-    private void SaveReport(string filename, string content)
-    {
-        try
-        {
-            // Create reports folder with current date
-            string reportFolder = Path.Combine(Application.StartupPath, "Reports", DateTime.Now.ToString("yyyy-MM-dd"));
-            Directory.CreateDirectory(reportFolder);
-
-            string fullPath = Path.Combine(reportFolder, $"{DateTime.Now.ToString("HH-mm-ss")}_{filename}");
-            File.WriteAllText(fullPath, content);
-
-            MessageBox.Show($"Report generated successfully:\n{fullPath}", "Report Complete");
-
-            // Optional: Open the folder automatically
-            Process.Start("explorer.exe", reportFolder);
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show("Error creating report: " + ex.Message);
-        }
-    }
-
-    private void MMReportExportCsv_Click(object sender, EventArgs e)
-    {
-        if (Pak == null || !Pak.IsOpen) return;
-        var scanner = new Helpers.PakScanner(Pak);
-        SaveReport("file_list.csv", scanner.GenerateCsvReport());
-    }
-
-    private void MMReportHoleScan_Click(object sender, EventArgs e)
-    {
-        if (Pak == null || !Pak.IsOpen) return;
-        var scanner = new Helpers.PakScanner(Pak);
-        SaveReport("holes.txt", scanner.GenerateHoleReport());
-    }
-
-private async void MMReportPaddingCheck_Click(object sender, EventArgs e)
-{
-    if (Pak == null || !Pak.IsOpen) return;
-
-    MMReport.Enabled = false;
-    pbGeneric.Visible = true;
-    pbGeneric.Value = 0;
-    pbGeneric.Maximum = Pak.Files.Count;
-    lFileCount.Text = "Scanning signatures...";
-
-    try 
-    {
-        string csvContent = await Task.Run(() => 
-        {
-            var scanner = new AAPakEditor.Helpers.PakScanner(Pak);
-            // Calling our new optimized CSV reporter
-            return scanner.GeneratePaddingReportCsv((progress) => {
-                this.Invoke((MethodInvoker)delegate {
-                    if (progress <= pbGeneric.Maximum)
-                        pbGeneric.Value = progress;
-                });
-            });
-        });
-
-        // Save as CSV instead of TXT
-        SaveReport("ghost_signatures.csv", csvContent);
-    }
-    catch (Exception ex)
-    {
-        MessageBox.Show("Scan Error: " + ex.Message);
-    }
-    finally 
-    {
-        pbGeneric.Visible = false;
-        MMReport.Enabled = true;
-        lFileCount.Text = "Scan Complete.";
-    }
-}
-private async void MMReportDumpPadding_Click(object sender, EventArgs e)
-{
-    if (Pak == null || !Pak.IsOpen) return;
-
-    var result = MessageBox.Show("This will extract all 'Ghost Data' larger than 1MB to your hard drive. Continue?", 
-        "Data Dump", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-    
-    if (result != DialogResult.Yes) return;
-
-    MMReport.Enabled = false;
-    pbGeneric.Visible = true;
-    pbGeneric.Value = 0;
-    pbGeneric.Maximum = Pak.Files.Count;
-    lFileCount.Text = "Dumping ghosts to disk...";
-
-    await Task.Run(() => 
-    {
-        var scanner = new AAPakEditor.Helpers.PakScanner(Pak);
-        // 1024 * 1024 = 1MB
-        scanner.DumpDirtyPadding(1024 * 1024, (progress) => {
-            this.Invoke((MethodInvoker)delegate {
-                if (progress <= pbGeneric.Maximum)
-                    pbGeneric.Value = progress;
-            });
-        });
-    });
-
-    pbGeneric.Visible = false;
-    MMReport.Enabled = true;
-    lFileCount.Text = "Dump Complete.";
-    
-    string dumpPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "padding_dump");
-    if (Directory.Exists(dumpPath))
-        Process.Start("explorer.exe", dumpPath);
-}
-
-private async void MMReportDumpResidual_Click(object sender, EventArgs e)
-{
-    if (Pak == null || !Pak.IsOpen) return;
-
-    var result = MessageBox.Show("This will extract all 'Orphaned Residual Data' (Holes) larger than 1MB. Continue?", 
-        "Residual Dump", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-    
-    if (result != DialogResult.Yes) return;
-
-    MMReport.Enabled = false;
-    pbGeneric.Visible = true;
-    pbGeneric.Value = 0;
-    pbGeneric.Maximum = Pak.Files.Count;
-    lFileCount.Text = "Exhuming orphaned data...";
-
-await Task.Run(() => 
-{
-    var scanner = new AAPakEditor.Helpers.PakScanner(Pak);
-    // Lowered to 10KB (10 * 1024) to catch almost everything in your report
-    scanner.DumpResidualData(10 * 1024, (progress) => {
-        this.Invoke((MethodInvoker)delegate {
-            if (progress <= pbGeneric.Maximum)
-                pbGeneric.Value = progress;
-        });
-    });
-});
-
-    pbGeneric.Visible = false;
-    MMReport.Enabled = true;
-    lFileCount.Text = "Residual Dump Complete.";
-    
-    string dumpPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "residual_dump");
-    if (Directory.Exists(dumpPath))
-        Process.Start("explorer.exe", dumpPath);
-}
-
-
-
-
 }

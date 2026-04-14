@@ -20,8 +20,6 @@
             base.Dispose(disposing);
         }
 
-
-
         #region Windows Form Designer generated code
 
         /// <summary>
@@ -107,14 +105,6 @@
             lTypePak = new System.Windows.Forms.ToolStripStatusLabel();
             MainFormSplitter = new System.Windows.Forms.SplitContainer();
             saveGamePakDialog = new System.Windows.Forms.SaveFileDialog();
-            //
-            this.MMReport = new System.Windows.Forms.ToolStripMenuItem();
-            this.MMReportExportCsv = new System.Windows.Forms.ToolStripMenuItem();
-            this.MMReportHoleScan = new System.Windows.Forms.ToolStripMenuItem();
-            this.MMReportPaddingCheck = new System.Windows.Forms.ToolStripMenuItem();
-            MMReportDumpPadding = new System.Windows.Forms.ToolStripMenuItem();
-            MMReportDumpResidual = new System.Windows.Forms.ToolStripMenuItem();
-            //
             MM.SuspendLayout();
             pFileInfo.SuspendLayout();
             tcDirectoryViews.SuspendLayout();
@@ -130,7 +120,7 @@
             // 
             // MM
             // 
-            MM.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { MMFile, MMEdit, MMExport, MMTools,MMReport, MMReportDumpPadding, MMReportDumpResidual, MMVersion });
+            MM.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { MMFile, MMEdit, MMExport, MMTools, MMVersion });
             MM.Location = new System.Drawing.Point(0, 0);
             MM.Name = "MM";
             MM.Padding = new System.Windows.Forms.Padding(7, 2, 0, 2);
@@ -253,8 +243,6 @@
             MMEditDeleteFolder.Size = new System.Drawing.Size(222, 22);
             MMEditDeleteFolder.Text = "Delete selected folder ...";
             MMEditDeleteFolder.Click += MMEditDeleteFolder_Click;
-
-
             // 
             // MMEditS1
             // 
@@ -404,51 +392,6 @@
             MMToolsPreview.Size = new System.Drawing.Size(234, 22);
             MMToolsPreview.Text = "Show Preview";
             MMToolsPreview.Click += MMToolsPreview_Click;
-            // 
-            // MMReport
-            // 
-            this.MMReport.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-                this.MMReportExportCsv,
-                this.MMReportHoleScan,
-                this.MMReportPaddingCheck});
-            this.MMReport.Name = "MMReport";
-            this.MMReport.Size = new System.Drawing.Size(59, 20);
-            this.MMReport.Text = "&Reports";
-            // 
-            // MMReportExportCsv
-            // 
-            this.MMReportExportCsv.Name = "MMReportExportCsv";
-            this.MMReportExportCsv.Size = new System.Drawing.Size(211, 22);
-            this.MMReportExportCsv.Text = "Export File List (CSV)";
-            this.MMReportExportCsv.Click += new System.EventHandler(this.MMReportExportCsv_Click);
-            // 
-            // MMReportHoleScan
-            // 
-            this.MMReportHoleScan.Name = "MMReportHoleScan";
-            this.MMReportHoleScan.Size = new System.Drawing.Size(211, 22);
-            this.MMReportHoleScan.Text = "Scan for Orphaned Holes";
-            this.MMReportHoleScan.Click += new System.EventHandler(this.MMReportHoleScan_Click);
-            // 
-            // MMReportPaddingCheck
-            // 
-            this.MMReportPaddingCheck.Name = "MMReportPaddingCheck";
-            this.MMReportPaddingCheck.Size = new System.Drawing.Size(211, 22);
-            this.MMReportPaddingCheck.Text = "Check for Dirty Padding";
-            this.MMReportPaddingCheck.Click += new System.EventHandler(this.MMReportPaddingCheck_Click);
-            // 
-// MMReportDumpPadding
-// 
-MMReportDumpPadding.Name = "MMReportDumpPadding";
-MMReportDumpPadding.Size = new System.Drawing.Size(211, 22);
-MMReportDumpPadding.Text = "Dump Large Ghost Data (>1MB)";
-MMReportDumpPadding.Click += MMReportDumpPadding_Click;
-//
-//MMReportDumpResidual
-//
-MMReportDumpResidual.Name = "MMReportDumpResidual";
-MMReportDumpResidual.Size = new System.Drawing.Size(211, 22);
-MMReportDumpResidual.Text = "Dump Large Residual Data (>1MB)";
-MMReportDumpResidual.Click += MMReportDumpResidual_Click;
             // 
             // MMVersion
             // 
@@ -921,15 +864,6 @@ MMReportDumpResidual.Click += MMReportDumpResidual_Click;
         private System.Windows.Forms.ToolStripMenuItem MMToolsConvertPak;
         private System.Windows.Forms.ToolStripMenuItem MMToolsPreview;
         private System.Windows.Forms.SaveFileDialog saveGamePakDialog;
-
-        //
-        private System.Windows.Forms.ToolStripMenuItem MMReport;
-        private System.Windows.Forms.ToolStripMenuItem MMReportExportCsv;
-        private System.Windows.Forms.ToolStripMenuItem MMReportHoleScan;
-        private System.Windows.Forms.ToolStripMenuItem MMReportPaddingCheck;
-        private System.Windows.Forms.ToolStripMenuItem MMReportDumpPadding;
-        private System.Windows.Forms.ToolStripMenuItem MMReportDumpResidual;
-        //
     }
 }
 

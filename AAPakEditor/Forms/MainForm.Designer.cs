@@ -45,6 +45,7 @@
             MMEditFileProp = new System.Windows.Forms.ToolStripMenuItem();
             MMEditS2 = new System.Windows.Forms.ToolStripSeparator();
             MMEditDeleteSelected = new System.Windows.Forms.ToolStripMenuItem();
+            MMEditDelFolder = new System.Windows.Forms.ToolStripMenuItem();
             MMEditS1 = new System.Windows.Forms.ToolStripSeparator();
             MMEditImportFiles = new System.Windows.Forms.ToolStripMenuItem();
             MMExport = new System.Windows.Forms.ToolStripMenuItem();
@@ -195,7 +196,7 @@
             // 
             // MMEdit
             // 
-            MMEdit.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { MMEditAddFile, MMEditReplace, MMEditFileProp, MMEditS2, MMEditDeleteSelected, MMEditS1, MMEditImportFiles });
+            MMEdit.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { MMEditAddFile, MMEditReplace, MMEditFileProp, MMEditS2, MMEditDeleteSelected, MMEditDelFolder, MMEditS1, MMEditImportFiles });
             MMEdit.Name = "MMEdit";
             MMEdit.Size = new System.Drawing.Size(39, 20);
             MMEdit.Text = "&Edit";
@@ -235,6 +236,13 @@
             MMEditDeleteSelected.Size = new System.Drawing.Size(222, 22);
             MMEditDeleteSelected.Text = "Delete selected file ...";
             MMEditDeleteSelected.Click += MMEditDeleteSelected_Click;
+            // 
+            // MMEditDelFolder
+            // 
+            MMEditDelFolder.Name = "MMEditDelFolder";
+            MMEditDelFolder.Size = new System.Drawing.Size(222, 22);
+            MMEditDelFolder.Text = "Delete selected folder ...";
+            MMEditDelFolder.Click += MMEditDelFolder_Click;
             // 
             // MMEditS1
             // 
@@ -328,15 +336,15 @@
             // 
             MMToolsCreatePatch.Name = "MMToolsCreatePatch";
             MMToolsCreatePatch.Size = new System.Drawing.Size(234, 22);
-            MMToolsCreatePatch.Text = "Create patch file ...";
+            MMToolsCreatePatch.Text = "Create patch pak file ...";
             MMToolsCreatePatch.Click += MMToolsCreatePatch_Click;
             // 
             // MMToolsApplyPatch
             // 
             MMToolsApplyPatch.Name = "MMToolsApplyPatch";
             MMToolsApplyPatch.Size = new System.Drawing.Size(234, 22);
-            MMToolsApplyPatch.Text = "Apply patch file ...";
-            MMToolsApplyPatch.Visible = false;
+            MMToolsApplyPatch.Text = "Apply patch pak file ...";
+            MMToolsApplyPatch.Click += MMToolsApplyPatch_Click;
             // 
             // MMToolsS2
             // 
@@ -446,7 +454,7 @@
             lbFiles.Location = new System.Drawing.Point(7, 32);
             lbFiles.Margin = new System.Windows.Forms.Padding(4);
             lbFiles.Name = "lbFiles";
-            lbFiles.Size = new System.Drawing.Size(363, 184);
+            lbFiles.Size = new System.Drawing.Size(359, 184);
             lbFiles.TabIndex = 4;
             lbFiles.SelectedIndexChanged += lbFiles_SelectedIndexChanged;
             // 
@@ -477,7 +485,7 @@
             pFileInfo.Location = new System.Drawing.Point(7, 244);
             pFileInfo.Margin = new System.Windows.Forms.Padding(4);
             pFileInfo.Name = "pFileInfo";
-            pFileInfo.Size = new System.Drawing.Size(363, 173);
+            pFileInfo.Size = new System.Drawing.Size(359, 173);
             pFileInfo.TabIndex = 6;
             // 
             // lfiCreateTime
@@ -503,7 +511,7 @@
             // lModifiedRaw
             // 
             lModifiedRaw.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-            lModifiedRaw.Location = new System.Drawing.Point(164, 81);
+            lModifiedRaw.Location = new System.Drawing.Point(160, 81);
             lModifiedRaw.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             lModifiedRaw.Name = "lModifiedRaw";
             lModifiedRaw.Size = new System.Drawing.Size(194, 15);
@@ -514,7 +522,7 @@
             // lCreateRaw
             // 
             lCreateRaw.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-            lCreateRaw.Location = new System.Drawing.Point(164, 62);
+            lCreateRaw.Location = new System.Drawing.Point(160, 62);
             lCreateRaw.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             lCreateRaw.Name = "lCreateRaw";
             lCreateRaw.Size = new System.Drawing.Size(194, 15);
@@ -855,6 +863,7 @@
         private System.Windows.Forms.ToolStripMenuItem MMToolsConvertPak;
         private System.Windows.Forms.ToolStripMenuItem MMToolsPreview;
         private System.Windows.Forms.SaveFileDialog saveGamePakDialog;
+        private System.Windows.Forms.ToolStripMenuItem MMEditDelFolder;
     }
 }
 

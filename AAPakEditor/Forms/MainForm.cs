@@ -11,6 +11,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices.JavaScript;
 using System.Text;
 using System.Windows.Forms;
 using MethodInvoker = System.Windows.Forms.MethodInvoker;
@@ -2394,6 +2395,80 @@ public partial class MainForm : Form
 
     private void MMEditDelFolder_Click(object sender, EventArgs e)
     {
-        MessageBox.Show("Not yet implemented");
+        if (Pak == null || !Pak.IsOpen)
+            return;
+
+        string targetDir = null;
+        if (tcDirectoryViews.SelectedTab == tpTreeView && tvFolders.SelectedNode != null)
+        {
+            targetDir = tvFolders.SelectedNode.Name;
+        }
+        else if (tcDirectoryViews.SelectedTab == tpFlatDirView && !string.IsNullOrWhiteSpace(lbFolders.Text))
+        {
+            targetDir = lbFolders.Text;
+        }
+
+        if (targetDir == null)
+        {
+            MessageBox.Show(@"No directory selected.");
+            return;
+        }
+
+        if (targetDir.Equals("<root>", StringComparison.CurrentCultureIgnoreCase))
+        {
+            targetDir = string.Empty;
+        }
+
+        if (string.IsNullOrWhiteSpace(targetDir))
+        {
+            if (MessageBox.Show(
+                    $"You are about to delete ALL files from this pak file!\r\n" +
+                    $"It is recommended that you simply create a new empty one instead.\r\n" +
+                    $"Are you sure you want to continue?",
+                    "Delete all files!",
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
+            {
+                return;
+            }
+        }
+
+        lFileCount.Text = "Analyzing folder for deletion ...";
+        var delFiles = new List<string>();
+        foreach (var aaPakFileInfo in Pak.Files)
+        {
+            if (aaPakFileInfo.Name.StartsWith(targetDir, StringComparison.InvariantCultureIgnoreCase))
+                delFiles.Add(aaPakFileInfo.Name);
+        }
+
+        if (MessageBox.Show(
+                $"Are you sure you want to delete {delFiles.Count} file(s) from\r\n\r\n"+
+                (string.IsNullOrWhiteSpace(targetDir) ? "<root>" : targetDir) + "\r\n\r\n" +
+                "and it's sub-folders ?",
+                "Delete folder",
+                MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
+        {
+            return;
+        }
+
+        lFileCount.Text = "Deleting ...";
+        var deleteCount = 0;
+        foreach (var delFile in delFiles)
+        {
+            if (Pak.DeleteFile(delFile))
+                deleteCount++;
+        }
+
+        MessageBox.Show($"{deleteCount} file(s) have been removed from\r\n\r\n" +
+                        (string.IsNullOrWhiteSpace(targetDir) ? "<root>" : targetDir) + "\r\n\r\n" +
+                        "and it's sub-folders!",
+            "Delete folder",
+            MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+        Application.UseWaitCursor = true;
+        lbFiles.Items.Clear();
+        GenerateFolderViews();
+        PopulateFilesList(string.Empty);
+        UpdateMm();
+        Application.UseWaitCursor = false;
     }
 }

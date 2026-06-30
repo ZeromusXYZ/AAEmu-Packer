@@ -1,21 +1,30 @@
-﻿using System;
+﻿using AAPacker;
+using System;
+using System.ComponentModel;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Windows.Forms;
-using AAPacker;
 
 namespace AAPakEditor.Forms;
 
 public partial class AddFileDialog : Form
 {
+    [DesignerSerializationVisibilityAttribute(DesignerSerializationVisibility.Hidden)]
     public string SuggestedDir { get; set; } = string.Empty;
+    [DesignerSerializationVisibilityAttribute(DesignerSerializationVisibility.Hidden)]
     public string SuggestedFile { get; set; } = string.Empty;
+    [DesignerSerializationVisibilityAttribute(DesignerSerializationVisibility.Hidden)]
     public AAPak Pak { get; set; }
+    [DesignerSerializationVisibilityAttribute(DesignerSerializationVisibility.Hidden)]
     public long CreateTimeAsNumber { get; set; }
+    [DesignerSerializationVisibilityAttribute(DesignerSerializationVisibility.Hidden)]
     public long ModifyTimeAsNumber { get; set; }
+    [DesignerSerializationVisibilityAttribute(DesignerSerializationVisibility.Hidden)]
     public byte[] Md5Value { get; set; } = new byte[16];
+    [DesignerSerializationVisibilityAttribute(DesignerSerializationVisibility.Hidden)]
     public uint Dummy1AsNumber { get; set; }
+    [DesignerSerializationVisibilityAttribute(DesignerSerializationVisibility.Hidden)]
     public uint Dummy2AsNumber { get; set; }
 
     public AddFileDialog()
